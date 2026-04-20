@@ -4,17 +4,18 @@
  */
 
 #include "tapiru/widgets/menu_bar.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 namespace tapiru {
 
-menu_bar_builder& menu_bar_builder::key(std::string_view k) {
+menu_bar_builder &menu_bar_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
-node_id menu_bar_builder::flatten_into(detail::scene& s) const {
+node_id menu_bar_builder::flatten_into(detail::scene &s) const {
     // The menu bar is a composite: an overlay with the bar as base
     // and the active dropdown as the overlay layer.
 
@@ -43,9 +44,9 @@ node_id menu_bar_builder::flatten_into(detail::scene& s) const {
     }
 
     // Build the dropdown menu for the active entry
-    const auto& entry = entries_[static_cast<size_t>(active)];
+    const auto &entry = entries_[static_cast<size_t>(active)];
     auto dropdown = menu_builder();
-    for (const auto& item : entry.items) {
+    for (const auto &item : entry.items) {
         dropdown.add(item);
     }
     dropdown.border(dropdown_border_);
@@ -64,4 +65,4 @@ node_id menu_bar_builder::flatten_into(detail::scene& s) const {
     return ov.flatten_into(s);
 }
 
-}  // namespace tapiru
+} // namespace tapiru

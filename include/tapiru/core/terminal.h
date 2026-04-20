@@ -11,10 +11,10 @@
 
 namespace tapiru {
 
-using tapioca::terminal_size;
 using tapioca::color_depth;
 using tapioca::terminal_caps;
+using tapioca::terminal_size;
 
 namespace terminal = tapioca::terminal;
 
-}  // namespace tapiru
+} // namespace tapiru

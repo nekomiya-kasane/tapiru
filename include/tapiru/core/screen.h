@@ -18,6 +18,10 @@
  *   scr.set_live(my_component);  // live-updating spinner/progress
  */
 
+#include "tapiru/core/component.h"
+#include "tapiru/core/element.h"
+#include "tapiru/exports.h"
+
 #include <atomic>
 #include <chrono>
 #include <cstdint>
@@ -25,20 +29,16 @@
 #include <memory>
 #include <string>
 
-#include "tapiru/core/component.h"
-#include "tapiru/core/element.h"
-#include "tapiru/exports.h"
-
 namespace tapiru {
 
 // ── screen_config ───────────────────────────────────────────────────────
 
 struct screen_config {
     uint32_t fps = 30;
-    uint32_t width = 0;       // 0 = auto-detect
-    uint32_t height = 0;      // 0 = auto-detect (fullscreen only)
-    bool     mouse = false;   // enable mouse tracking
-    bool     cursor = false;  // show cursor
+    uint32_t width = 0;  // 0 = auto-detect
+    uint32_t height = 0; // 0 = auto-detect (fullscreen only)
+    bool mouse = false;  // enable mouse tracking
+    bool cursor = false; // show cursor
 
     /** @brief Custom output sink (default: stdout). */
     std::function<void(std::string_view)> sink;
@@ -47,13 +47,13 @@ struct screen_config {
 // ── screen ──────────────────────────────────────────────────────────────
 
 class TAPIRU_API screen {
-public:
+  public:
     ~screen();
 
-    screen(const screen&) = delete;
-    screen& operator=(const screen&) = delete;
-    screen(screen&&) noexcept;
-    screen& operator=(screen&&) noexcept;
+    screen(const screen &) = delete;
+    screen &operator=(const screen &) = delete;
+    screen(screen &&) noexcept;
+    screen &operator=(screen &&) noexcept;
 
     // ── Factory methods ─────────────────────────────────────────────────
 
@@ -80,7 +80,7 @@ public:
     // ── Streaming API ───────────────────────────────────────────────────
 
     /** @brief Render an element once and print to output. */
-    void render_once(const element& elem);
+    void render_once(const element &elem);
 
     /** @brief Start live-updating display with a component (spinner/progress). */
     void set_live(component comp);
@@ -99,11 +99,11 @@ public:
     /** @brief Get the current terminal dimensions. */
     [[nodiscard]] std::pair<uint32_t, uint32_t> dimensions() const;
 
-private:
+  private:
     struct impl;
     std::unique_ptr<impl> impl_;
 
     explicit screen(std::unique_ptr<impl> p);
 };
 
-}  // namespace tapiru
+} // namespace tapiru

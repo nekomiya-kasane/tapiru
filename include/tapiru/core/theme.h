@@ -11,13 +11,13 @@
  *   con.print_widget(text_builder("[.danger]Error![/]"), 80);
  */
 
+#include "tapiru/core/style.h"
+#include "tapiru/exports.h"
+
 #include <cstdint>
 #include <string>
 #include <string_view>
 #include <unordered_map>
-
-#include "tapiru/exports.h"
-#include "tapiru/core/style.h"
 
 namespace tapiru {
 
@@ -25,11 +25,11 @@ namespace tapiru {
  * @brief A collection of named styles that can be referenced in markup.
  */
 class TAPIRU_API theme {
-public:
+  public:
     theme() = default;
 
-    void define(std::string name, const style& s);
-    [[nodiscard]] const style* lookup(std::string_view name) const;
+    void define(std::string name, const style &s);
+    [[nodiscard]] const style *lookup(std::string_view name) const;
     [[nodiscard]] bool has(std::string_view name) const;
     void remove(std::string_view name);
     void clear();
@@ -42,8 +42,8 @@ public:
     [[nodiscard]] static theme light();
     [[nodiscard]] static theme monokai();
 
-private:
+  private:
     std::unordered_map<std::string, style> styles_;
 };
 
-}  // namespace tapiru
+} // namespace tapiru

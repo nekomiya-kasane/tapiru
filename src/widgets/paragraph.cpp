@@ -4,6 +4,7 @@
  */
 
 #include "tapiru/widgets/paragraph.h"
+
 #include "tapiru/widgets/builders.h"
 
 #include <string>
@@ -40,12 +41,12 @@ std::vector<std::string> split_words(std::string_view text) {
 }
 
 // Word-wrap into lines of max_width characters
-std::vector<std::string> wrap_lines(const std::vector<std::string>& words, uint32_t max_width) {
+std::vector<std::string> wrap_lines(const std::vector<std::string> &words, uint32_t max_width) {
     std::vector<std::string> lines;
     std::string line;
     uint32_t line_len = 0;
 
-    for (const auto& word : words) {
+    for (const auto &word : words) {
         if (word == "\n") {
             lines.push_back(std::move(line));
             line.clear();
@@ -75,12 +76,12 @@ std::vector<std::string> wrap_lines(const std::vector<std::string>& words, uint3
 }
 
 // Justify a line to exactly target_width by inserting extra spaces between words
-std::string justify_line(const std::string& line, uint32_t target_width) {
+std::string justify_line(const std::string &line, uint32_t target_width) {
     auto words = split_words(line);
     if (words.size() <= 1) return line;
 
     uint32_t total_word_len = 0;
-    for (const auto& w : words) total_word_len += static_cast<uint32_t>(w.size());
+    for (const auto &w : words) total_word_len += static_cast<uint32_t>(w.size());
 
     uint32_t total_spaces = target_width > total_word_len ? target_width - total_word_len : 0;
     uint32_t gaps = static_cast<uint32_t>(words.size()) - 1;
@@ -100,7 +101,7 @@ std::string justify_line(const std::string& line, uint32_t target_width) {
     return result;
 }
 
-}  // anonymous namespace
+} // anonymous namespace
 
 element make_paragraph(std::string_view text) {
     // Use a default width; the actual wrapping happens at a fixed width
@@ -111,7 +112,7 @@ element make_paragraph(std::string_view text) {
     auto lines = wrap_lines(words, default_width);
 
     auto rb = rows_builder();
-    for (const auto& line : lines) {
+    for (const auto &line : lines) {
         rb.add(text_builder(line));
     }
     return element(std::move(rb));
@@ -135,4 +136,4 @@ element make_paragraph_justify(std::string_view text) {
     return element(std::move(rb));
 }
 
-}  // namespace tapiru
+} // namespace tapiru

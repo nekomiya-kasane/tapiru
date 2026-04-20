@@ -14,6 +14,8 @@
  *   logger.set_format("[{level}] {time} - {message}");
  */
 
+#include "tapiru/exports.h"
+
 #include <chrono>
 #include <cstdint>
 #include <functional>
@@ -22,8 +24,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
-#include "tapiru/exports.h"
 
 namespace tapiru {
 
@@ -34,8 +34,8 @@ class console;
 enum class log_level : uint8_t {
     trace = 0,
     debug = 1,
-    info  = 2,
-    warn  = 3,
+    info = 2,
+    warn = 3,
     error = 4,
     fatal = 5,
 };
@@ -49,7 +49,7 @@ enum class log_level : uint8_t {
 // ── Log record ──────────────────────────────────────────────────────────
 
 struct log_record {
-    log_level   level = log_level::info;
+    log_level level = log_level::info;
     std::string message;
     std::string logger_name;
     std::string module;
@@ -65,8 +65,8 @@ struct log_record {
  * sends them to a console.
  */
 class TAPIRU_API log_handler {
-public:
-    explicit log_handler(console& con);
+  public:
+    explicit log_handler(console &con);
 
     /** @brief Set minimum log level. Messages below this are suppressed. */
     void set_level(log_level min_level) noexcept { min_level_ = min_level; }
@@ -75,7 +75,7 @@ public:
     [[nodiscard]] log_level level() const noexcept { return min_level_; }
 
     /** @brief Log a pre-built record. */
-    void log(const log_record& record);
+    void log(const log_record &record);
 
     /** @brief Log a message at a specific level. */
     void log(log_level lv, std::string_view message);
@@ -83,8 +83,8 @@ public:
     /** @brief Convenience methods for each level. */
     void trace(std::string_view msg) { log(log_level::trace, msg); }
     void debug(std::string_view msg) { log(log_level::debug, msg); }
-    void info(std::string_view msg)  { log(log_level::info,  msg); }
-    void warn(std::string_view msg)  { log(log_level::warn,  msg); }
+    void info(std::string_view msg) { log(log_level::info, msg); }
+    void warn(std::string_view msg) { log(log_level::warn, msg); }
     void error(std::string_view msg) { log(log_level::error, msg); }
     void fatal(std::string_view msg) { log(log_level::fatal, msg); }
 
@@ -107,19 +107,21 @@ public:
     void allow_tag(std::string t) { allowed_tags_.insert(std::move(t)); }
 
     /** @brief Clear all module/tag filters (allow everything). */
-    void clear_filters() { allowed_modules_.clear(); allowed_tags_.clear(); }
+    void clear_filters() {
+        allowed_modules_.clear();
+        allowed_tags_.clear();
+    }
 
     /** @brief Log with structured fields. */
-    void log_structured(log_level lv, std::string_view message,
-                        std::unordered_map<std::string, std::string> fields);
+    void log_structured(log_level lv, std::string_view message, std::unordered_map<std::string, std::string> fields);
 
-private:
-    bool passes_filter(const log_record& r) const;
+  private:
+    bool passes_filter(const log_record &r) const;
 
-    console&  console_;
+    console &console_;
     log_level min_level_ = log_level::trace;
-    bool      show_time_  = true;
-    bool      show_level_ = true;
+    bool show_time_ = true;
+    bool show_level_ = true;
     std::string module_;
     std::string tag_;
     std::unordered_set<std::string> allowed_modules_;
@@ -128,7 +130,9 @@ private:
 
 // ── Log panel builder ──────────────────────────────────────────────────
 
-namespace detail { class scene; }
+namespace detail {
+class scene;
+}
 using node_id = uint32_t;
 
 /**
@@ -137,27 +141,32 @@ using node_id = uint32_t;
  * Stores recent log records and renders them as styled text.
  */
 class TAPIRU_API log_panel_builder {
-public:
-    explicit log_panel_builder(uint32_t max_lines = 100)
-        : max_lines_(max_lines) {}
+  public:
+    explicit log_panel_builder(uint32_t max_lines = 100) : max_lines_(max_lines) {}
 
-    void push(const log_record& record);
+    void push(const log_record &record);
     void clear();
 
     [[nodiscard]] size_t size() const noexcept { return lines_.size(); }
     [[nodiscard]] uint32_t max_lines() const noexcept { return max_lines_; }
-    [[nodiscard]] const std::vector<std::string>& lines() const noexcept { return lines_; }
+    [[nodiscard]] const std::vector<std::string> &lines() const noexcept { return lines_; }
 
-    log_panel_builder& visible_lines(uint32_t n) { visible_ = n; return *this; }
-    log_panel_builder& scroll_to_bottom(bool v = true) { auto_scroll_ = v; return *this; }
+    log_panel_builder &visible_lines(uint32_t n) {
+        visible_ = n;
+        return *this;
+    }
+    log_panel_builder &scroll_to_bottom(bool v = true) {
+        auto_scroll_ = v;
+        return *this;
+    }
 
-    node_id flatten_into(detail::scene& s) const;
+    node_id flatten_into(detail::scene &s) const;
 
-private:
+  private:
     uint32_t max_lines_ = 100;
     uint32_t visible_ = 20;
     bool auto_scroll_ = true;
-    std::vector<std::string> lines_;  // pre-formatted markup lines
+    std::vector<std::string> lines_; // pre-formatted markup lines
 };
 
-}  // namespace tapiru
+} // namespace tapiru

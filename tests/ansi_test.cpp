@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
-
 #include "tapiru/core/ansi.h"
 #include "tapiru/core/terminal.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
@@ -34,25 +34,25 @@ TEST(AnsiTest, SgrBoldOnly) {
 
 TEST(AnsiTest, SgrFgOnly16) {
     style s;
-    s.fg = colors::red;  // index 1 → SGR 31
+    s.fg = colors::red; // index 1 → SGR 31
     EXPECT_EQ(ansi::sgr(s), "\033[31m");
 }
 
 TEST(AnsiTest, SgrFgBright16) {
     style s;
-    s.fg = colors::bright_red;  // index 9 → SGR 91
+    s.fg = colors::bright_red; // index 9 → SGR 91
     EXPECT_EQ(ansi::sgr(s), "\033[91m");
 }
 
 TEST(AnsiTest, SgrBg16) {
     style s;
-    s.bg = colors::blue;  // index 4 → SGR 44
+    s.bg = colors::blue; // index 4 → SGR 44
     EXPECT_EQ(ansi::sgr(s), "\033[44m");
 }
 
 TEST(AnsiTest, SgrBgBright16) {
     style s;
-    s.bg = colors::bright_green;  // index 10 → SGR 102
+    s.bg = colors::bright_green; // index 10 → SGR 102
     EXPECT_EQ(ansi::sgr(s), "\033[102m");
 }
 

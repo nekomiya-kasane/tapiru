@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #include "tapiru/core/unicode_width.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
@@ -62,66 +62,66 @@ TEST(CharWidthTest, AsciiPrintable) {
 }
 
 TEST(CharWidthTest, ControlChars) {
-    EXPECT_EQ(char_width(U'\x00'), -1);  // NUL
-    EXPECT_EQ(char_width(U'\x01'), -1);  // SOH
-    EXPECT_EQ(char_width(U'\x7F'), -1);  // DEL
-    EXPECT_EQ(char_width(U'\x80'), -1);  // C1
-    EXPECT_EQ(char_width(U'\x9F'), -1);  // C1 end
+    EXPECT_EQ(char_width(U'\x00'), -1); // NUL
+    EXPECT_EQ(char_width(U'\x01'), -1); // SOH
+    EXPECT_EQ(char_width(U'\x7F'), -1); // DEL
+    EXPECT_EQ(char_width(U'\x80'), -1); // C1
+    EXPECT_EQ(char_width(U'\x9F'), -1); // C1 end
 }
 
 TEST(CharWidthTest, CjkIdeograph) {
-    EXPECT_EQ(char_width(U'\x4E2D'), 2);  // 中
-    EXPECT_EQ(char_width(U'\x4E00'), 2);  // 一
-    EXPECT_EQ(char_width(U'\x9FFF'), 2);  // CJK range
+    EXPECT_EQ(char_width(U'\x4E2D'), 2); // 中
+    EXPECT_EQ(char_width(U'\x4E00'), 2); // 一
+    EXPECT_EQ(char_width(U'\x9FFF'), 2); // CJK range
 }
 
 TEST(CharWidthTest, Hiragana) {
-    EXPECT_EQ(char_width(U'\x3042'), 2);  // あ
-    EXPECT_EQ(char_width(U'\x3044'), 2);  // い
+    EXPECT_EQ(char_width(U'\x3042'), 2); // あ
+    EXPECT_EQ(char_width(U'\x3044'), 2); // い
 }
 
 TEST(CharWidthTest, Katakana) {
-    EXPECT_EQ(char_width(U'\x30A2'), 2);  // ア
-    EXPECT_EQ(char_width(U'\x30AB'), 2);  // カ
+    EXPECT_EQ(char_width(U'\x30A2'), 2); // ア
+    EXPECT_EQ(char_width(U'\x30AB'), 2); // カ
 }
 
 TEST(CharWidthTest, HangulSyllable) {
-    EXPECT_EQ(char_width(U'\xAC00'), 2);  // 가
-    EXPECT_EQ(char_width(U'\xD7A3'), 2);  // last Hangul syllable
+    EXPECT_EQ(char_width(U'\xAC00'), 2); // 가
+    EXPECT_EQ(char_width(U'\xD7A3'), 2); // last Hangul syllable
 }
 
 TEST(CharWidthTest, FullwidthForms) {
-    EXPECT_EQ(char_width(U'\xFF01'), 2);  // ！
-    EXPECT_EQ(char_width(U'\xFF10'), 2);  // ０
+    EXPECT_EQ(char_width(U'\xFF01'), 2); // ！
+    EXPECT_EQ(char_width(U'\xFF10'), 2); // ０
 }
 
 TEST(CharWidthTest, CombiningMark) {
-    EXPECT_EQ(char_width(U'\x0300'), 0);  // Combining Grave Accent
-    EXPECT_EQ(char_width(U'\x0301'), 0);  // Combining Acute Accent
-    EXPECT_EQ(char_width(U'\x036F'), 0);  // end of combining diacriticals
+    EXPECT_EQ(char_width(U'\x0300'), 0); // Combining Grave Accent
+    EXPECT_EQ(char_width(U'\x0301'), 0); // Combining Acute Accent
+    EXPECT_EQ(char_width(U'\x036F'), 0); // end of combining diacriticals
 }
 
 TEST(CharWidthTest, ZeroWidthChars) {
-    EXPECT_EQ(char_width(U'\x200B'), 0);  // Zero Width Space
-    EXPECT_EQ(char_width(U'\x200D'), 0);  // Zero Width Joiner
-    EXPECT_EQ(char_width(U'\xFEFF'), 0);  // BOM
-    EXPECT_EQ(char_width(U'\xFE0F'), 0);  // Variation Selector-16
+    EXPECT_EQ(char_width(U'\x200B'), 0); // Zero Width Space
+    EXPECT_EQ(char_width(U'\x200D'), 0); // Zero Width Joiner
+    EXPECT_EQ(char_width(U'\xFEFF'), 0); // BOM
+    EXPECT_EQ(char_width(U'\xFE0F'), 0); // Variation Selector-16
 }
 
 TEST(CharWidthTest, Emoji) {
-    EXPECT_EQ(char_width(U'\x1F600'), 2);  // 😀
-    EXPECT_EQ(char_width(U'\x1F4A9'), 2);  // 💩
-    EXPECT_EQ(char_width(U'\x2764'), 2);   // ❤
+    EXPECT_EQ(char_width(U'\x1F600'), 2); // 😀
+    EXPECT_EQ(char_width(U'\x1F4A9'), 2); // 💩
+    EXPECT_EQ(char_width(U'\x2764'), 2);  // ❤
 }
 
 TEST(CharWidthTest, HangulJamo) {
-    EXPECT_EQ(char_width(U'\x1100'), 2);  // ᄀ (Hangul Choseong)
-    EXPECT_EQ(char_width(U'\x115F'), 2);  // last Choseong
+    EXPECT_EQ(char_width(U'\x1100'), 2); // ᄀ (Hangul Choseong)
+    EXPECT_EQ(char_width(U'\x115F'), 2); // last Choseong
 }
 
 TEST(CharWidthTest, HangulJungseongZeroWidth) {
-    EXPECT_EQ(char_width(U'\x1160'), 0);  // Hangul Jungseong Filler
-    EXPECT_EQ(char_width(U'\x11FF'), 0);  // last Jongseong
+    EXPECT_EQ(char_width(U'\x1160'), 0); // Hangul Jungseong Filler
+    EXPECT_EQ(char_width(U'\x11FF'), 0); // last Jongseong
 }
 
 // ── string_width ────────────────────────────────────────────────────────

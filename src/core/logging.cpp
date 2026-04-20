@@ -4,10 +4,11 @@
  */
 
 #include "tapiru/core/logging.h"
-#include "tapiru/core/console.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
 #include "detail/widget_types.h"
+#include "tapiru/core/console.h"
+#include "tapiru/widgets/builders.h"
 
 #include <algorithm>
 #include <ctime>
@@ -19,32 +20,43 @@ namespace tapiru {
 
 std::string_view log_level_name(log_level lv) noexcept {
     switch (lv) {
-        case log_level::trace: return "TRACE";
-        case log_level::debug: return "DEBUG";
-        case log_level::info:  return "INFO";
-        case log_level::warn:  return "WARN";
-        case log_level::error: return "ERROR";
-        case log_level::fatal: return "FATAL";
+    case log_level::trace:
+        return "TRACE";
+    case log_level::debug:
+        return "DEBUG";
+    case log_level::info:
+        return "INFO";
+    case log_level::warn:
+        return "WARN";
+    case log_level::error:
+        return "ERROR";
+    case log_level::fatal:
+        return "FATAL";
     }
     return "?????";
 }
 
 std::string_view log_level_style(log_level lv) noexcept {
     switch (lv) {
-        case log_level::trace: return "dim";
-        case log_level::debug: return "cyan";
-        case log_level::info:  return "green";
-        case log_level::warn:  return "bold yellow";
-        case log_level::error: return "bold red";
-        case log_level::fatal: return "bold white on_red";
+    case log_level::trace:
+        return "dim";
+    case log_level::debug:
+        return "cyan";
+    case log_level::info:
+        return "green";
+    case log_level::warn:
+        return "bold yellow";
+    case log_level::error:
+        return "bold red";
+    case log_level::fatal:
+        return "bold white on_red";
     }
     return "";
 }
 
 // ── Log handler ─────────────────────────────────────────────────────────
 
-log_handler::log_handler(console& con)
-    : console_(con) {}
+log_handler::log_handler(console &con) : console_(con) {}
 
 void log_handler::log(log_level lv, std::string_view message) {
     log_record rec;
@@ -56,7 +68,7 @@ void log_handler::log(log_level lv, std::string_view message) {
     log(rec);
 }
 
-void log_handler::log(const log_record& record) {
+void log_handler::log(const log_record &record) {
     if (record.level < min_level_) return;
     if (!passes_filter(record)) return;
 
@@ -109,7 +121,7 @@ void log_handler::log(const log_record& record) {
     if (!record.fields.empty()) {
         markup += " [dim]";
         bool first = true;
-        for (const auto& [k, v] : record.fields) {
+        for (const auto &[k, v] : record.fields) {
             if (!first) markup += ", ";
             markup += k;
             markup += '=';
@@ -134,21 +146,19 @@ void log_handler::log_structured(log_level lv, std::string_view message,
     log(rec);
 }
 
-bool log_handler::passes_filter(const log_record& r) const {
+bool log_handler::passes_filter(const log_record &r) const {
     if (!allowed_modules_.empty() && !r.module.empty()) {
-        if (allowed_modules_.find(r.module) == allowed_modules_.end())
-            return false;
+        if (allowed_modules_.find(r.module) == allowed_modules_.end()) return false;
     }
     if (!allowed_tags_.empty() && !r.tag.empty()) {
-        if (allowed_tags_.find(r.tag) == allowed_tags_.end())
-            return false;
+        if (allowed_tags_.find(r.tag) == allowed_tags_.end()) return false;
     }
     return true;
 }
 
 // ── log_panel_builder ─────────────────────────────────────────────────
 
-void log_panel_builder::push(const log_record& record) {
+void log_panel_builder::push(const log_record &record) {
     std::string line;
     auto style_tag = log_level_style(record.level);
     auto level_name = log_level_name(record.level);
@@ -164,7 +174,7 @@ void log_panel_builder::push(const log_record& record) {
     if (!record.fields.empty()) {
         line += " [dim]";
         bool first = true;
-        for (const auto& [k, v] : record.fields) {
+        for (const auto &[k, v] : record.fields) {
             if (!first) line += ", ";
             line += k;
             line += '=';
@@ -184,7 +194,7 @@ void log_panel_builder::clear() {
     lines_.clear();
 }
 
-node_id log_panel_builder::flatten_into(detail::scene& s) const {
+node_id log_panel_builder::flatten_into(detail::scene &s) const {
     if (lines_.empty()) {
         return text_builder("(no logs)").flatten_into(s);
     }
@@ -207,4 +217,4 @@ node_id log_panel_builder::flatten_into(detail::scene& s) const {
     return text_builder(markup).flatten_into(s);
 }
 
-}  // namespace tapiru
+} // namespace tapiru

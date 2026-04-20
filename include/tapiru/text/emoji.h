@@ -11,11 +11,11 @@
  *   auto s  = tapiru::replace_emoji(":wave: Hi!");  // → "👋 Hi!"
  */
 
+#include "tapiru/exports.h"
+
 #include <cstdint>
 #include <string>
 #include <string_view>
-
-#include "tapiru/exports.h"
 
 namespace tapiru {
 
@@ -33,4 +33,4 @@ namespace tapiru {
  */
 [[nodiscard]] TAPIRU_API std::string replace_emoji(std::string_view input);
 
-}  // namespace tapiru
+} // namespace tapiru

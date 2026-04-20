@@ -13,29 +13,32 @@
  *   auto container = container::vertical({ btn, renderer });
  */
 
+#include "tapiru/core/element.h"
+#include "tapiru/core/input.h"
+#include "tapiru/exports.h"
+
 #include <cstdint>
 #include <functional>
 #include <memory>
 #include <type_traits>
 #include <vector>
 
-#include "tapiru/core/element.h"
-#include "tapiru/core/input.h"
-#include "tapiru/exports.h"
-
 namespace tapiru {
 
 // ── component_base ──────────────────────────────────────────────────────
 
 class TAPIRU_API component_base {
-public:
+  public:
     virtual ~component_base() = default;
 
     /** @brief Produce the element tree for the current frame. */
     virtual element render() = 0;
 
     /** @brief Handle an input event. Return true if consumed. */
-    virtual bool on_event(const input_event& ev) { (void)ev; return false; }
+    virtual bool on_event(const input_event &ev) {
+        (void)ev;
+        return false;
+    }
 
     /** @brief Whether this component can receive focus. */
     [[nodiscard]] virtual bool focusable() const { return false; }
@@ -58,7 +61,7 @@ public:
     /** @brief Get the currently active/focused child (for containers). */
     [[nodiscard]] virtual std::shared_ptr<component_base> active_child() { return nullptr; }
 
-private:
+  private:
     bool focused_ = false;
 };
 
@@ -77,13 +80,13 @@ namespace container {
 
 TAPIRU_API component vertical(std::vector<component> children);
 TAPIRU_API component horizontal(std::vector<component> children);
-TAPIRU_API component tab(std::vector<component> children, int* selected = nullptr);
-TAPIRU_API component stacked(std::vector<component> children, int* selected = nullptr);
+TAPIRU_API component tab(std::vector<component> children, int *selected = nullptr);
+TAPIRU_API component stacked(std::vector<component> children, int *selected = nullptr);
 
-}  // namespace container
+} // namespace container
 
 // ── catch_event ─────────────────────────────────────────────────────────
 
-TAPIRU_API component catch_event(component inner, std::function<bool(const input_event&)> handler);
+TAPIRU_API component catch_event(component inner, std::function<bool(const input_event &)> handler);
 
-}  // namespace tapiru
+} // namespace tapiru

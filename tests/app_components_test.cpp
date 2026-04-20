@@ -3,18 +3,18 @@
  * @brief Tests for app-level component factories: menu_bar, status_bar, resizable_split.
  */
 
-#include <gtest/gtest.h>
-
-#include "tapiru/widgets/app_components.h"
 #include "tapiru/core/console.h"
+#include "tapiru/widgets/app_components.h"
 #include "tapiru/widgets/builders.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
 // ── Helper ──────────────────────────────────────────────────────────────
 
 class virtual_terminal {
-public:
+  public:
     [[nodiscard]] console make_console() {
         console_config cfg;
         cfg.sink = [this](std::string_view data) { buffer_ += data; };
@@ -22,9 +22,10 @@ public:
         cfg.no_color = true;
         return console(cfg);
     }
-    [[nodiscard]] const std::string& raw() const noexcept { return buffer_; }
+    [[nodiscard]] const std::string &raw() const noexcept { return buffer_; }
     void clear() { buffer_.clear(); }
-private:
+
+  private:
     std::string buffer_;
 };
 
@@ -80,7 +81,7 @@ TEST(AppComponentTest, MenuBarLeftNav) {
 
     key_event left{0, special_key::left, key_mod::none};
     EXPECT_TRUE(mb->on_event(left));
-    EXPECT_EQ(sel, 1);  // wraps to last
+    EXPECT_EQ(sel, 1); // wraps to last
 }
 
 TEST(AppComponentTest, MenuBarOpenClose) {
@@ -88,18 +89,16 @@ TEST(AppComponentTest, MenuBarOpenClose) {
     auto mb = make_menu_bar({{"File", {}}}, &sel);
 
     key_event enter{0, special_key::enter, key_mod::none};
-    EXPECT_TRUE(mb->on_event(enter));  // open
+    EXPECT_TRUE(mb->on_event(enter)); // open
 
     key_event esc{0, special_key::escape, key_mod::none};
-    EXPECT_TRUE(mb->on_event(esc));  // close
+    EXPECT_TRUE(mb->on_event(esc)); // close
 }
 
 // ── status_bar ──────────────────────────────────────────────────────────
 
 TEST(AppComponentTest, StatusBarRendersContent) {
-    auto sb = make_status_bar([]() {
-        return element(text_builder("Ready | Ln 1, Col 1"));
-    });
+    auto sb = make_status_bar([]() { return element(text_builder("Ready | Ln 1, Col 1")); });
     auto out = render_comp(sb);
     EXPECT_TRUE(out.find("Ready") != std::string::npos);
 }

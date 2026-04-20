@@ -3,8 +3,9 @@
  * @brief Tests for input event types, event_table, focus_manager, and hit_test.
  */
 
-#include <gtest/gtest.h>
 #include "tapiru/core/input.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
@@ -54,7 +55,7 @@ TEST(InputTest, InputEventVariant) {
 TEST(EventTableTest, DispatchKeyToRegisteredNode) {
     event_table et;
     bool called = false;
-    et.on_key(42, [&](const key_event& ev) {
+    et.on_key(42, [&](const key_event &ev) {
         called = true;
         EXPECT_EQ(ev.codepoint, U'x');
         return true;
@@ -74,7 +75,7 @@ TEST(EventTableTest, DispatchKeyToUnregisteredNodeReturnsFalse) {
 TEST(EventTableTest, DispatchMouseToRegisteredNode) {
     event_table et;
     bool called = false;
-    et.on_mouse(7, [&](const mouse_event& ev) {
+    et.on_mouse(7, [&](const mouse_event &ev) {
         called = true;
         EXPECT_EQ(ev.x, 5u);
         EXPECT_EQ(ev.y, 10u);
@@ -88,7 +89,7 @@ TEST(EventTableTest, DispatchMouseToRegisteredNode) {
 
 TEST(EventTableTest, ClearRemovesAllHandlers) {
     event_table et;
-    et.on_key(1, [](const key_event&) { return true; });
+    et.on_key(1, [](const key_event &) { return true; });
     et.clear();
     EXPECT_FALSE(et.dispatch_key(1, key_event{}));
 }
@@ -96,8 +97,14 @@ TEST(EventTableTest, ClearRemovesAllHandlers) {
 TEST(EventTableTest, OverwriteHandler) {
     event_table et;
     int call_count = 0;
-    et.on_key(1, [&](const key_event&) { call_count = 1; return true; });
-    et.on_key(1, [&](const key_event&) { call_count = 2; return true; });
+    et.on_key(1, [&](const key_event &) {
+        call_count = 1;
+        return true;
+    });
+    et.on_key(1, [&](const key_event &) {
+        call_count = 2;
+        return true;
+    });
     et.dispatch_key(1, key_event{});
     EXPECT_EQ(call_count, 2);
 }
@@ -124,14 +131,14 @@ TEST(FocusManagerTest, FocusNext) {
     EXPECT_EQ(fm.focused(), 20u);
     fm.focus_next();
     EXPECT_EQ(fm.focused(), 30u);
-    fm.focus_next();  // wraps
+    fm.focus_next(); // wraps
     EXPECT_EQ(fm.focused(), 10u);
 }
 
 TEST(FocusManagerTest, FocusPrev) {
     focus_manager fm;
     fm.set_focusable_nodes({10, 20, 30});
-    fm.focus_prev();  // wraps from first to last
+    fm.focus_prev(); // wraps from first to last
     EXPECT_EQ(fm.focused(), 30u);
     fm.focus_prev();
     EXPECT_EQ(fm.focused(), 20u);
@@ -149,8 +156,8 @@ TEST(FocusManagerTest, FocusSpecificNode) {
 TEST(FocusManagerTest, FocusInvalidNodeIgnored) {
     focus_manager fm;
     fm.set_focusable_nodes({10, 20, 30});
-    fm.focus(99);  // not in list
-    EXPECT_EQ(fm.focused(), 10u);  // unchanged
+    fm.focus(99);                 // not in list
+    EXPECT_EQ(fm.focused(), 10u); // unchanged
 }
 
 TEST(FocusManagerTest, SetFocusablePreservesCurrentFocus) {
@@ -158,13 +165,13 @@ TEST(FocusManagerTest, SetFocusablePreservesCurrentFocus) {
     fm.set_focusable_nodes({10, 20, 30});
     fm.focus(20);
     fm.set_focusable_nodes({10, 20, 30, 40});
-    EXPECT_EQ(fm.focused(), 20u);  // preserved
+    EXPECT_EQ(fm.focused(), 20u); // preserved
 }
 
 TEST(FocusManagerTest, SetFocusableResetsIfCurrentRemoved) {
     focus_manager fm;
     fm.set_focusable_nodes({10, 20, 30});
     fm.focus(20);
-    fm.set_focusable_nodes({10, 30});  // 20 removed
-    EXPECT_EQ(fm.focused(), 10u);  // reset to first
+    fm.set_focusable_nodes({10, 30}); // 20 removed
+    EXPECT_EQ(fm.focused(), 10u);     // reset to first
 }

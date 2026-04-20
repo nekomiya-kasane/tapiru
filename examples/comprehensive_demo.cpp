@@ -25,22 +25,14 @@
  */
 
 #ifdef _WIN32
-#  define WIN32_LEAN_AND_MEAN
-#  define NOMINMAX
-#  include <Windows.h>
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
 #else
-#  include <termios.h>
-#  include <unistd.h>
-#  include <sys/select.h>
+#include <sys/select.h>
+#include <termios.h>
+#include <unistd.h>
 #endif
-
-#include <chrono>
-#include <cmath>
-#include <cstdio>
-#include <cstdint>
-#include <cstring>
-#include <string>
-#include <vector>
 
 #include "tapiru/core/console.h"
 #include "tapiru/core/decorator.h"
@@ -57,6 +49,14 @@
 #include "tapiru/widgets/progress.h"
 #include "tapiru/widgets/status_bar.h"
 
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <string>
+#include <vector>
+
 using namespace tapiru;
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -64,14 +64,29 @@ using namespace tapiru;
 // ═══════════════════════════════════════════════════════════════════════
 
 enum class input_ev : uint8_t {
-    none, up, down, left, right, enter, tab, shift_tab, quit, space,
-    key_1, key_2, key_3, key_4, key_5, key_6, key_7
+    none,
+    up,
+    down,
+    left,
+    right,
+    enter,
+    tab,
+    shift_tab,
+    quit,
+    space,
+    key_1,
+    key_2,
+    key_3,
+    key_4,
+    key_5,
+    key_6,
+    key_7
 };
 
 #ifdef _WIN32
 
 static HANDLE g_stdin = INVALID_HANDLE_VALUE;
-static DWORD  g_old_mode = 0;
+static DWORD g_old_mode = 0;
 
 static void enable_raw_input() {
     g_stdin = GetStdHandle(STD_INPUT_HANDLE);
@@ -84,25 +99,23 @@ static void restore_input() {
 }
 
 static input_ev poll_input(int timeout_ms) {
-    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0)
-        return input_ev::none;
+    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0) return input_ev::none;
     INPUT_RECORD rec;
     DWORD count = 0;
-    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0)
-        return input_ev::none;
+    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0) return input_ev::none;
     if (rec.EventType == KEY_EVENT && rec.Event.KeyEvent.bKeyDown) {
         auto vk = rec.Event.KeyEvent.wVirtualKeyCode;
         auto ch = rec.Event.KeyEvent.uChar.UnicodeChar;
         bool shift = (rec.Event.KeyEvent.dwControlKeyState & SHIFT_PRESSED) != 0;
-        if (vk == VK_UP)     return input_ev::up;
-        if (vk == VK_DOWN)   return input_ev::down;
-        if (vk == VK_LEFT)   return input_ev::left;
-        if (vk == VK_RIGHT)  return input_ev::right;
+        if (vk == VK_UP) return input_ev::up;
+        if (vk == VK_DOWN) return input_ev::down;
+        if (vk == VK_LEFT) return input_ev::left;
+        if (vk == VK_RIGHT) return input_ev::right;
         if (vk == VK_RETURN) return input_ev::enter;
-        if (vk == VK_TAB)    return shift ? input_ev::shift_tab : input_ev::tab;
+        if (vk == VK_TAB) return shift ? input_ev::shift_tab : input_ev::tab;
         if (vk == VK_ESCAPE) return input_ev::quit;
         if (ch == L'q' || ch == L'Q') return input_ev::quit;
-        if (ch == L' ')      return input_ev::space;
+        if (ch == L' ') return input_ev::space;
         if (ch == L'1') return input_ev::key_1;
         if (ch == L'2') return input_ev::key_2;
         if (ch == L'3') return input_ev::key_3;
@@ -138,8 +151,7 @@ static input_ev poll_input(int timeout_ms) {
     struct timeval tv;
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
-    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0)
-        return input_ev::none;
+    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0) return input_ev::none;
     char buf[16];
     int n = static_cast<int>(read(STDIN_FILENO, buf, sizeof(buf)));
     if (n <= 0) return input_ev::none;
@@ -167,29 +179,28 @@ static input_ev poll_input(int timeout_ms) {
 // ═══════════════════════════════════════════════════════════════════════
 
 static constexpr int NUM_PAGES = 7;
-static const char* page_names[NUM_PAGES] = {
-    "Canvas", "Gauge", "Paragraph", "Decorators", "Colors", "Widgets", "Dashboard"
-};
+static const char *page_names[NUM_PAGES] = {"Canvas", "Gauge",   "Paragraph", "Decorators",
+                                            "Colors", "Widgets", "Dashboard"};
 
 struct app_state {
     bool quit = false;
-    int  page = 0;
-    int  cursor = 0;
-    int  tick = 0;
+    int page = 0;
+    int cursor = 0;
+    int tick = 0;
 
     // Page 0: Canvas
-    int  canvas_shape = 0;   // 0=circles, 1=sine, 2=star, 3=spiral
+    int canvas_shape = 0; // 0=circles, 1=sine, 2=star, 3=spiral
     bool canvas_animate = true;
 
     // Page 1: Gauge
     float gauge_values[4] = {0.73f, 0.45f, 0.12f, 0.88f};
-    int   gauge_selected = 0;
-    bool  gauge_vertical = false;
+    int gauge_selected = 0;
+    bool gauge_vertical = false;
 
     // Page 2: Paragraph
-    int  para_width = 45;
+    int para_width = 45;
     bool para_justify = false;
-    int  para_text_idx = 0;
+    int para_text_idx = 0;
 
     // Page 3: Decorators
     bool deco_border = true;
@@ -201,24 +212,24 @@ struct app_state {
     bool deco_padding = false;
 
     // Page 4: Colors
-    int  color_depth = 3;  // 0=none, 1=16, 2=256, 3=rgb
-    int  color_selected = 0;
+    int color_depth = 3; // 0=none, 1=16, 2=256, 3=rgb
+    int color_selected = 0;
 
     // Page 5: Widgets
     bool cb_values[3] = {true, false, true};
     float slider_val = 0.5f;
-    int  radio_sel = 0;
-    int  widget_focus = 0;
+    int radio_sel = 0;
+    int widget_focus = 0;
 
     // Page 6: Dashboard
-    int  dash_sidebar = 0;
+    int dash_sidebar = 0;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
 //  Shared UI components
 // ═══════════════════════════════════════════════════════════════════════
 
-static auto build_tab_bar(const app_state& st) {
+static auto build_tab_bar(const app_state &st) {
     std::string tabs = " ";
     for (int i = 0; i < NUM_PAGES; ++i) {
         if (i == st.page)
@@ -230,13 +241,11 @@ static auto build_tab_bar(const app_state& st) {
     return text_builder(tabs);
 }
 
-static auto build_footer(const app_state& st) {
+static auto build_footer(const app_state &st) {
     (void)st;
-    return text_builder(
-        " [dim]Tab[/] page  [dim]\xe2\x86\x91\xe2\x86\x93[/] navigate  "
-        "[dim]Enter/Space[/] toggle  [dim]\xe2\x86\x90\xe2\x86\x92[/] adjust  "
-        "[dim]1-7[/] jump  [dim]q[/] quit"
-    );
+    return text_builder(" [dim]Tab[/] page  [dim]\xe2\x86\x91\xe2\x86\x93[/] navigate  "
+                        "[dim]Enter/Space[/] toggle  [dim]\xe2\x86\x90\xe2\x86\x92[/] adjust  "
+                        "[dim]1-7[/] jump  [dim]q[/] quit");
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -244,10 +253,10 @@ static auto build_footer(const app_state& st) {
 // ═══════════════════════════════════════════════════════════════════════
 
 class canvas_page_view {
-public:
-    explicit canvas_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit canvas_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -255,7 +264,7 @@ public:
         page.add(text_builder(""));
 
         // Shape selector
-        const char* shapes[] = {"Circles", "Sine Wave", "Star", "Spiral"};
+        const char *shapes[] = {"Circles", "Sine Wave", "Star", "Spiral"};
         {
             std::string sel_line = "  Shape: ";
             for (int i = 0; i < 4; ++i) {
@@ -272,15 +281,13 @@ public:
 
         // Canvas
         int t = st_.canvas_animate ? st_.tick : 0;
-        auto cvs = make_canvas(72, 32, [&](canvas_widget_builder& c) {
+        auto cvs = make_canvas(72, 32, [&](canvas_widget_builder &c) {
             c.draw_rect(0, 0, 71, 31, colors::bright_black);
 
             switch (st_.canvas_shape) {
-            case 0: {  // Concentric circles
-                const color ring_colors[] = {
-                    colors::red, colors::yellow, colors::green,
-                    colors::cyan, colors::blue, colors::magenta
-                };
+            case 0: { // Concentric circles
+                const color ring_colors[] = {colors::red,  colors::yellow, colors::green,
+                                             colors::cyan, colors::blue,   colors::magenta};
                 for (int r = 3; r <= 14; r += 2) {
                     int offset = st_.canvas_animate ? static_cast<int>(2.0 * std::sin(t * 0.1 + r * 0.3)) : 0;
                     c.draw_circle(36 + offset, 16, r, ring_colors[(r / 2) % 6]);
@@ -288,7 +295,7 @@ public:
                 c.draw_text(2, 1, "Concentric Circles", style{colors::bright_yellow, {}, attr::bold});
                 break;
             }
-            case 1: {  // Sine wave
+            case 1: { // Sine wave
                 c.draw_line(0, 16, 71, 16, colors::bright_black);
                 c.draw_line(0, 0, 0, 31, colors::bright_black);
                 for (int x = 1; x < 72; ++x) {
@@ -303,7 +310,7 @@ public:
                 c.draw_text(2, 3, "cos(x)", style{colors::bright_cyan, {}, attr::bold});
                 break;
             }
-            case 2: {  // Star
+            case 2: { // Star
                 int cx = 36, cy = 16;
                 int outer = 14, inner = 6;
                 double phase = st_.canvas_animate ? t * 0.05 : 0.0;
@@ -323,7 +330,7 @@ public:
                 c.draw_text(2, 1, "Rotating Star", style{colors::bright_yellow, {}, attr::bold});
                 break;
             }
-            case 3: {  // Spiral
+            case 3: { // Spiral
                 double phase = st_.canvas_animate ? t * 0.08 : 0.0;
                 int px = 36, py = 16;
                 for (int i = 0; i < 200; ++i) {
@@ -334,9 +341,11 @@ public:
                     if (nx >= 0 && nx < 72 && ny >= 0 && ny < 32) {
                         uint8_t g = static_cast<uint8_t>(100 + i * 0.7);
                         c.draw_point(nx, ny, color::from_rgb(0, g, static_cast<uint8_t>(255 - i * 0.7)));
-                        if (i > 0) c.draw_line(px, py, nx, ny, color::from_rgb(0, g, static_cast<uint8_t>(255 - i * 0.7)));
+                        if (i > 0)
+                            c.draw_line(px, py, nx, ny, color::from_rgb(0, g, static_cast<uint8_t>(255 - i * 0.7)));
                     }
-                    px = nx; py = ny;
+                    px = nx;
+                    py = ny;
                 }
                 c.draw_text(2, 1, "Spiral", style{colors::bright_cyan, {}, attr::bold});
                 break;
@@ -348,8 +357,9 @@ public:
         page.key("canvas-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -357,10 +367,10 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class gauge_page_view {
-public:
-    explicit gauge_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit gauge_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -368,7 +378,7 @@ public:
         page.add(text_builder("  [dim]Up/Down: select  Left/Right: adjust  Enter: toggle direction[/]"));
         page.add(text_builder(""));
 
-        const char* labels[] = {"CPU Usage", "Memory   ", "Disk I/O ", "Network  "};
+        const char *labels[] = {"CPU Usage", "Memory   ", "Disk I/O ", "Network  "};
         const style gauge_styles[] = {
             {colors::bright_green, {}, attr::bold},
             {colors::bright_cyan, {}, attr::bold},
@@ -382,9 +392,8 @@ public:
             for (int i = 0; i < 4; ++i) {
                 columns_builder row;
                 bool sel = (st_.gauge_selected == i);
-                std::string label = sel
-                    ? std::string("[bold bright_white on_blue] \xe2\x96\xb6 ") + labels[i] + "[/]"
-                    : std::string("   ") + labels[i];
+                std::string label = sel ? std::string("[bold bright_white on_blue] \xe2\x96\xb6 ") + labels[i] + "[/]"
+                                        : std::string("   ") + labels[i];
                 row.add(text_builder(label));
 
                 char pct[16];
@@ -401,9 +410,8 @@ public:
             for (int i = 0; i < 4; ++i) {
                 rows_builder col;
                 bool sel = (st_.gauge_selected == i);
-                std::string label = sel
-                    ? std::string("[bold bright_white on_blue]") + labels[i] + "[/]"
-                    : std::string("[dim]") + labels[i] + "[/]";
+                std::string label = sel ? std::string("[bold bright_white on_blue]") + labels[i] + "[/]"
+                                        : std::string("[dim]") + labels[i] + "[/]";
                 col.add(make_gauge_direction(st_.gauge_values[i], gauge_direction::vertical));
                 char pct[8];
                 std::snprintf(pct, sizeof(pct), "%d%%", static_cast<int>(st_.gauge_values[i] * 100));
@@ -436,15 +444,16 @@ public:
         page.key("gauge-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
 //  Page 2: Paragraph — dynamic word wrap
 // ═══════════════════════════════════════════════════════════════════════
 
-static const char* g_para_texts[] = {
+static const char *g_para_texts[] = {
     "The quick brown fox jumps over the lazy dog. "
     "This sentence demonstrates automatic word wrapping in the tapiru "
     "paragraph widget. Long text is broken at word boundaries to fit "
@@ -464,10 +473,10 @@ static const char* g_para_texts[] = {
 };
 
 class paragraph_page_view {
-public:
-    explicit paragraph_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit paragraph_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -475,11 +484,8 @@ public:
 
         {
             char buf[128];
-            std::snprintf(buf, sizeof(buf),
-                "  Width: [bold cyan]%d[/]  Justify: %s  Text: [bold]%d/3[/]",
-                st_.para_width,
-                st_.para_justify ? "[green]ON[/]" : "[dim]OFF[/]",
-                st_.para_text_idx + 1);
+            std::snprintf(buf, sizeof(buf), "  Width: [bold cyan]%d[/]  Justify: %s  Text: [bold]%d/3[/]",
+                          st_.para_width, st_.para_justify ? "[green]ON[/]" : "[dim]OFF[/]", st_.para_text_idx + 1);
             page.add(text_builder(buf));
         }
         page.add(text_builder("  [dim]Left/Right: width  Enter: justify  Up/Down: text[/]"));
@@ -487,9 +493,8 @@ public:
 
         // Paragraph in a panel
         {
-            auto para = st_.para_justify
-                ? make_paragraph_justify(g_para_texts[st_.para_text_idx])
-                : make_paragraph(g_para_texts[st_.para_text_idx]);
+            auto para = st_.para_justify ? make_paragraph_justify(g_para_texts[st_.para_text_idx])
+                                         : make_paragraph(g_para_texts[st_.para_text_idx]);
             panel_builder pb(std::move(para));
             pb.title(st_.para_justify ? "Justified" : "Word Wrap");
             pb.border(border_style::rounded);
@@ -499,8 +504,9 @@ public:
         page.key("para-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -508,10 +514,10 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class decorator_page_view {
-public:
-    explicit decorator_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit decorator_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -520,15 +526,14 @@ public:
         page.add(text_builder(""));
 
         // Toggle list
-        struct toggle_item { const char* name; bool on; };
+        struct toggle_item {
+            const char *name;
+            bool on;
+        };
         toggle_item items[] = {
-            {"Border (rounded)",  st_.deco_border},
-            {"Bold",              st_.deco_bold},
-            {"Italic",            st_.deco_italic},
-            {"Underline",         st_.deco_underline},
-            {"Center",            st_.deco_center},
-            {"Fg Color (cyan)",   st_.deco_color},
-            {"Padding (1,2)",     st_.deco_padding},
+            {"Border (rounded)", st_.deco_border}, {"Bold", st_.deco_bold},     {"Italic", st_.deco_italic},
+            {"Underline", st_.deco_underline},     {"Center", st_.deco_center}, {"Fg Color (cyan)", st_.deco_color},
+            {"Padding (1,2)", st_.deco_padding},
         };
 
         for (int i = 0; i < 7; ++i) {
@@ -549,26 +554,26 @@ public:
 
         // Build the element with selected decorators
         element e = element(text_builder("[bold]Hello, tapiru![/] Decorator pipes in action."));
-        if (st_.deco_padding)   e = std::move(e) | padding(1, 2);
-        if (st_.deco_border)    e = std::move(e) | border(border_style::rounded);
-        if (st_.deco_bold)      e = std::move(e) | bold();
-        if (st_.deco_italic)    e = std::move(e) | italic();
+        if (st_.deco_padding) e = std::move(e) | padding(1, 2);
+        if (st_.deco_border) e = std::move(e) | border(border_style::rounded);
+        if (st_.deco_bold) e = std::move(e) | bold();
+        if (st_.deco_italic) e = std::move(e) | italic();
         if (st_.deco_underline) e = std::move(e) | underline();
-        if (st_.deco_color)     e = std::move(e) | fg_color(colors::bright_cyan);
-        if (st_.deco_center)    e = std::move(e) | center();
+        if (st_.deco_color) e = std::move(e) | fg_color(colors::bright_cyan);
+        if (st_.deco_center) e = std::move(e) | center();
         page.add(std::move(e));
 
         // Show the pipe expression
         page.add(text_builder(""));
         {
             std::string expr = "  [dim]element(text)";
-            if (st_.deco_padding)   expr += " | padding(1,2)";
-            if (st_.deco_border)    expr += " | border()";
-            if (st_.deco_bold)      expr += " | bold()";
-            if (st_.deco_italic)    expr += " | italic()";
+            if (st_.deco_padding) expr += " | padding(1,2)";
+            if (st_.deco_border) expr += " | border()";
+            if (st_.deco_bold) expr += " | bold()";
+            if (st_.deco_italic) expr += " | italic()";
             if (st_.deco_underline) expr += " | underline()";
-            if (st_.deco_color)     expr += " | fg_color(cyan)";
-            if (st_.deco_center)    expr += " | center()";
+            if (st_.deco_color) expr += " | fg_color(cyan)";
+            if (st_.deco_center) expr += " | center()";
             expr += "[/]";
             page.add(text_builder(expr));
         }
@@ -576,8 +581,9 @@ public:
         page.key("deco-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -585,36 +591,32 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class color_page_view {
-public:
-    explicit color_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit color_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
         page.add(text_builder("[bold bright_cyan]  Color Downgrade[/]  [dim](Stage 7)[/]"));
 
-        const char* depth_names[] = {"None", "16-color", "256-color", "True Color (RGB)"};
+        const char *depth_names[] = {"None", "16-color", "256-color", "True Color (RGB)"};
         {
             char buf[128];
-            std::snprintf(buf, sizeof(buf),
-                "  Target depth: [bold cyan]%s[/]  [dim](Left/Right to change)[/]",
-                depth_names[st_.color_depth]);
+            std::snprintf(buf, sizeof(buf), "  Target depth: [bold cyan]%s[/]  [dim](Left/Right to change)[/]",
+                          depth_names[st_.color_depth]);
             page.add(text_builder(buf));
         }
         page.add(text_builder(""));
 
         // Color table
-        struct color_entry { const char* name; uint8_t r, g, b; };
+        struct color_entry {
+            const char *name;
+            uint8_t r, g, b;
+        };
         color_entry entries[] = {
-            {"Pure Red",     255, 0,   0},
-            {"Pure Green",   0,   255, 0},
-            {"Pure Blue",    0,   0,   255},
-            {"Orange",       255, 128, 0},
-            {"Magenta",      255, 0,   255},
-            {"Cyan",         0,   255, 255},
-            {"Gray(128)",    128, 128, 128},
-            {"White",        255, 255, 255},
+            {"Pure Red", 255, 0, 0},  {"Pure Green", 0, 255, 0}, {"Pure Blue", 0, 0, 255},     {"Orange", 255, 128, 0},
+            {"Magenta", 255, 0, 255}, {"Cyan", 0, 255, 255},     {"Gray(128)", 128, 128, 128}, {"White", 255, 255, 255},
         };
 
         table_builder tb;
@@ -624,7 +626,7 @@ public:
         tb.border(border_style::rounded);
         tb.header_style(style{colors::bright_cyan, {}, attr::bold});
 
-        for (auto& e : entries) {
+        for (auto &e : entries) {
             auto c = color::from_rgb(e.r, e.g, e.b);
             auto d = c.downgrade(static_cast<uint8_t>(st_.color_depth));
 
@@ -652,8 +654,9 @@ public:
         page.key("color-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -661,10 +664,10 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class widgets_page_view {
-public:
-    explicit widgets_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit widgets_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -674,12 +677,11 @@ public:
 
         // Checkboxes
         {
-            std::string hdr = (st_.widget_focus == 0)
-                ? "[bold bright_white on_blue] \xe2\x96\xb6 Checkboxes [/]"
-                : "  [bold]Checkboxes[/]";
+            std::string hdr = (st_.widget_focus == 0) ? "[bold bright_white on_blue] \xe2\x96\xb6 Checkboxes [/]"
+                                                      : "  [bold]Checkboxes[/]";
             page.add(text_builder(hdr));
 
-            const char* cb_labels[] = {"Enable notifications", "Dark mode", "Auto-save"};
+            const char *cb_labels[] = {"Enable notifications", "Dark mode", "Auto-save"};
             for (int i = 0; i < 3; ++i) {
                 std::string line = "    ";
                 line += st_.cb_values[i] ? "[green]\xe2\x9c\x93[/] " : "[dim]\xe2\x97\x8b[/] ";
@@ -692,9 +694,8 @@ public:
 
         // Slider
         {
-            std::string hdr = (st_.widget_focus == 1)
-                ? "[bold bright_white on_blue] \xe2\x96\xb6 Slider [/]"
-                : "  [bold]Slider[/]";
+            std::string hdr =
+                (st_.widget_focus == 1) ? "[bold bright_white on_blue] \xe2\x96\xb6 Slider [/]" : "  [bold]Slider[/]";
             page.add(text_builder(hdr));
 
             // Visual slider bar
@@ -720,12 +721,11 @@ public:
 
         // Radio group
         {
-            std::string hdr = (st_.widget_focus == 2)
-                ? "[bold bright_white on_blue] \xe2\x96\xb6 Radio Group [/]"
-                : "  [bold]Radio Group[/]";
+            std::string hdr = (st_.widget_focus == 2) ? "[bold bright_white on_blue] \xe2\x96\xb6 Radio Group [/]"
+                                                      : "  [bold]Radio Group[/]";
             page.add(text_builder(hdr));
 
-            const char* options[] = {"Light theme", "Dark theme", "System default"};
+            const char *options[] = {"Light theme", "Dark theme", "System default"};
             for (int i = 0; i < 3; ++i) {
                 std::string line = "    ";
                 line += (st_.radio_sel == i) ? "[bright_cyan]\xe2\x97\x89[/] " : "[dim]\xe2\x97\x8b[/] ";
@@ -738,20 +738,19 @@ public:
 
         // Gauge as widget
         {
-            std::string hdr = (st_.widget_focus == 3)
-                ? "[bold bright_white on_blue] \xe2\x96\xb6 Gauge [/]"
-                : "  [bold]Gauge[/]";
+            std::string hdr =
+                (st_.widget_focus == 3) ? "[bold bright_white on_blue] \xe2\x96\xb6 Gauge [/]" : "  [bold]Gauge[/]";
             page.add(text_builder(hdr));
-            page.add(make_gauge(st_.slider_val,
-                style{colors::bright_green, {}, attr::bold},
-                style{colors::bright_black, {}, attr::dim}));
+            page.add(make_gauge(st_.slider_val, style{colors::bright_green, {}, attr::bold},
+                                style{colors::bright_black, {}, attr::dim}));
         }
 
         page.key("widgets-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -759,10 +758,10 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class dashboard_page_view {
-public:
-    explicit dashboard_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit dashboard_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -773,18 +772,16 @@ public:
         columns_builder body;
 
         // Sidebar menu
-        body.add(
-            menu_builder()
-                .add_item("Overview")
-                .add_item("Canvas")
-                .add_item("Metrics")
-                .add_separator()
-                .add_item("About")
-                .cursor(&st_.dash_sidebar)
-                .highlight_style(style{colors::bright_white, colors::blue, attr::bold})
-                .border(border_style::rounded)
-                .key("dash-menu")
-        );
+        body.add(menu_builder()
+                     .add_item("Overview")
+                     .add_item("Canvas")
+                     .add_item("Metrics")
+                     .add_separator()
+                     .add_item("About")
+                     .cursor(&st_.dash_sidebar)
+                     .highlight_style(style{colors::bright_white, colors::blue, attr::bold})
+                     .border(border_style::rounded)
+                     .key("dash-menu"));
 
         // Content
         {
@@ -792,24 +789,23 @@ public:
             content.gap(0);
 
             switch (st_.dash_sidebar) {
-            case 0: {  // Overview — gauges
+            case 0: { // Overview — gauges
                 content.add(text_builder("[bold]System Overview[/]"));
                 content.add(rule_builder());
                 content.add(text_builder("[bold]CPU[/]"));
                 float cpu = 0.5f + 0.3f * static_cast<float>(std::sin(st_.tick * 0.1));
-                content.add(make_gauge(cpu,
-                    style{colors::bright_green, {}, attr::bold},
-                    style{colors::bright_black, {}, attr::dim}));
+                content.add(make_gauge(cpu, style{colors::bright_green, {}, attr::bold},
+                                       style{colors::bright_black, {}, attr::dim}));
                 content.add(text_builder("[bold]Memory[/]"));
                 content.add(make_gauge(0.62f));
                 content.add(text_builder("[bold]Disk[/]"));
                 content.add(make_gauge(0.34f));
                 break;
             }
-            case 1: {  // Canvas
+            case 1: { // Canvas
                 content.add(text_builder("[bold]Live Canvas[/]"));
                 content.add(rule_builder());
-                auto cvs = make_canvas(40, 16, [&](canvas_widget_builder& c) {
+                auto cvs = make_canvas(40, 16, [&](canvas_widget_builder &c) {
                     c.draw_rect(0, 0, 39, 15, colors::bright_black);
                     for (int x = 0; x < 40; ++x) {
                         int y = 8 + static_cast<int>(6.0 * std::sin((x + st_.tick * 2) * 0.15));
@@ -820,26 +816,22 @@ public:
                 content.add(std::move(cvs));
                 break;
             }
-            case 2: {  // Metrics
+            case 2: { // Metrics
                 content.add(text_builder("[bold]Performance Metrics[/]"));
                 content.add(rule_builder());
                 std::vector<float> data;
                 for (int i = 0; i < 30; ++i)
-                    data.push_back(static_cast<float>(
-                        std::sin((i + st_.tick) * 0.2) * 30 + 50));
-                content.add(line_chart_builder(data, 25, 4)
-                    .style_override(style{colors::bright_green})
-                    .key("metric-chart"));
+                    data.push_back(static_cast<float>(std::sin((i + st_.tick) * 0.2) * 30 + 50));
+                content.add(
+                    line_chart_builder(data, 25, 4).style_override(style{colors::bright_green}).key("metric-chart"));
                 break;
             }
-            default: {  // About
+            default: { // About
                 content.add(text_builder("[bold]About tapiru[/]"));
                 content.add(rule_builder());
-                auto para = make_paragraph(
-                    "tapiru is a modern C++23 terminal UI library. "
-                    "Features: canvas drawing, gauges, paragraphs, "
-                    "color downgrade, decorator pipes, and more."
-                );
+                auto para = make_paragraph("tapiru is a modern C++23 terminal UI library. "
+                                           "Features: canvas drawing, gauges, paragraphs, "
+                                           "color downgrade, decorator pipes, and more.");
                 content.add(std::move(para));
                 break;
             }
@@ -860,16 +852,17 @@ public:
         char tick_buf[32];
         std::snprintf(tick_buf, sizeof(tick_buf), "Frame %d", st_.tick);
         page.add(status_bar_builder()
-            .left("[bold] LIVE [/]")
-            .center(tick_buf)
-            .right("[green]All systems nominal[/]")
-            .style_override(style{colors::bright_white, color::from_rgb(30, 30, 60)}));
+                     .left("[bold] LIVE [/]")
+                     .center(tick_buf)
+                     .right("[green]All systems nominal[/]")
+                     .style_override(style{colors::bright_white, color::from_rgb(30, 30, 60)}));
 
         page.key("dash-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -877,10 +870,10 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class app_view {
-public:
-    explicit app_view(const app_state& st) : st_(st) {}
+  public:
+    explicit app_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder root;
         root.gap(0);
 
@@ -893,13 +886,41 @@ public:
 
         // Page
         switch (st_.page) {
-        case 0: { auto v = canvas_page_view(st_);    root.add(std::move(v)); break; }
-        case 1: { auto v = gauge_page_view(st_);     root.add(std::move(v)); break; }
-        case 2: { auto v = paragraph_page_view(st_);  root.add(std::move(v)); break; }
-        case 3: { auto v = decorator_page_view(st_);   root.add(std::move(v)); break; }
-        case 4: { auto v = color_page_view(st_);       root.add(std::move(v)); break; }
-        case 5: { auto v = widgets_page_view(st_);     root.add(std::move(v)); break; }
-        case 6: { auto v = dashboard_page_view(st_);    root.add(std::move(v)); break; }
+        case 0: {
+            auto v = canvas_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 1: {
+            auto v = gauge_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 2: {
+            auto v = paragraph_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 3: {
+            auto v = decorator_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 4: {
+            auto v = color_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 5: {
+            auto v = widgets_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 6: {
+            auto v = dashboard_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
         }
 
         // Footer
@@ -910,7 +931,8 @@ public:
         root.key("app-root");
         return root.flatten_into(s);
     }
-private:
+
+  private:
     app_state st_;
 };
 
@@ -918,20 +940,28 @@ private:
 //  Input handling
 // ═══════════════════════════════════════════════════════════════════════
 
-static int max_cursor(const app_state& st) {
+static int max_cursor(const app_state &st) {
     switch (st.page) {
-    case 0: return 3;   // canvas shapes
-    case 1: return 3;   // gauge bars
-    case 2: return 2;   // paragraph texts
-    case 3: return 6;   // decorator toggles
-    case 4: return 0;
-    case 5: return 3;   // widget groups
-    case 6: return 4;   // dashboard sidebar
-    default: return 0;
+    case 0:
+        return 3; // canvas shapes
+    case 1:
+        return 3; // gauge bars
+    case 2:
+        return 2; // paragraph texts
+    case 3:
+        return 6; // decorator toggles
+    case 4:
+        return 0;
+    case 5:
+        return 3; // widget groups
+    case 6:
+        return 4; // dashboard sidebar
+    default:
+        return 0;
     }
 }
 
-static void handle_input(app_state& st, input_ev ev) {
+static void handle_input(app_state &st, input_ev ev) {
     // Page jump via number keys
     if (ev >= input_ev::key_1 && ev <= input_ev::key_7) {
         int target = static_cast<int>(ev) - static_cast<int>(input_ev::key_1);
@@ -952,16 +982,20 @@ static void handle_input(app_state& st, input_ev ev) {
         st.cursor = 0;
         break;
     case input_ev::up:
-        if (st.page == 6) { if (st.dash_sidebar > 0) --st.dash_sidebar; }
-        else if (st.cursor > 0) --st.cursor;
+        if (st.page == 6) {
+            if (st.dash_sidebar > 0) --st.dash_sidebar;
+        } else if (st.cursor > 0)
+            --st.cursor;
         // Sync page-specific state
         if (st.page == 0) st.canvas_shape = st.cursor;
         if (st.page == 1) st.gauge_selected = st.cursor;
         if (st.page == 5) st.widget_focus = st.cursor;
         break;
     case input_ev::down:
-        if (st.page == 6) { if (st.dash_sidebar < 4) ++st.dash_sidebar; }
-        else if (st.cursor < max_cursor(st)) ++st.cursor;
+        if (st.page == 6) {
+            if (st.dash_sidebar < 4) ++st.dash_sidebar;
+        } else if (st.cursor < max_cursor(st))
+            ++st.cursor;
         if (st.page == 0) st.canvas_shape = st.cursor;
         if (st.page == 1) st.gauge_selected = st.cursor;
         if (st.page == 5) st.widget_focus = st.cursor;
@@ -974,8 +1008,10 @@ static void handle_input(app_state& st, input_ev ev) {
         } else if (st.page == 4) {
             st.color_depth = std::max(0, st.color_depth - 1);
         } else if (st.page == 5) {
-            if (st.widget_focus == 1) st.slider_val = std::max(0.0f, st.slider_val - 0.05f);
-            else if (st.widget_focus == 2 && st.radio_sel > 0) --st.radio_sel;
+            if (st.widget_focus == 1)
+                st.slider_val = std::max(0.0f, st.slider_val - 0.05f);
+            else if (st.widget_focus == 2 && st.radio_sel > 0)
+                --st.radio_sel;
         }
         break;
     case input_ev::right:
@@ -986,8 +1022,10 @@ static void handle_input(app_state& st, input_ev ev) {
         } else if (st.page == 4) {
             st.color_depth = std::min(3, st.color_depth + 1);
         } else if (st.page == 5) {
-            if (st.widget_focus == 1) st.slider_val = std::min(1.0f, st.slider_val + 0.05f);
-            else if (st.widget_focus == 2 && st.radio_sel < 2) ++st.radio_sel;
+            if (st.widget_focus == 1)
+                st.slider_val = std::min(1.0f, st.slider_val + 0.05f);
+            else if (st.widget_focus == 2 && st.radio_sel < 2)
+                ++st.radio_sel;
         }
         break;
     case input_ev::enter:
@@ -1001,13 +1039,27 @@ static void handle_input(app_state& st, input_ev ev) {
         } else if (st.page == 3) {
             // Toggle the selected decorator
             switch (st.cursor) {
-            case 0: st.deco_border    = !st.deco_border;    break;
-            case 1: st.deco_bold      = !st.deco_bold;      break;
-            case 2: st.deco_italic    = !st.deco_italic;    break;
-            case 3: st.deco_underline = !st.deco_underline; break;
-            case 4: st.deco_center    = !st.deco_center;    break;
-            case 5: st.deco_color     = !st.deco_color;     break;
-            case 6: st.deco_padding   = !st.deco_padding;   break;
+            case 0:
+                st.deco_border = !st.deco_border;
+                break;
+            case 1:
+                st.deco_bold = !st.deco_bold;
+                break;
+            case 2:
+                st.deco_italic = !st.deco_italic;
+                break;
+            case 3:
+                st.deco_underline = !st.deco_underline;
+                break;
+            case 4:
+                st.deco_center = !st.deco_center;
+                break;
+            case 5:
+                st.deco_color = !st.deco_color;
+                break;
+            case 6:
+                st.deco_padding = !st.deco_padding;
+                break;
             }
         } else if (st.page == 5) {
             if (st.widget_focus == 0) {
@@ -1059,15 +1111,14 @@ int main() {
     con.write("\x1b[J");
 
     while (!st.quit) {
-        auto ev = poll_input(33);  // ~30 fps
+        auto ev = poll_input(33); // ~30 fps
         bool changed = (ev != input_ev::none);
         handle_input(st, ev);
 
         st.tick++;
 
         // Animated pages always re-render
-        bool anim = (st.page == 0 && st.canvas_animate)
-                 || (st.page == 6);
+        bool anim = (st.page == 0 && st.canvas_animate) || (st.page == 6);
 
         if (changed || anim) {
             con.write("\x1b[H");

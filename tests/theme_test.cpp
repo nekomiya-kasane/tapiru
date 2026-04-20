@@ -3,15 +3,16 @@
  * @brief Tests for theme/style sheet system.
  */
 
-#include <gtest/gtest.h>
 #include "tapiru/core/theme.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
 TEST(ThemeTest, DefineAndLookup) {
     theme th;
     th.define("danger", {color::from_rgb(255, 0, 0), color::default_color(), attr::bold});
-    auto* s = th.lookup("danger");
+    auto *s = th.lookup("danger");
     ASSERT_NE(s, nullptr);
     EXPECT_EQ(s->fg.r, 255);
     EXPECT_EQ(s->fg.g, 0);
@@ -51,7 +52,7 @@ TEST(ThemeTest, OverwriteExisting) {
     theme th;
     th.define("x", {color::from_rgb(1, 2, 3), color::default_color(), attr::none});
     th.define("x", {color::from_rgb(4, 5, 6), color::default_color(), attr::bold});
-    auto* s = th.lookup("x");
+    auto *s = th.lookup("x");
     ASSERT_NE(s, nullptr);
     EXPECT_EQ(s->fg.r, 4);
     EXPECT_EQ(s->attrs, attr::bold);
@@ -79,7 +80,7 @@ TEST(ThemeTest, LightPreset) {
     auto th = theme::light();
     EXPECT_TRUE(th.has("danger"));
     EXPECT_TRUE(th.has("link"));
-    auto* link = th.lookup("link");
+    auto *link = th.lookup("link");
     ASSERT_NE(link, nullptr);
     EXPECT_EQ(link->attrs, attr::underline);
 }
@@ -87,14 +88,14 @@ TEST(ThemeTest, LightPreset) {
 TEST(ThemeTest, MonokaiPreset) {
     auto th = theme::monokai();
     EXPECT_TRUE(th.has("danger"));
-    auto* danger = th.lookup("danger");
+    auto *danger = th.lookup("danger");
     ASSERT_NE(danger, nullptr);
     EXPECT_EQ(danger->attrs, attr::bold);
 }
 
 TEST(ThemeTest, DarkDangerIsRed) {
     auto th = theme::dark();
-    auto* s = th.lookup("danger");
+    auto *s = th.lookup("danger");
     ASSERT_NE(s, nullptr);
     EXPECT_EQ(s->fg.r, 255);
     EXPECT_EQ(s->fg.g, 85);

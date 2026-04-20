@@ -4,12 +4,13 @@
  */
 
 #include "tapiru/widgets/tree_view.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 namespace tapiru {
 
-tree_view_builder& tree_view_builder::key(std::string_view k) {
+tree_view_builder &tree_view_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
@@ -17,15 +18,15 @@ tree_view_builder& tree_view_builder::key(std::string_view k) {
 namespace {
 
 struct flatten_ctx {
-    detail::scene& sc;
+    detail::scene &sc;
     detail::pool_index rows_pi;
-    const std::unordered_set<std::string>* expanded;
-    const int* cursor;
-    const style& node_sty;
-    const style& highlight_sty;
+    const std::unordered_set<std::string> *expanded;
+    const int *cursor;
+    const style &node_sty;
+    const style &highlight_sty;
 };
 
-void flatten_node(flatten_ctx& ctx, const tree_node& node, int depth, int& flat_index) {
+void flatten_node(flatten_ctx &ctx, const tree_node &node, int depth, int &flat_index) {
     int cur = ctx.cursor ? *ctx.cursor : -1;
     bool is_selected = (flat_index == cur);
     bool has_children = !node.children.empty();
@@ -53,15 +54,15 @@ void flatten_node(flatten_ctx& ctx, const tree_node& node, int depth, int& flat_
     flat_index++;
 
     if (has_children && is_expanded) {
-        for (const auto& child : node.children) {
+        for (const auto &child : node.children) {
             flatten_node(ctx, child, depth + 1, flat_index);
         }
     }
 }
 
-}  // anonymous namespace
+} // anonymous namespace
 
-node_id tree_view_builder::flatten_into(detail::scene& s) const {
+node_id tree_view_builder::flatten_into(detail::scene &s) const {
     detail::rows_data rd;
     rd.gap = 0;
 
@@ -74,7 +75,7 @@ node_id tree_view_builder::flatten_into(detail::scene& s) const {
     if (!root_.label.empty()) {
         flatten_node(ctx, root_, 0, flat_index);
     } else {
-        for (const auto& child : root_.children) {
+        for (const auto &child : root_.children) {
             flatten_node(ctx, child, 0, flat_index);
         }
     }
@@ -82,4 +83,4 @@ node_id tree_view_builder::flatten_into(detail::scene& s) const {
     return rows_id;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

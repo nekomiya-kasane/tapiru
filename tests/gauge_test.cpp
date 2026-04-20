@@ -3,18 +3,18 @@
  * @brief Tests for gauge element factories.
  */
 
-#include <gtest/gtest.h>
-
-#include "tapiru/widgets/gauge.h"
 #include "tapiru/core/console.h"
 #include "tapiru/widgets/builders.h"
+#include "tapiru/widgets/gauge.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
 // ── Helper ──────────────────────────────────────────────────────────────
 
 class virtual_terminal {
-public:
+  public:
     [[nodiscard]] console make_console() {
         console_config cfg;
         cfg.sink = [this](std::string_view data) { buffer_ += data; };
@@ -22,9 +22,10 @@ public:
         cfg.no_color = true;
         return console(cfg);
     }
-    [[nodiscard]] const std::string& raw() const noexcept { return buffer_; }
+    [[nodiscard]] const std::string &raw() const noexcept { return buffer_; }
     void clear() { buffer_.clear(); }
-private:
+
+  private:
     std::string buffer_;
 };
 

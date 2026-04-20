@@ -119,8 +119,8 @@ TEST(SceneTest, MeasurePadding) {
     s.get_padding(pi_pad).content = text_id;
 
     auto m = dispatch_measure(s, pad_id, box_constraints::loose(80, 24));
-    EXPECT_EQ(m.width, 1 + 2 + 2);   // 1 char + 2 left + 2 right = 5
-    EXPECT_EQ(m.height, 1 + 1 + 1);   // 1 line + 1 top + 1 bottom = 3
+    EXPECT_EQ(m.width, 1 + 2 + 2);  // 1 char + 2 left + 2 right = 5
+    EXPECT_EQ(m.height, 1 + 1 + 1); // 1 line + 1 top + 1 bottom = 3
 }
 
 // ── Panel measure ───────────────────────────────────────────────────────
@@ -135,8 +135,8 @@ TEST(SceneTest, MeasurePanel) {
     s.get_panel(pi_panel).content = text_id;
 
     auto m = dispatch_measure(s, panel_id, box_constraints::loose(80, 24));
-    EXPECT_EQ(m.width, 5 + 2);   // content + border
-    EXPECT_EQ(m.height, 1 + 2);  // content + border
+    EXPECT_EQ(m.width, 5 + 2);  // content + border
+    EXPECT_EQ(m.height, 1 + 2); // content + border
 }
 
 // ── Z-order & flags ────────────────────────────────────────────────────
@@ -173,11 +173,11 @@ TEST(SceneTest, SetVisibleAndFocusable) {
 
     s.set_focusable(id, true);
     EXPECT_TRUE(s.is_focusable(id));
-    EXPECT_TRUE(s.is_visible(id));  // unchanged
+    EXPECT_TRUE(s.is_visible(id)); // unchanged
 
     s.set_visible(id, false);
     EXPECT_FALSE(s.is_visible(id));
-    EXPECT_TRUE(s.is_focusable(id));  // unchanged
+    EXPECT_TRUE(s.is_focusable(id)); // unchanged
 }
 
 // ── Clear (capacity reuse) ─────────────────────────────────────────────

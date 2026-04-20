@@ -4,6 +4,7 @@
  */
 
 #include "tapiru/widgets/gauge.h"
+
 #include "tapiru/widgets/builders.h"
 
 #include <algorithm>
@@ -13,22 +14,18 @@
 namespace tapiru {
 
 // Horizontal gauge block characters (eighths): ▏▎▍▌▋▊▉█
-static constexpr char32_t h_blocks[] = {
-    U' ', U'\x258F', U'\x258E', U'\x258D', U'\x258C',
-    U'\x258B', U'\x258A', U'\x2589', U'\x2588'
-};
+static constexpr char32_t h_blocks[] = {U' ',      U'\x258F', U'\x258E', U'\x258D', U'\x258C',
+                                        U'\x258B', U'\x258A', U'\x2589', U'\x2588'};
 
 // Vertical gauge block characters (eighths): ▁▂▃▄▅▆▇█
-static constexpr char32_t v_blocks[] = {
-    U' ', U'\x2581', U'\x2582', U'\x2583', U'\x2584',
-    U'\x2585', U'\x2586', U'\x2587', U'\x2588'
-};
+static constexpr char32_t v_blocks[] = {U' ',      U'\x2581', U'\x2582', U'\x2583', U'\x2584',
+                                        U'\x2585', U'\x2586', U'\x2587', U'\x2588'};
 
 element make_gauge(float progress) {
     return make_gauge(progress, style{}, style{color::default_color(), color::default_color(), attr::dim});
 }
 
-element make_gauge(float progress, const style& filled, const style& remaining) {
+element make_gauge(float progress, const style &filled, const style &remaining) {
     float p = std::clamp(progress, 0.0f, 1.0f);
 
     // Build a text representation using block characters
@@ -126,4 +123,4 @@ element make_gauge_direction(float progress, gauge_direction dir) {
     return element(std::move(rb));
 }
 
-}  // namespace tapiru
+} // namespace tapiru

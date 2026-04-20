@@ -4,6 +4,7 @@
  */
 
 #include "tapiru/widgets/virtual_list.h"
+
 #include "detail/scene.h"
 #include "detail/widget_types.h"
 
@@ -12,7 +13,7 @@
 
 namespace tapiru {
 
-node_id virtual_list_builder::flatten_into(detail::scene& s) const {
+node_id virtual_list_builder::flatten_into(detail::scene &s) const {
     if (!item_fn_ || total_ == 0 || visible_ == 0) {
         return text_builder("").flatten_into(s);
     }
@@ -39,4 +40,4 @@ node_id virtual_list_builder::flatten_into(detail::scene& s) const {
     return rows_id;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

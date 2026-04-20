@@ -14,4 +14,4 @@ namespace tapiru {
 
 using tapioca::canvas;
 
-}  // namespace tapiru
+} // namespace tapiru

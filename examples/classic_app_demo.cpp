@@ -14,13 +14,13 @@
  *   .\build\bin\Release\tapiru_classic_app_demo.exe
  */
 
+#include "tapiru/widgets/classic_app.h"
+
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <string>
 #include <vector>
-
-#include "tapiru/widgets/classic_app.h"
 
 using namespace tapiru;
 
@@ -32,82 +32,87 @@ static std::vector<menu_bar_entry> build_menus() {
     std::vector<menu_bar_entry> menus;
 
     // File
-    menus.push_back({"File", {
-        menu_item_builder("New File").shortcut("Ctrl+N"),
-        menu_item_builder("New Window").shortcut("Ctrl+Shift+N"),
-        menu_item_builder::separator(),
-        menu_item_builder("Open File...").shortcut("Ctrl+O"),
-        menu_item_builder("Open Folder...").shortcut("Ctrl+K Ctrl+O"),
-        menu_item_builder("Open Recent")
-            .add(menu_item_builder("project_alpha"))
-            .add(menu_item_builder("my_website"))
-            .add(menu_item_builder("tapiru"))
-            .add(menu_item_builder("game_engine")),
-        menu_item_builder::separator(),
-        menu_item_builder("Save").shortcut("Ctrl+S"),
-        menu_item_builder("Save As...").shortcut("Ctrl+Shift+S"),
-        menu_item_builder("Save All").shortcut("Ctrl+K S"),
-        menu_item_builder::separator(),
-        menu_item_builder("Exit").shortcut("Ctrl+Q"),
-    }});
+    menus.push_back({"File",
+                     {
+                         menu_item_builder("New File").shortcut("Ctrl+N"),
+                         menu_item_builder("New Window").shortcut("Ctrl+Shift+N"),
+                         menu_item_builder::separator(),
+                         menu_item_builder("Open File...").shortcut("Ctrl+O"),
+                         menu_item_builder("Open Folder...").shortcut("Ctrl+K Ctrl+O"),
+                         menu_item_builder("Open Recent")
+                             .add(menu_item_builder("project_alpha"))
+                             .add(menu_item_builder("my_website"))
+                             .add(menu_item_builder("tapiru"))
+                             .add(menu_item_builder("game_engine")),
+                         menu_item_builder::separator(),
+                         menu_item_builder("Save").shortcut("Ctrl+S"),
+                         menu_item_builder("Save As...").shortcut("Ctrl+Shift+S"),
+                         menu_item_builder("Save All").shortcut("Ctrl+K S"),
+                         menu_item_builder::separator(),
+                         menu_item_builder("Exit").shortcut("Ctrl+Q"),
+                     }});
 
     // Edit
-    menus.push_back({"Edit", {
-        menu_item_builder("Undo").shortcut("Ctrl+Z"),
-        menu_item_builder("Redo").shortcut("Ctrl+Y"),
-        menu_item_builder::separator(),
-        menu_item_builder("Cut").shortcut("Ctrl+X"),
-        menu_item_builder("Copy").shortcut("Ctrl+C"),
-        menu_item_builder("Paste").shortcut("Ctrl+V"),
-        menu_item_builder::separator(),
-        menu_item_builder("Find").shortcut("Ctrl+F"),
-        menu_item_builder("Replace").shortcut("Ctrl+H"),
-        menu_item_builder("Find in Files").shortcut("Ctrl+Shift+F"),
-    }});
+    menus.push_back({"Edit",
+                     {
+                         menu_item_builder("Undo").shortcut("Ctrl+Z"),
+                         menu_item_builder("Redo").shortcut("Ctrl+Y"),
+                         menu_item_builder::separator(),
+                         menu_item_builder("Cut").shortcut("Ctrl+X"),
+                         menu_item_builder("Copy").shortcut("Ctrl+C"),
+                         menu_item_builder("Paste").shortcut("Ctrl+V"),
+                         menu_item_builder::separator(),
+                         menu_item_builder("Find").shortcut("Ctrl+F"),
+                         menu_item_builder("Replace").shortcut("Ctrl+H"),
+                         menu_item_builder("Find in Files").shortcut("Ctrl+Shift+F"),
+                     }});
 
     // View
-    menus.push_back({"View", {
-        menu_item_builder("Command Palette...").shortcut("Ctrl+Shift+P"),
-        menu_item_builder("Open View")
-            .add(menu_item_builder("Explorer"))
-            .add(menu_item_builder("Search"))
-            .add(menu_item_builder("Source Control"))
-            .add(menu_item_builder("Debug"))
-            .add(menu_item_builder("Extensions")),
-        menu_item_builder::separator(),
-        menu_item_builder("Appearance")
-            .add(menu_item_builder("Full Screen").shortcut("F11"))
-            .add(menu_item_builder("Zen Mode").shortcut("Ctrl+K Z"))
-            .add(menu_item_builder("Centered Layout")),
-        menu_item_builder("Editor Layout")
-            .add(menu_item_builder("Split Up"))
-            .add(menu_item_builder("Split Down"))
-            .add(menu_item_builder("Split Left"))
-            .add(menu_item_builder("Split Right")),
-        menu_item_builder::separator(),
-        menu_item_builder("Zoom In").shortcut("Ctrl++"),
-        menu_item_builder("Zoom Out").shortcut("Ctrl+-"),
-        menu_item_builder("Reset Zoom").shortcut("Ctrl+0"),
-    }});
+    menus.push_back({"View",
+                     {
+                         menu_item_builder("Command Palette...").shortcut("Ctrl+Shift+P"),
+                         menu_item_builder("Open View")
+                             .add(menu_item_builder("Explorer"))
+                             .add(menu_item_builder("Search"))
+                             .add(menu_item_builder("Source Control"))
+                             .add(menu_item_builder("Debug"))
+                             .add(menu_item_builder("Extensions")),
+                         menu_item_builder::separator(),
+                         menu_item_builder("Appearance")
+                             .add(menu_item_builder("Full Screen").shortcut("F11"))
+                             .add(menu_item_builder("Zen Mode").shortcut("Ctrl+K Z"))
+                             .add(menu_item_builder("Centered Layout")),
+                         menu_item_builder("Editor Layout")
+                             .add(menu_item_builder("Split Up"))
+                             .add(menu_item_builder("Split Down"))
+                             .add(menu_item_builder("Split Left"))
+                             .add(menu_item_builder("Split Right")),
+                         menu_item_builder::separator(),
+                         menu_item_builder("Zoom In").shortcut("Ctrl++"),
+                         menu_item_builder("Zoom Out").shortcut("Ctrl+-"),
+                         menu_item_builder("Reset Zoom").shortcut("Ctrl+0"),
+                     }});
 
     // Terminal
-    menus.push_back({"Terminal", {
-        menu_item_builder("New Terminal").shortcut("Ctrl+`"),
-        menu_item_builder("Split Terminal"),
-        menu_item_builder::separator(),
-        menu_item_builder("Run Task..."),
-        menu_item_builder("Run Build Task...").shortcut("Ctrl+Shift+B"),
-    }});
+    menus.push_back({"Terminal",
+                     {
+                         menu_item_builder("New Terminal").shortcut("Ctrl+`"),
+                         menu_item_builder("Split Terminal"),
+                         menu_item_builder::separator(),
+                         menu_item_builder("Run Task..."),
+                         menu_item_builder("Run Build Task...").shortcut("Ctrl+Shift+B"),
+                     }});
 
     // Help
-    menus.push_back({"Help", {
-        menu_item_builder("Welcome"),
-        menu_item_builder("Documentation"),
-        menu_item_builder("Release Notes"),
-        menu_item_builder::separator(),
-        menu_item_builder("Report Issue"),
-        menu_item_builder("About"),
-    }});
+    menus.push_back({"Help",
+                     {
+                         menu_item_builder("Welcome"),
+                         menu_item_builder("Documentation"),
+                         menu_item_builder("Release Notes"),
+                         menu_item_builder::separator(),
+                         menu_item_builder("Report Issue"),
+                         menu_item_builder("About"),
+                     }});
 
     return menus;
 }
@@ -132,17 +137,18 @@ static std::vector<std::string> generate_document() {
     lines.push_back("    [bold bright_magenta]return[/] [bright_yellow]0[/];");
     lines.push_back("}");
     lines.push_back("");
-    lines.push_back("[bold bright_yellow]// \xe2\x94\x80\xe2\x94\x80 Hyperlink demos (rendered as overlay) \xe2\x94\x80\xe2\x94\x80[/]");
+    lines.push_back("[bold bright_yellow]// \xe2\x94\x80\xe2\x94\x80 Hyperlink demos (rendered as overlay) "
+                    "\xe2\x94\x80\xe2\x94\x80[/]");
     lines.push_back("");
     lines.push_back("[dim]OSC 8 hyperlink:[/]  (click me in Windows Terminal)");
     lines.push_back("[dim]OSC 8 mailto:[/]     (click to send email)");
     lines.push_back("[dim]OSC 8 file:[/]       (click to open local path)");
     lines.push_back("");
-    lines.push_back("[bold bright_yellow]// \xe2\x94\x80\xe2\x94\x80 Sixel image (rendered as overlay) \xe2\x94\x80\xe2\x94\x80[/]");
+    lines.push_back("[bold bright_yellow]// \xe2\x94\x80\xe2\x94\x80 Sixel image (rendered as overlay) "
+                    "\xe2\x94\x80\xe2\x94\x80[/]");
     lines.push_back("");
     // Reserve blank lines for the Sixel image area (10 rows)
-    for (int i = 0; i < 10; ++i)
-        lines.push_back("");
+    for (int i = 0; i < 10; ++i) lines.push_back("");
     lines.push_back("");
     lines.push_back("[dim]// End of demo content[/]");
     return lines;
@@ -172,17 +178,27 @@ static std::string generate_sixel_image(int width, int height) {
         double c = 1.0;
         double x = 1.0 - std::fabs(std::fmod(hue / 60.0, 2.0) - 1.0);
         double r = 0, g = 0, b = 0;
-        if (hue < 60)       { r = c; g = x; }
-        else if (hue < 120) { r = x; g = c; }
-        else if (hue < 180) { g = c; b = x; }
-        else if (hue < 240) { g = x; b = c; }
-        else if (hue < 300) { r = x; b = c; }
-        else                { r = c; b = x; }
+        if (hue < 60) {
+            r = c;
+            g = x;
+        } else if (hue < 120) {
+            r = x;
+            g = c;
+        } else if (hue < 180) {
+            g = c;
+            b = x;
+        } else if (hue < 240) {
+            g = x;
+            b = c;
+        } else if (hue < 300) {
+            r = x;
+            b = c;
+        } else {
+            r = c;
+            b = x;
+        }
         char reg[32];
-        std::snprintf(reg, sizeof(reg), "#%d;2;%d;%d;%d",
-                      i,
-                      static_cast<int>(r * 100),
-                      static_cast<int>(g * 100),
+        std::snprintf(reg, sizeof(reg), "#%d;2;%d;%d;%d", i, static_cast<int>(r * 100), static_cast<int>(g * 100),
                       static_cast<int>(b * 100));
         s += reg;
     }
@@ -210,12 +226,12 @@ static std::string generate_sixel_image(int width, int height) {
                 }
                 s += static_cast<char>(63 + mask);
             }
-            s += '$';  // carriage return (same band, next color)
+            s += '$'; // carriage return (same band, next color)
         }
-        s += '-';  // next band (line feed)
+        s += '-'; // next band (line feed)
     }
 
-    s += "\x1b\\";  // ST — exit Sixel mode
+    s += "\x1b\\"; // ST — exit Sixel mode
     return s;
 }
 
@@ -234,23 +250,21 @@ int main() {
     app.set_content_lines(static_cast<int>(doc.size()));
     app.set_document_lines(doc);
 
-    app.set_content([&](rows_builder& content, int scroll_y, int viewport_h) {
+    app.set_content([&](rows_builder &content, int scroll_y, int viewport_h) {
         int start = scroll_y;
         int end_line = start + viewport_h;
-        if (end_line > static_cast<int>(doc.size()))
-            end_line = static_cast<int>(doc.size());
+        if (end_line > static_cast<int>(doc.size())) end_line = static_cast<int>(doc.size());
 
         for (int i = start; i < end_line; ++i) {
             int screen_row = i - start + 1;
             bool is_cursor = (screen_row == app.cursor_line());
             char buf[256];
             if (is_cursor) {
-                std::snprintf(buf, sizeof(buf),
-                    "[on_rgb(38,79,120)] [dim]%3d[/][on_rgb(38,79,120)] \xe2\x94\x82 %s[/]",
-                    i + 1, doc[static_cast<size_t>(i)].c_str());
+                std::snprintf(buf, sizeof(buf), "[on_rgb(38,79,120)] [dim]%3d[/][on_rgb(38,79,120)] \xe2\x94\x82 %s[/]",
+                              i + 1, doc[static_cast<size_t>(i)].c_str());
             } else {
-                std::snprintf(buf, sizeof(buf), " [dim]%3d[/] \xe2\x94\x82 %s",
-                    i + 1, doc[static_cast<size_t>(i)].c_str());
+                std::snprintf(buf, sizeof(buf), " [dim]%3d[/] \xe2\x94\x82 %s", i + 1,
+                              doc[static_cast<size_t>(i)].c_str());
             }
             content.add(text_builder(buf));
         }
@@ -260,7 +274,7 @@ int main() {
         }
     });
 
-    app.set_status([&](status_bar_builder& sb) {
+    app.set_status([&](status_bar_builder &sb) {
         char left_buf[128];
         std::snprintf(left_buf, sizeof(left_buf), " [bold]Ready[/]");
 
@@ -270,30 +284,26 @@ int main() {
             app.selection_range(sl, sc, el, ec);
             int sel_lines = el - sl + 1;
             if (sel_lines == 1) {
-                std::snprintf(center_buf, sizeof(center_buf),
-                    "Ln %d, Col %d  (%d selected)",
-                    app.cursor_line() + app.scroll_y(), app.cursor_col(), ec - sc);
+                std::snprintf(center_buf, sizeof(center_buf), "Ln %d, Col %d  (%d selected)",
+                              app.cursor_line() + app.scroll_y(), app.cursor_col(), ec - sc);
             } else {
-                std::snprintf(center_buf, sizeof(center_buf),
-                    "Ln %d, Col %d  (%d lines selected)",
-                    app.cursor_line() + app.scroll_y(), app.cursor_col(), sel_lines);
+                std::snprintf(center_buf, sizeof(center_buf), "Ln %d, Col %d  (%d lines selected)",
+                              app.cursor_line() + app.scroll_y(), app.cursor_col(), sel_lines);
             }
         } else {
-            std::snprintf(center_buf, sizeof(center_buf),
-                "Ln %d, Col %d", app.cursor_line() + app.scroll_y(), app.cursor_col());
+            std::snprintf(center_buf, sizeof(center_buf), "Ln %d, Col %d", app.cursor_line() + app.scroll_y(),
+                          app.cursor_col());
         }
 
         char right_buf[128];
-        std::snprintf(right_buf, sizeof(right_buf),
-            "UTF-8  C++  %d lines ", static_cast<int>(doc.size()));
+        std::snprintf(right_buf, sizeof(right_buf), "UTF-8  C++  %d lines ", static_cast<int>(doc.size()));
 
         sb.left(left_buf);
         sb.center(center_buf);
         sb.right(right_buf);
     });
 
-    app.on_menu_action([&](int /*menu_index*/, int /*item_global_index*/,
-                           const std::string& label) {
+    app.on_menu_action([&](int /*menu_index*/, int /*item_global_index*/, const std::string &label) {
         app.set_status_message("Selected: " + label);
     });
 
@@ -301,7 +311,7 @@ int main() {
     std::string sixel_data = generate_sixel_image(60, 48);
 
     // OSC 8 String Terminator: ESC backslash
-    static const char k_st[] = "\x1b\x5c";  // \x1b + '\'
+    static const char k_st[] = "\x1b\x5c"; // \x1b + '\'
 
     // Overlay: Sixel image + hyperlinks, rendered as raw ANSI after widget paint
     // Hyperlink doc lines start at line index 16 in the document.
@@ -310,36 +320,35 @@ int main() {
     static constexpr int k_gutter = 7;
 
     struct link_def {
-        int line_offset;   // relative to k_link_doc_line
-        int col;           // column after gutter
-        const char* url;
-        const char* text;
-        const char* ansi_style; // ANSI style prefix
+        int line_offset; // relative to k_link_doc_line
+        int col;         // column after gutter
+        const char *url;
+        const char *text;
+        const char *ansi_style; // ANSI style prefix
     };
     static const link_def links[] = {
-        {0, 21, "https://github.com/nicebyte/tapiru",
-         "tapiru on GitHub",
-         "\x1b[4;38;2;86;156;214m"},  // underline + blue
-        {1, 21, "mailto:dev@tapiru.io",
-         "dev@tapiru.io",
-         "\x1b[4;38;2;78;201;176m"},  // underline + teal
+        {0, 21, "https://github.com/nicebyte/tapiru", "tapiru on GitHub",
+         "\x1b[4;38;2;86;156;214m"},                                                 // underline + blue
+        {1, 21, "mailto:dev@tapiru.io", "dev@tapiru.io", "\x1b[4;38;2;78;201;176m"}, // underline + teal
         {2, 21, "file:///C:/Windows/System32",
-         "C:" "\x5c" "Windows" "\x5c" "System32",
-         "\x1b[4;38;2;206;145;120m"},  // underline + orange
+         "C:"
+         "\x5c"
+         "Windows"
+         "\x5c"
+         "System32",
+         "\x1b[4;38;2;206;145;120m"}, // underline + orange
     };
 
-    app.set_overlay([&](std::string& buf, uint32_t /*tw*/, uint32_t /*th*/,
-                        int scroll_y, int viewport_h) {
+    app.set_overlay([&](std::string &buf, uint32_t /*tw*/, uint32_t /*th*/, int scroll_y, int viewport_h) {
         // OSC 8 hyperlinks
-        for (const auto& lk : links) {
+        for (const auto &lk : links) {
             int doc_line = k_link_doc_line + lk.line_offset;
             int screen_line = doc_line - scroll_y;
             if (screen_line < 0 || screen_line >= viewport_h) continue;
-            int screen_row = screen_line + 1;  // +1 for menu bar
+            int screen_row = screen_line + 1; // +1 for menu bar
 
             char pos[24];
-            std::snprintf(pos, sizeof(pos), "\x1b[%d;%dH",
-                          screen_row + 1, k_gutter + lk.col + 1);
+            std::snprintf(pos, sizeof(pos), "\x1b[%d;%dH", screen_row + 1, k_gutter + lk.col + 1);
             buf += pos;
             buf += lk.ansi_style;
             // OSC 8 open: ESC ] 8 ; ; URL ST
@@ -356,10 +365,9 @@ int main() {
         // Sixel image
         int sixel_screen_line = k_sixel_doc_line - scroll_y;
         if (sixel_screen_line >= 0 && sixel_screen_line < viewport_h) {
-            int screen_row = sixel_screen_line + 1;  // +1 for menu bar
+            int screen_row = sixel_screen_line + 1; // +1 for menu bar
             char pos[24];
-            std::snprintf(pos, sizeof(pos), "\x1b[%d;%dH",
-                          screen_row + 1, k_gutter + 1);
+            std::snprintf(pos, sizeof(pos), "\x1b[%d;%dH", screen_row + 1, k_gutter + 1);
             buf += pos;
             buf += sixel_data;
         }

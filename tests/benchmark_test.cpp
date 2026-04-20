@@ -1,18 +1,17 @@
-#include <gtest/gtest.h>
-
-#include <chrono>
-#include <cstdio>
-#include <mutex>
-#include <string>
-
 #include "tapiru/core/console.h"
-#include "tapiru/text/markup.h"
 #include "tapiru/text/constexpr_markup.h"
 #include "tapiru/text/emoji.h"
 #include "tapiru/text/markdown.h"
+#include "tapiru/text/markup.h"
 #include "tapiru/widgets/builders.h"
 #include "tapiru/widgets/progress.h"
 #include "tapiru/widgets/spinner.h"
+
+#include <chrono>
+#include <cstdio>
+#include <gtest/gtest.h>
+#include <mutex>
+#include <string>
 
 using namespace tapiru;
 using clk = std::chrono::high_resolution_clock;
@@ -20,7 +19,7 @@ using clk = std::chrono::high_resolution_clock;
 // ── Helpers ─────────────────────────────────────────────────────────────
 
 class null_sink {
-public:
+  public:
     void operator()(std::string_view) {}
 };
 
@@ -32,15 +31,14 @@ static console make_null_console() {
     return console(cfg);
 }
 
-template <typename Fn>
-double measure_us(Fn&& fn, int iterations = 1000) {
+template <typename Fn> double measure_us(Fn &&fn, int iterations = 1000) {
     auto start = clk::now();
     for (int i = 0; i < iterations; ++i) {
         fn();
     }
     auto end = clk::now();
     auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-    return static_cast<double>(ns) / (iterations * 1000.0);  // microseconds per call
+    return static_cast<double>(ns) / (iterations * 1000.0); // microseconds per call
 }
 
 // ── Markup parsing benchmarks ───────────────────────────────────────────
@@ -51,14 +49,13 @@ TEST(BenchmarkTest, MarkupParseSimple) {
         (void)frags;
     });
     std::printf("  markup parse (simple):    %.2f us/call\n", us);
-    EXPECT_LT(us, 500.0);  // sanity: under 500us
+    EXPECT_LT(us, 500.0); // sanity: under 500us
 }
 
 TEST(BenchmarkTest, MarkupParseComplex) {
     double us = measure_us([] {
-        auto frags = parse_markup(
-            "[bold]Title[/bold]: [italic cyan]description[/italic cyan] "
-            "[dim]([/dim][#FF8000]v1.2.3[/#FF8000][dim])[/dim]");
+        auto frags = parse_markup("[bold]Title[/bold]: [italic cyan]description[/italic cyan] "
+                                  "[dim]([/dim][#FF8000]v1.2.3[/#FF8000][dim])[/dim]");
         (void)frags;
     });
     std::printf("  markup parse (complex):   %.2f us/call\n", us);
@@ -77,10 +74,12 @@ TEST(BenchmarkTest, StripMarkup) {
 // ── Emoji benchmarks ────────────────────────────────────────────────────
 
 TEST(BenchmarkTest, EmojiLookup) {
-    double us = measure_us([] {
-        auto cp = emoji_lookup(":fire:");
-        (void)cp;
-    }, 10000);
+    double us = measure_us(
+        [] {
+            auto cp = emoji_lookup(":fire:");
+            (void)cp;
+        },
+        10000);
     std::printf("  emoji lookup:             %.2f us/call\n", us);
     EXPECT_LT(us, 50.0);
 }
@@ -98,10 +97,9 @@ TEST(BenchmarkTest, EmojiReplace) {
 
 TEST(BenchmarkTest, MarkdownParse) {
     double us = measure_us([] {
-        auto blocks = parse_markdown(
-            "# Title\n\nSome **bold** and *italic* text.\n\n"
-            "- Item one\n- Item two\n- Item three\n\n"
-            "---\n\n> A blockquote\n\nFinal paragraph.");
+        auto blocks = parse_markdown("# Title\n\nSome **bold** and *italic* text.\n\n"
+                                     "- Item one\n- Item two\n- Item three\n\n"
+                                     "---\n\n> A blockquote\n\nFinal paragraph.");
         (void)blocks;
     });
     std::printf("  markdown parse:           %.2f us/call\n", us);
@@ -121,9 +119,7 @@ TEST(BenchmarkTest, MarkdownInlineConvert) {
 
 TEST(BenchmarkTest, TextWidgetRender) {
     auto con = make_null_console();
-    double us = measure_us([&] {
-        con.print_widget(text_builder("[bold red]Hello World[/]"), 80);
-    });
+    double us = measure_us([&] { con.print_widget(text_builder("[bold red]Hello World[/]"), 80); });
     std::printf("  text widget render:       %.2f us/call\n", us);
     EXPECT_LT(us, 5000.0);
 }
@@ -145,9 +141,7 @@ TEST(BenchmarkTest, ProgressWidgetRender) {
     auto task = std::make_shared<progress_task>("Loading", 100);
     task->advance(50);
     double us = measure_us([&] {
-        con.print_widget(
-            progress_builder().add_task(task).bar_width(20).complete_char('#').remaining_char('.'),
-            80);
+        con.print_widget(progress_builder().add_task(task).bar_width(20).complete_char('#').remaining_char('.'), 80);
     });
     std::printf("  progress widget render:   %.2f us/call\n", us);
     EXPECT_LT(us, 5000.0);
@@ -155,11 +149,8 @@ TEST(BenchmarkTest, ProgressWidgetRender) {
 
 TEST(BenchmarkTest, MarkdownWidgetRender) {
     auto con = make_null_console();
-    double us = measure_us([&] {
-        con.print_widget(
-            markdown_builder("# Title\n\nSome **bold** text\n\n- Item\n\n---"),
-            80);
-    });
+    double us =
+        measure_us([&] { con.print_widget(markdown_builder("# Title\n\nSome **bold** text\n\n- Item\n\n---"), 80); });
     std::printf("  markdown widget render:   %.2f us/call\n", us);
     EXPECT_LT(us, 10000.0);
 }

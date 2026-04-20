@@ -16,11 +16,14 @@ int main() {
     con.print("");
 
     con.print("[bold]1. Inline Tags[/]");
-    con.print("  [error]error[/]  [warning]warning[/]  [success]success[/]  [info]info[/]  [debug]debug[/]  [muted]muted[/]");
+    con.print(
+        "  [error]error[/]  [warning]warning[/]  [success]success[/]  [info]info[/]  [debug]debug[/]  [muted]muted[/]");
     con.print("  [highlight]highlight[/]  [code_inline]code_inline[/]  [url]url[/]  [path]path[/]  [key]key[/]");
     con.print("  [badge.red] ERR [/] [badge.green] OK [/] [badge.blue] INFO [/] [badge.yellow] WARN [/]");
-    con.print("  [rgb(255,128,0)]rgb(255,128,0)[/]  [on_rgb(0,0,80) white]on_rgb(0,0,80)[/]  [color256(208)]color256(208)[/]");
-    con.print("  [overline]overline[/]  [double_underline]double_underline[/]  [superscript]superscript[/]  [subscript]subscript[/]");
+    con.print("  [rgb(255,128,0)]rgb(255,128,0)[/]  [on_rgb(0,0,80) white]on_rgb(0,0,80)[/]  "
+              "[color256(208)]color256(208)[/]");
+    con.print("  [overline]overline[/]  [double_underline]double_underline[/]  [superscript]superscript[/]  "
+              "[subscript]subscript[/]");
     con.print("  [bold italic not_bold]not_bold (italic only)[/]");
     con.print("");
 

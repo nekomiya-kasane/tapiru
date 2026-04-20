@@ -30,8 +30,8 @@
 #include "tapiru/text/markup.h"
 
 // ── Element / Decorator ──────────────────────────────────────────────────
-#include "tapiru/core/element.h"
 #include "tapiru/core/decorator.h"
+#include "tapiru/core/element.h"
 #include "tapiru/core/terminal.h"
 
 // ── Widgets ─────────────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ using namespace tapiru;
 //  Helper: section header
 // ═══════════════════════════════════════════════════════════════════════
 
-static void section(console& con, const char* title) {
+static void section(console &con, const char *title) {
     con.newline();
     con.print_widget(rule_builder(title).rule_style(style{colors::bright_cyan, {}, attr::bold}), 70);
     con.newline();
@@ -64,12 +64,13 @@ static void section(console& con, const char* title) {
 //  1. Markup & Styled Text
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_markup(console& con) {
+static void demo_markup(console &con) {
     section(con, " 1. Markup & Styled Text ");
 
     con.print("[bold]Bold[/bold], [italic]Italic[/italic], [underline]Underline[/underline], [strike]Strike[/strike]");
     con.print("[red]Red[/], [green]Green[/], [blue]Blue[/], [yellow]Yellow[/], [magenta]Magenta[/], [cyan]Cyan[/]");
-    con.print("[bold bright_white on_red] ERROR [/] [bold bright_white on_green] SUCCESS [/] [bold black on_yellow] WARNING [/]");
+    con.print("[bold bright_white on_red] ERROR [/] [bold bright_white on_green] SUCCESS [/] [bold black on_yellow] "
+              "WARNING [/]");
     con.print("[#FF8000]Orange (RGB)[/], [#00BFFF]Deep Sky Blue (RGB)[/], [on_#333333] Dark BG [/]");
     con.print("[bold red]Compound[/bold red] tags: [bold italic cyan]bold+italic+cyan[/]");
     con.print("Escaped bracket: [[ looks like a literal [");
@@ -79,13 +80,13 @@ static void demo_markup(console& con) {
 //  2. Constexpr Markup (compile-time style resolution)
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_constexpr_markup(console& con) {
+static void demo_constexpr_markup(console &con) {
     section(con, " 2. Constexpr Markup ");
 
     // Styles resolved entirely at compile time — zero runtime parsing
     constexpr auto error_style = markup_style("bold red");
-    constexpr auto info_style  = markup_style("bold cyan");
-    constexpr auto warn_style  = markup_style("bold yellow on_#332200");
+    constexpr auto info_style = markup_style("bold cyan");
+    constexpr auto warn_style = markup_style("bold yellow on_#332200");
 
     // Verify at compile time
     static_assert(error_style.fg == colors::red);
@@ -98,12 +99,10 @@ static void demo_constexpr_markup(console& con) {
 
     // Full compile-time markup parsing
     constexpr auto parsed = ct_parse_markup("[bold]Hello[/] [italic cyan]World[/]");
-    static_assert(parsed.count == 3);  // "Hello", " ", "World"
+    static_assert(parsed.count == 3); // "Hello", " ", "World"
 
     char buf[128];
-    std::snprintf(buf, sizeof(buf),
-        "[dim]ct_parse_markup produced %zu fragments at compile time[/]",
-        parsed.count);
+    std::snprintf(buf, sizeof(buf), "[dim]ct_parse_markup produced %zu fragments at compile time[/]", parsed.count);
     con.print(buf);
 }
 
@@ -111,17 +110,18 @@ static void demo_constexpr_markup(console& con) {
 //  3. Text Widget
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_text_widget(console& con) {
+static void demo_text_widget(console &con) {
     section(con, " 3. Text Widget ");
 
-    con.print_widget(text_builder("[bold green]Hello[/], [italic]tapiru[/]! A [underline]rich text[/] library for C++23."), 70);
+    con.print_widget(
+        text_builder("[bold green]Hello[/], [italic]tapiru[/]! A [underline]rich text[/] library for C++23."), 70);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 //  4. Rule Widget
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_rule(console& con) {
+static void demo_rule(console &con) {
     section(con, " 4. Rule Widget ");
 
     con.print_widget(rule_builder(), 70);
@@ -135,7 +135,7 @@ static void demo_rule(console& con) {
 //  5. Panel Widget
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_panel(console& con) {
+static void demo_panel(console &con) {
     section(con, " 5. Panel Widget ");
 
     panel_builder pb1(text_builder("[bold]Welcome to tapiru![/]\nA modern C++23 rich terminal library."));
@@ -156,7 +156,7 @@ static void demo_panel(console& con) {
 //  6. Padding Widget
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_padding(console& con) {
+static void demo_padding(console &con) {
     section(con, " 6. Padding Widget ");
 
     padding_builder pad(text_builder("[cyan]Padded content[/] (2 cells all around)"));
@@ -168,7 +168,7 @@ static void demo_padding(console& con) {
 //  7. Columns Widget
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_columns(console& con) {
+static void demo_columns(console &con) {
     section(con, " 7. Columns Layout ");
 
     columns_builder cols;
@@ -183,7 +183,7 @@ static void demo_columns(console& con) {
 //  8. Table Widget
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_table(console& con) {
+static void demo_table(console &con) {
     section(con, " 8. Table Widget ");
 
     table_builder tb;
@@ -193,10 +193,10 @@ static void demo_table(console& con) {
     tb.border(border_style::rounded);
     tb.header_style(style{colors::bright_cyan, {}, attr::bold});
 
-    tb.add_row({"tapiru",   "C++23", "1000"});
-    tb.add_row({"rich",     "Python", "48000"});
-    tb.add_row({"chalk",    "JS",     "21000"});
-    tb.add_row({"termcolor","Rust",   "2000"});
+    tb.add_row({"tapiru", "C++23", "1000"});
+    tb.add_row({"rich", "Python", "48000"});
+    tb.add_row({"chalk", "JS", "21000"});
+    tb.add_row({"termcolor", "Rust", "2000"});
 
     con.print_widget(tb, 60);
 }
@@ -205,10 +205,11 @@ static void demo_table(console& con) {
 //  9. Emoji Shortcodes
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_emoji(console& con) {
+static void demo_emoji(console &con) {
     section(con, " 9. Emoji Shortcodes ");
 
-    con.print(replace_emoji(":rocket: [bold]Launch[/] — :fire: [red]Hot[/] — :star: [yellow]Star[/] — :heart: [red]Love[/]"));
+    con.print(
+        replace_emoji(":rocket: [bold]Launch[/] — :fire: [red]Hot[/] — :star: [yellow]Star[/] — :heart: [red]Love[/]"));
     con.print(replace_emoji(":check: [green]Passed[/]  :cross: [red]Failed[/]  :warning: [yellow]Warning[/]"));
     con.print(replace_emoji(":coffee: Coffee  :beer: Beer  :pizza: Pizza  :tada: Party"));
     con.print(replace_emoji(":bug: Bug  :wrench: Fix  :sparkles: Feature  :memo: Docs"));
@@ -218,23 +219,22 @@ static void demo_emoji(console& con) {
 //  10. Markdown Rendering
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_markdown(console& con) {
+static void demo_markdown(console &con) {
     section(con, " 10. Markdown Rendering ");
 
-    const char* md =
-        "# tapiru Library\n"
-        "\n"
-        "A **modern** C++23 library for *rich* terminal output.\n"
-        "\n"
-        "## Features\n"
-        "\n"
-        "- **Markup parser** with `[tag]` syntax\n"
-        "- *Widget system* with layout engine\n"
-        "- Live display with `async` rendering\n"
-        "\n"
-        "---\n"
-        "\n"
-        "> The best way to predict the future is to **invent** it.\n";
+    const char *md = "# tapiru Library\n"
+                     "\n"
+                     "A **modern** C++23 library for *rich* terminal output.\n"
+                     "\n"
+                     "## Features\n"
+                     "\n"
+                     "- **Markup parser** with `[tag]` syntax\n"
+                     "- *Widget system* with layout engine\n"
+                     "- Live display with `async` rendering\n"
+                     "\n"
+                     "---\n"
+                     "\n"
+                     "> The best way to predict the future is to **invent** it.\n";
 
     con.print_widget(markdown_builder(md), 70);
 }
@@ -243,7 +243,7 @@ static void demo_markdown(console& con) {
 //  11. Logging Handler
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_logging(console& con) {
+static void demo_logging(console &con) {
     section(con, " 11. Logging Handler ");
 
     log_handler logger(con);
@@ -261,33 +261,32 @@ static void demo_logging(console& con) {
 //  12. Progress Bar (static snapshot)
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_progress(console& con) {
+static void demo_progress(console &con) {
     section(con, " 12. Progress Bar ");
 
     auto t1 = std::make_shared<progress_task>("Downloading", 100);
-    auto t2 = std::make_shared<progress_task>("Compiling",   200);
-    auto t3 = std::make_shared<progress_task>("Linking",     50);
+    auto t2 = std::make_shared<progress_task>("Compiling", 200);
+    auto t3 = std::make_shared<progress_task>("Linking", 50);
 
     t1->set_completed();
     t2->advance(140);
     t3->advance(10);
 
-    con.print_widget(
-        progress_builder()
-            .add_task(t1)
-            .add_task(t2)
-            .add_task(t3)
-            .bar_width(30)
-            .complete_char(U'\x2588')   // █
-            .remaining_char(U'\x2591'), // ░
-        70);
+    con.print_widget(progress_builder()
+                         .add_task(t1)
+                         .add_task(t2)
+                         .add_task(t3)
+                         .bar_width(30)
+                         .complete_char(U'\x2588')   // █
+                         .remaining_char(U'\x2591'), // ░
+                     70);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 //  13. Spinner (static snapshot)
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_spinner(console& con) {
+static void demo_spinner(console &con) {
     section(con, " 13. Spinner ");
 
     con.print("[dim]Spinner frames (dots):[/]");
@@ -307,7 +306,7 @@ static void demo_spinner(console& con) {
 //  14. Gradient Panels
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_gradient(console& con) {
+static void demo_gradient(console &con) {
     section(con, " 14. Gradient Panels ");
 
     panel_builder pb(text_builder("[bold white]Gradient background: cyan → magenta[/]"));
@@ -319,16 +318,14 @@ static void demo_gradient(console& con) {
     con.newline();
 
     con.print_widget(
-        rule_builder("Gradient Rule")
-            .gradient({color::from_rgb(255, 100, 0), color::from_rgb(0, 100, 255)}),
-        70);
+        rule_builder("Gradient Rule").gradient({color::from_rgb(255, 100, 0), color::from_rgb(0, 100, 255)}), 70);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 //  15. Braille Charts
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_charts(console& con) {
+static void demo_charts(console &con) {
     section(con, " 15. Braille Charts ");
 
     // Line chart — sine wave
@@ -343,10 +340,8 @@ static void demo_charts(console& con) {
 
     // Bar chart
     con.print("[dim]Bar chart:[/]");
-    con.print_widget(
-        bar_chart_builder({3, 7, 2, 9, 5, 8, 1, 6}, 6)
-            .labels({"M", "T", "W", "T", "F", "S", "S", "A"}),
-        70);
+    con.print_widget(bar_chart_builder({3, 7, 2, 9, 5, 8, 1, 6}, 6).labels({"M", "T", "W", "T", "F", "S", "S", "A"}),
+                     70);
 
     con.newline();
 
@@ -365,7 +360,7 @@ static void demo_charts(console& con) {
 //  16. Image to Character Art
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_image(console& con) {
+static void demo_image(console &con) {
     section(con, " 16. Image to Character Art ");
 
     // Generate a 16x16 gradient image (red→blue horizontal, green→black vertical)
@@ -386,18 +381,18 @@ static void demo_image(console& con) {
 //  17. Theme System
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_theme(console& con) {
+static void demo_theme(console &con) {
     section(con, " 17. Theme System ");
 
     auto th = theme::dark();
     con.print("[dim]Dark theme preset styles:[/]");
 
-    auto show = [&](const char* name) {
-        auto* s = th.lookup(name);
+    auto show = [&](const char *name) {
+        auto *s = th.lookup(name);
         if (!s) return;
         char buf[128];
-        std::snprintf(buf, sizeof(buf), "  [#%02X%02X%02X]%s[/]  fg=(%u,%u,%u)",
-            s->fg.r, s->fg.g, s->fg.b, name, s->fg.r, s->fg.g, s->fg.b);
+        std::snprintf(buf, sizeof(buf), "  [#%02X%02X%02X]%s[/]  fg=(%u,%u,%u)", s->fg.r, s->fg.g, s->fg.b, name,
+                      s->fg.r, s->fg.g, s->fg.b);
         con.print(buf);
     };
 
@@ -413,7 +408,7 @@ static void demo_theme(console& con) {
 //  18. Structured Logging
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_structured_logging(console& con) {
+static void demo_structured_logging(console &con) {
     section(con, " 18. Structured Logging ");
 
     log_handler logger(con);
@@ -422,42 +417,39 @@ static void demo_structured_logging(console& con) {
 
     logger.log_structured(log_level::info, "Request handled",
                           {{"method", "GET"}, {"path", "/api/users"}, {"status", "200"}});
-    logger.log_structured(log_level::warn, "Slow query",
-                          {{"duration", "1200ms"}, {"table", "orders"}});
+    logger.log_structured(log_level::warn, "Slow query", {{"duration", "1200ms"}, {"table", "orders"}});
 
     logger.set_module("auth");
-    logger.log_structured(log_level::error, "Login failed",
-                          {{"user", "admin"}, {"reason", "bad_password"}});
+    logger.log_structured(log_level::error, "Login failed", {{"user", "admin"}, {"reason", "bad_password"}});
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 //  19. GFM Markdown
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_gfm_markdown(console& con) {
+static void demo_gfm_markdown(console &con) {
     section(con, " 19. GFM Markdown ");
 
-    const char* md =
-        "## Task List\n"
-        "\n"
-        "- [x] Canvas optimization\n"
-        "- [x] Gradient engine\n"
-        "- [ ] Deploy to production\n"
-        "\n"
-        "## Code Block\n"
-        "\n"
-        "```cpp\n"
-        "int main() {\n"
-        "    return 0;\n"
-        "}\n"
-        "```\n"
-        "\n"
-        "## Table\n"
-        "\n"
-        "| Feature | Status |\n"
-        "|---------|--------|\n"
-        "| Charts  | Done   |\n"
-        "| Themes  | Done   |\n";
+    const char *md = "## Task List\n"
+                     "\n"
+                     "- [x] Canvas optimization\n"
+                     "- [x] Gradient engine\n"
+                     "- [ ] Deploy to production\n"
+                     "\n"
+                     "## Code Block\n"
+                     "\n"
+                     "```cpp\n"
+                     "int main() {\n"
+                     "    return 0;\n"
+                     "}\n"
+                     "```\n"
+                     "\n"
+                     "## Table\n"
+                     "\n"
+                     "| Feature | Status |\n"
+                     "|---------|--------|\n"
+                     "| Charts  | Done   |\n"
+                     "| Themes  | Done   |\n";
 
     con.print_widget(markdown_builder(md), 70);
 }
@@ -466,7 +458,7 @@ static void demo_gfm_markdown(console& con) {
 //  20. Rows Layout
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_rows(console& con) {
+static void demo_rows(console &con) {
     section(con, " 20. Rows Layout ");
 
     rows_builder rb;
@@ -481,45 +473,43 @@ static void demo_rows(console& con) {
 //  21. Status Bar
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_status_bar(console& con) {
+static void demo_status_bar(console &con) {
     section(con, " 21. Status Bar ");
 
-    con.print_widget(
-        status_bar_builder()
-            .left("[bold] NORMAL [/]")
-            .center("main.cpp")
-            .right("Ln 42, Col 8")
-            .style_override(style{colors::bright_white, color::from_rgb(40, 40, 80)}),
-        70);
+    con.print_widget(status_bar_builder()
+                         .left("[bold] NORMAL [/]")
+                         .center("main.cpp")
+                         .right("Ln 42, Col 8")
+                         .style_override(style{colors::bright_white, color::from_rgb(40, 40, 80)}),
+                     70);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 //  22. Menu Widget
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_menu(console& con) {
+static void demo_menu(console &con) {
     section(con, " 22. Menu Widget ");
 
     int cursor = 1;
-    con.print_widget(
-        menu_builder()
-            .add_item("New File", "Ctrl+N")
-            .add_item("Open File", "Ctrl+O")
-            .add_item("Save", "Ctrl+S")
-            .add_separator()
-            .add_item("Exit", "Ctrl+Q")
-            .cursor(&cursor)
-            .highlight_style(style{colors::bright_white, colors::blue, attr::bold})
-            .shortcut_style(style{colors::bright_black})
-            .shadow(),
-        30);
+    con.print_widget(menu_builder()
+                         .add_item("New File", "Ctrl+N")
+                         .add_item("Open File", "Ctrl+O")
+                         .add_item("Save", "Ctrl+S")
+                         .add_separator()
+                         .add_item("Exit", "Ctrl+Q")
+                         .cursor(&cursor)
+                         .highlight_style(style{colors::bright_white, colors::blue, attr::bold})
+                         .shortcut_style(style{colors::bright_black})
+                         .shadow(),
+                     30);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 //  23. Table with Shadow
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_table_shadow(console& con) {
+static void demo_table_shadow(console &con) {
     section(con, " 23. Table with Shadow ");
 
     table_builder tb;
@@ -529,11 +519,11 @@ static void demo_table_shadow(console& con) {
     tb.header_style(style{colors::bright_cyan, {}, attr::bold});
     tb.shadow();
 
-    tb.add_row({"Rows layout",   "[green]Done[/]"});
-    tb.add_row({"Status bar",    "[green]Done[/]"});
-    tb.add_row({"Menu widget",   "[green]Done[/]"});
-    tb.add_row({"Popup widget",  "[green]Done[/]"});
-    tb.add_row({"Table shadow",  "[green]Done[/]"});
+    tb.add_row({"Rows layout", "[green]Done[/]"});
+    tb.add_row({"Status bar", "[green]Done[/]"});
+    tb.add_row({"Menu widget", "[green]Done[/]"});
+    tb.add_row({"Popup widget", "[green]Done[/]"});
+    tb.add_row({"Table shadow", "[green]Done[/]"});
 
     con.print_widget(tb, 50);
 }
@@ -542,7 +532,7 @@ static void demo_table_shadow(console& con) {
 //  24. Live Display (animated)
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_live(console& con) {
+static void demo_live(console &con) {
     section(con, " 24. Live Display (animated) ");
 
     if (!terminal::is_tty()) {
@@ -558,13 +548,7 @@ static void demo_live(console& con) {
 
     {
         live lv(con, 15, 70);
-        lv.set(
-            progress_builder()
-                .add_task(task)
-                .bar_width(40)
-                .complete_char('#')
-                .remaining_char('.')
-        );
+        lv.set(progress_builder().add_task(task).bar_width(40).complete_char('#').remaining_char('.'));
 
         for (int i = 0; i <= 100; i += 5) {
             task->set_current(i);
@@ -582,7 +566,7 @@ static void demo_live(console& con) {
 //  25. Element Pipe Composition
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_element_pipe(console& con) {
+static void demo_element_pipe(console &con) {
     section(con, " 25. Element Pipe Composition ");
 
     con.print("[dim]Compose elements with decorator pipes: elem | border() | bold()[/]");
@@ -595,18 +579,14 @@ static void demo_element_pipe(console& con) {
     con.newline();
 
     // Chained decorators: padding + border + color
-    auto e2 = element(text_builder("Styled with pipes"))
-        | padding(1, 2)
-        | border(border_style::rounded)
-        | fg_color(colors::bright_cyan);
+    auto e2 = element(text_builder("Styled with pipes")) | padding(1, 2) | border(border_style::rounded) |
+              fg_color(colors::bright_cyan);
     con.print_widget(e2, 40);
 
     con.newline();
 
     // Centered element
-    auto e3 = element(text_builder("[bold]Centered![/]"))
-        | border(border_style::heavy)
-        | center();
+    auto e3 = element(text_builder("[bold]Centered![/]")) | border(border_style::heavy) | center();
     con.print_widget(e3, 50);
 }
 
@@ -614,13 +594,13 @@ static void demo_element_pipe(console& con) {
 //  26. Canvas Drawing (Braille / Block)
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_canvas(console& con) {
+static void demo_canvas(console &con) {
     section(con, " 26. Canvas Drawing (Braille) ");
 
     // 26a. Simple shapes
     con.print("[dim]26a. Points, lines, and circles on a braille canvas:[/]");
     {
-        auto cvs = make_canvas(60, 32, [](canvas_widget_builder& c) {
+        auto cvs = make_canvas(60, 32, [](canvas_widget_builder &c) {
             // Border rectangle
             c.draw_rect(0, 0, 59, 31, colors::bright_black);
 
@@ -645,7 +625,7 @@ static void demo_canvas(console& con) {
     // 26b. Sine wave with text overlay
     con.print("[dim]26b. Sine wave with text overlay:[/]");
     {
-        auto cvs = make_canvas(80, 24, [](canvas_widget_builder& c) {
+        auto cvs = make_canvas(80, 24, [](canvas_widget_builder &c) {
             // Draw axes
             c.draw_line(0, 12, 79, 12, colors::bright_black);
             c.draw_line(0, 0, 0, 23, colors::bright_black);
@@ -653,8 +633,7 @@ static void demo_canvas(console& con) {
             // Sine wave
             for (int x = 0; x < 80; ++x) {
                 int y = 12 + static_cast<int>(10.0 * std::sin(x * 0.15));
-                if (y >= 0 && y < 24)
-                    c.draw_point(x, y, colors::bright_green);
+                if (y >= 0 && y < 24) c.draw_point(x, y, colors::bright_green);
             }
 
             // Text label
@@ -680,7 +659,7 @@ static void demo_canvas(console& con) {
 //  27. Gauge Widget
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_gauge(console& con) {
+static void demo_gauge(console &con) {
     section(con, " 27. Gauge Widget ");
 
     // 27a. Horizontal gauges at various levels
@@ -688,7 +667,7 @@ static void demo_gauge(console& con) {
     {
         rows_builder rb;
 
-        auto add_gauge_row = [&](const char* label, float progress) {
+        auto add_gauge_row = [&](const char *label, float progress) {
             columns_builder row;
             row.add(text_builder(label));
             row.add(make_gauge(progress), 1);
@@ -754,18 +733,16 @@ static void demo_gauge(console& con) {
 //  28. Paragraph Widget (Word Wrap)
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_paragraph(console& con) {
+static void demo_paragraph(console &con) {
     section(con, " 28. Paragraph Widget ");
 
     // 28a. Basic word-wrapping paragraph
     con.print("[dim]28a. Word-wrapped paragraph (narrow width):[/]");
     {
-        auto para = make_paragraph(
-            "The quick brown fox jumps over the lazy dog. "
-            "This sentence demonstrates automatic word wrapping in the tapiru "
-            "paragraph widget. Long text is broken at word boundaries to fit "
-            "within the available width."
-        );
+        auto para = make_paragraph("The quick brown fox jumps over the lazy dog. "
+                                   "This sentence demonstrates automatic word wrapping in the tapiru "
+                                   "paragraph widget. Long text is broken at word boundaries to fit "
+                                   "within the available width.");
         panel_builder pb(std::move(para));
         pb.border(border_style::rounded);
         pb.title("Word Wrap");
@@ -777,11 +754,9 @@ static void demo_paragraph(console& con) {
     // 28b. Justified paragraph
     con.print("[dim]28b. Justified paragraph (spaces distributed evenly):[/]");
     {
-        auto para = make_paragraph_justify(
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-            "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "
-            "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris."
-        );
+        auto para = make_paragraph_justify("Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+                                           "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "
+                                           "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.");
         panel_builder pb(std::move(para));
         pb.border(border_style::rounded);
         pb.title("Justified");
@@ -793,11 +768,9 @@ static void demo_paragraph(console& con) {
     // 28c. Paragraph with explicit newlines
     con.print("[dim]28c. Paragraph preserving explicit newlines:[/]");
     {
-        auto para = make_paragraph(
-            "Line one: Introduction\n"
-            "Line two: Details and explanation\n"
-            "Line three: Conclusion"
-        );
+        auto para = make_paragraph("Line one: Introduction\n"
+                                   "Line two: Details and explanation\n"
+                                   "Line three: Conclusion");
         con.print_widget(para, 50);
     }
 }
@@ -806,23 +779,21 @@ static void demo_paragraph(console& con) {
 //  29. Color Downgrade
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_color_downgrade(console& con) {
+static void demo_color_downgrade(console &con) {
     section(con, " 29. Color Downgrade ");
 
     con.print("[dim]color::downgrade() converts colors to lower bit depths:[/]");
     con.newline();
 
     // Show RGB → 256 → 16 → none chain
-    auto original = color::from_rgb(255, 100, 0);  // orange
-    auto to_256   = original.downgrade(2);
-    auto to_16    = original.downgrade(1);
-    auto to_none  = original.downgrade(0);
+    auto original = color::from_rgb(255, 100, 0); // orange
+    auto to_256 = original.downgrade(2);
+    auto to_16 = original.downgrade(1);
+    auto to_none = original.downgrade(0);
 
     char buf[256];
-    std::snprintf(buf, sizeof(buf),
-        "[#FF6400]  RGB(255,100,0)[/]  → 256-idx=%u → 16-idx=%u → %s",
-        to_256.r, to_16.r,
-        to_none.is_default() ? "default" : "???");
+    std::snprintf(buf, sizeof(buf), "[#FF6400]  RGB(255,100,0)[/]  → 256-idx=%u → 16-idx=%u → %s", to_256.r, to_16.r,
+                  to_none.is_default() ? "default" : "???");
     con.print(buf);
 
     // Demonstrate with a table
@@ -833,20 +804,20 @@ static void demo_color_downgrade(console& con) {
     tb.border(border_style::rounded);
     tb.header_style(style{colors::bright_cyan, {}, attr::bold});
 
-    auto show_downgrade = [&](const char* name, color c) {
+    auto show_downgrade = [&](const char *name, color c) {
         auto d256 = c.downgrade(2);
-        auto d16  = c.downgrade(1);
+        auto d16 = c.downgrade(1);
         char c256[32], c16[32];
         std::snprintf(c256, sizeof(c256), "idx %u", d256.r);
-        std::snprintf(c16,  sizeof(c16),  "idx %u", d16.r);
+        std::snprintf(c16, sizeof(c16), "idx %u", d16.r);
         tb.add_row({name, c256, c16});
     };
 
-    show_downgrade("[red]Pure Red[/]",       color::from_rgb(255, 0, 0));
-    show_downgrade("[green]Pure Green[/]",   color::from_rgb(0, 255, 0));
-    show_downgrade("[blue]Pure Blue[/]",     color::from_rgb(0, 0, 255));
-    show_downgrade("[#FF8000]Orange[/]",     color::from_rgb(255, 128, 0));
-    show_downgrade("[dim]Gray(128)[/]",      color::from_rgb(128, 128, 128));
+    show_downgrade("[red]Pure Red[/]", color::from_rgb(255, 0, 0));
+    show_downgrade("[green]Pure Green[/]", color::from_rgb(0, 255, 0));
+    show_downgrade("[blue]Pure Blue[/]", color::from_rgb(0, 0, 255));
+    show_downgrade("[#FF8000]Orange[/]", color::from_rgb(255, 128, 0));
+    show_downgrade("[dim]Gray(128)[/]", color::from_rgb(128, 128, 128));
     show_downgrade("[bright_white]White[/]", color::from_rgb(255, 255, 255));
 
     con.print_widget(tb, 55);
@@ -856,7 +827,7 @@ static void demo_color_downgrade(console& con) {
 //  30. Double Underline & New Attributes
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_double_underline(console& con) {
+static void demo_double_underline(console &con) {
     section(con, " 30. Double Underline & Attributes ");
 
     con.print("[dim]attr::double_underline (SGR 21) — new in Stage 7:[/]");
@@ -869,15 +840,15 @@ static void demo_double_underline(console& con) {
     tb.border(border_style::rounded);
     tb.header_style(style{colors::bright_cyan, {}, attr::bold});
 
-    tb.add_row({"[bold]bold[/]",                 "0x0001"});
-    tb.add_row({"[dim]dim[/]",                   "0x0002"});
-    tb.add_row({"[italic]italic[/]",             "0x0004"});
-    tb.add_row({"[underline]underline[/]",       "0x0008"});
-    tb.add_row({"[blink]blink[/]",               "0x0010"});
-    tb.add_row({"[reverse]reverse[/]",           "0x0020"});
-    tb.add_row({"[hidden]hidden[/]",             "0x0040"});
-    tb.add_row({"[strike]strikethrough[/]",      "0x0080"});
-    tb.add_row({"double_underline (new!)",       "0x0100"});
+    tb.add_row({"[bold]bold[/]", "0x0001"});
+    tb.add_row({"[dim]dim[/]", "0x0002"});
+    tb.add_row({"[italic]italic[/]", "0x0004"});
+    tb.add_row({"[underline]underline[/]", "0x0008"});
+    tb.add_row({"[blink]blink[/]", "0x0010"});
+    tb.add_row({"[reverse]reverse[/]", "0x0020"});
+    tb.add_row({"[hidden]hidden[/]", "0x0040"});
+    tb.add_row({"[strike]strikethrough[/]", "0x0080"});
+    tb.add_row({"double_underline (new!)", "0x0100"});
 
     con.print_widget(tb, 50);
 
@@ -901,11 +872,10 @@ int main() {
     console con;
 
     con.newline();
-    con.print_widget(
-        rule_builder(" tapiru — Comprehensive Feature Demo ")
-            .rule_style(style{colors::bright_yellow, {}, attr::bold})
-            .character(U'\x2550'),  // ═
-        70);
+    con.print_widget(rule_builder(" tapiru — Comprehensive Feature Demo ")
+                         .rule_style(style{colors::bright_yellow, {}, attr::bold})
+                         .character(U'\x2550'), // ═
+                     70);
 
     demo_markup(con);
     demo_constexpr_markup(con);
@@ -939,11 +909,10 @@ int main() {
     demo_double_underline(con);
 
     con.newline();
-    con.print_widget(
-        rule_builder(" Demo Complete! ")
-            .rule_style(style{colors::bright_green, {}, attr::bold})
-            .character(U'\x2550'),  // ═
-        70);
+    con.print_widget(rule_builder(" Demo Complete! ")
+                         .rule_style(style{colors::bright_green, {}, attr::bold})
+                         .character(U'\x2550'), // ═
+                     70);
     con.newline();
 
     return 0;

@@ -4,9 +4,10 @@
  */
 
 #include "tapiru/widgets/form.h"
-#include "tapiru/widgets/builders.h"
-#include "tapiru/core/element.h"
+
 #include "tapiru/core/decorator.h"
+#include "tapiru/core/element.h"
+#include "tapiru/widgets/builders.h"
 
 #include <algorithm>
 
@@ -15,10 +16,8 @@ namespace tapiru {
 namespace {
 
 class form_component : public component_base {
-public:
-    explicit form_component(form_option opt)
-        : opt_(std::move(opt))
-    {
+  public:
+    explicit form_component(form_option opt) : opt_(std::move(opt)) {
         int n = static_cast<int>(opt_.fields.size());
         errors_.resize(static_cast<size_t>(n), false);
         cursor_positions_.resize(static_cast<size_t>(n), 0);
@@ -41,7 +40,7 @@ public:
         rows.gap(0);
 
         for (int i = 0; i < n; ++i) {
-            const auto& f = opt_.fields[static_cast<size_t>(i)];
+            const auto &f = opt_.fields[static_cast<size_t>(i)];
             bool focused = (i == focused_field_);
             bool has_error = errors_[static_cast<size_t>(i)];
 
@@ -59,8 +58,8 @@ public:
                 // Show cursor position with brackets
                 int cp = cursor_positions_[static_cast<size_t>(i)];
                 if (cp > static_cast<int>(val.size())) cp = static_cast<int>(val.size());
-                input_display = "  > " + val.substr(0, static_cast<size_t>(cp))
-                              + "|" + val.substr(static_cast<size_t>(cp));
+                input_display =
+                    "  > " + val.substr(0, static_cast<size_t>(cp)) + "|" + val.substr(static_cast<size_t>(cp));
             } else {
                 input_display = "    " + val;
             }
@@ -73,12 +72,12 @@ public:
             auto input_tb = text_builder(input_display);
             if (has_error) {
                 input_tb.style_override(opt_.error_sty.fg.kind != color_kind::default_color
-                    ? opt_.error_sty
-                    : style{color::from_rgb(255, 80, 80), color::default_color()});
+                                            ? opt_.error_sty
+                                            : style{color::from_rgb(255, 80, 80), color::default_color()});
             } else if (focused) {
                 input_tb.style_override(opt_.focused_sty.fg.kind != color_kind::default_color
-                    ? opt_.focused_sty
-                    : style{color::from_rgb(100, 200, 255), color::default_color()});
+                                            ? opt_.focused_sty
+                                            : style{color::from_rgb(100, 200, 255), color::default_color()});
             } else {
                 if (opt_.input_sty.fg.kind != color_kind::default_color) {
                     input_tb.style_override(opt_.input_sty);
@@ -104,8 +103,8 @@ public:
         return std::move(rows);
     }
 
-    bool on_event(const input_event& ev) override {
-        auto* ke = std::get_if<key_event>(&ev);
+    bool on_event(const input_event &ev) override {
+        auto *ke = std::get_if<key_event>(&ev);
         if (!ke) return false;
 
         int n = static_cast<int>(opt_.fields.size());
@@ -128,10 +127,10 @@ public:
         }
 
         // Editing the current field
-        auto& f = opt_.fields[static_cast<size_t>(focused_field_)];
+        auto &f = opt_.fields[static_cast<size_t>(focused_field_)];
         if (!f.value) return false;
-        auto& val = *f.value;
-        int& cp = cursor_positions_[static_cast<size_t>(focused_field_)];
+        auto &val = *f.value;
+        int &cp = cursor_positions_[static_cast<size_t>(focused_field_)];
         if (cp > static_cast<int>(val.size())) cp = static_cast<int>(val.size());
 
         if (ke->key == special_key::backspace) {
@@ -180,14 +179,14 @@ public:
         return false;
     }
 
-private:
-    static bool has_mod(const key_event& ke, key_mod m) {
+  private:
+    static bool has_mod(const key_event &ke, key_mod m) {
         return (static_cast<uint8_t>(ke.mods) & static_cast<uint8_t>(m)) != 0;
     }
 
     void validate_current() {
         int i = focused_field_;
-        const auto& f = opt_.fields[static_cast<size_t>(i)];
+        const auto &f = opt_.fields[static_cast<size_t>(i)];
         if (f.validator && f.value) {
             errors_[static_cast<size_t>(i)] = !f.validator(*f.value);
         }
@@ -197,7 +196,7 @@ private:
         int n = static_cast<int>(opt_.fields.size());
         bool all_valid = true;
         for (int i = 0; i < n; ++i) {
-            const auto& f = opt_.fields[static_cast<size_t>(i)];
+            const auto &f = opt_.fields[static_cast<size_t>(i)];
             if (f.validator && f.value) {
                 bool ok = f.validator(*f.value);
                 errors_[static_cast<size_t>(i)] = !ok;
@@ -227,10 +226,10 @@ private:
     bool submit_blocked_ = false;
 };
 
-}  // namespace
+} // namespace
 
 component make_form(form_option opt) {
     return std::make_shared<form_component>(std::move(opt));
 }
 
-}  // namespace tapiru
+} // namespace tapiru

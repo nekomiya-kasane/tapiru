@@ -3,12 +3,12 @@
  * @brief Tests for screen: factory methods, render_once, query methods.
  */
 
-#include <gtest/gtest.h>
-
-#include "tapiru/core/screen.h"
 #include "tapiru/core/component.h"
 #include "tapiru/core/console.h"
+#include "tapiru/core/screen.h"
 #include "tapiru/widgets/builders.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 

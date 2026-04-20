@@ -4,6 +4,7 @@
  */
 
 #include "tapiru/widgets/component_factories.h"
+
 #include "tapiru/widgets/interactive.h"
 
 #include <algorithm>
@@ -15,7 +16,7 @@ namespace tapiru {
 namespace {
 
 class button_component final : public component_base {
-public:
+  public:
     explicit button_component(button_option opt) : opt_(std::move(opt)) {}
 
     element render() override {
@@ -26,8 +27,8 @@ public:
         return element(std::move(bb));
     }
 
-    bool on_event(const input_event& ev) override {
-        if (auto* ke = std::get_if<key_event>(&ev)) {
+    bool on_event(const input_event &ev) override {
+        if (auto *ke = std::get_if<key_event>(&ev)) {
             if (ke->key == special_key::enter && focused()) {
                 if (opt_.on_click) opt_.on_click();
                 return true;
@@ -38,14 +39,14 @@ public:
 
     bool focusable() const override { return true; }
 
-private:
+  private:
     button_option opt_;
 };
 
 // ── checkbox_component ──────────────────────────────────────────────────
 
 class checkbox_component final : public component_base {
-public:
+  public:
     explicit checkbox_component(checkbox_option opt) : opt_(std::move(opt)) {}
 
     element render() override {
@@ -55,8 +56,8 @@ public:
         return element(std::move(cb));
     }
 
-    bool on_event(const input_event& ev) override {
-        if (auto* ke = std::get_if<key_event>(&ev)) {
+    bool on_event(const input_event &ev) override {
+        if (auto *ke = std::get_if<key_event>(&ev)) {
             if ((ke->key == special_key::enter || ke->codepoint == U' ') && focused()) {
                 if (opt_.value) *opt_.value = !*opt_.value;
                 return true;
@@ -67,14 +68,14 @@ public:
 
     bool focusable() const override { return true; }
 
-private:
+  private:
     checkbox_option opt_;
 };
 
 // ── radio_group_component ───────────────────────────────────────────────
 
 class radio_group_component final : public component_base {
-public:
+  public:
     explicit radio_group_component(radio_group_option opt) : opt_(std::move(opt)) {}
 
     element render() override {
@@ -85,9 +86,9 @@ public:
         return element(std::move(rb));
     }
 
-    bool on_event(const input_event& ev) override {
+    bool on_event(const input_event &ev) override {
         if (!opt_.selected) return false;
-        if (auto* ke = std::get_if<key_event>(&ev)) {
+        if (auto *ke = std::get_if<key_event>(&ev)) {
             int n = static_cast<int>(opt_.options.size());
             if (n == 0) return false;
             if (ke->key == special_key::up || ke->key == special_key::left) {
@@ -104,14 +105,14 @@ public:
 
     bool focusable() const override { return true; }
 
-private:
+  private:
     radio_group_option opt_;
 };
 
 // ── selectable_list_component ───────────────────────────────────────────
 
 class selectable_list_component final : public component_base {
-public:
+  public:
     explicit selectable_list_component(selectable_list_option opt) : opt_(std::move(opt)) {}
 
     element render() override {
@@ -122,9 +123,9 @@ public:
         return element(std::move(lb));
     }
 
-    bool on_event(const input_event& ev) override {
+    bool on_event(const input_event &ev) override {
         if (!opt_.cursor) return false;
-        if (auto* ke = std::get_if<key_event>(&ev)) {
+        if (auto *ke = std::get_if<key_event>(&ev)) {
             int n = static_cast<int>(opt_.items.size());
             if (n == 0) return false;
             if (ke->key == special_key::up) {
@@ -145,16 +146,15 @@ public:
 
     bool focusable() const override { return true; }
 
-private:
+  private:
     selectable_list_option opt_;
 };
 
 // ── text_input_component ────────────────────────────────────────────────
 
 class text_input_component final : public component_base {
-public:
-    explicit text_input_component(text_input_option opt)
-        : opt_(std::move(opt)), cursor_pos_(0) {}
+  public:
+    explicit text_input_component(text_input_option opt) : opt_(std::move(opt)), cursor_pos_(0) {}
 
     element render() override {
         auto tb = text_input_builder(opt_.buffer);
@@ -166,10 +166,10 @@ public:
         return element(std::move(tb));
     }
 
-    bool on_event(const input_event& ev) override {
+    bool on_event(const input_event &ev) override {
         if (!opt_.buffer || !focused()) return false;
-        if (auto* ke = std::get_if<key_event>(&ev)) {
-            auto& buf = *opt_.buffer;
+        if (auto *ke = std::get_if<key_event>(&ev)) {
+            auto &buf = *opt_.buffer;
             if (ke->key == special_key::backspace && cursor_pos_ > 0) {
                 buf.erase(cursor_pos_ - 1, 1);
                 cursor_pos_--;
@@ -203,7 +203,8 @@ public:
                 int len = 0;
                 char32_t cp = ke->codepoint;
                 if (cp < 0x80) {
-                    utf8[0] = static_cast<char>(cp); len = 1;
+                    utf8[0] = static_cast<char>(cp);
+                    len = 1;
                 } else if (cp < 0x800) {
                     utf8[0] = static_cast<char>(0xC0 | (cp >> 6));
                     utf8[1] = static_cast<char>(0x80 | (cp & 0x3F));
@@ -231,7 +232,7 @@ public:
 
     bool focusable() const override { return true; }
 
-private:
+  private:
     text_input_option opt_;
     uint32_t cursor_pos_;
 };
@@ -239,7 +240,7 @@ private:
 // ── slider_component ────────────────────────────────────────────────────
 
 class slider_component final : public component_base {
-public:
+  public:
     explicit slider_component(slider_option opt) : opt_(std::move(opt)) {}
 
     element render() override {
@@ -250,9 +251,9 @@ public:
         return element(std::move(sb));
     }
 
-    bool on_event(const input_event& ev) override {
+    bool on_event(const input_event &ev) override {
         if (!opt_.value || !focused()) return false;
-        if (auto* ke = std::get_if<key_event>(&ev)) {
+        if (auto *ke = std::get_if<key_event>(&ev)) {
             if (ke->key == special_key::right || ke->key == special_key::up) {
                 *opt_.value = std::min(opt_.max_val, *opt_.value + opt_.step);
                 if (opt_.on_change) opt_.on_change(*opt_.value);
@@ -269,11 +270,11 @@ public:
 
     bool focusable() const override { return true; }
 
-private:
+  private:
     slider_option opt_;
 };
 
-}  // anonymous namespace
+} // anonymous namespace
 
 // ── Factory functions ───────────────────────────────────────────────────
 
@@ -301,4 +302,4 @@ component make_slider(slider_option opt) {
     return std::make_shared<slider_component>(std::move(opt));
 }
 
-}  // namespace tapiru
+} // namespace tapiru

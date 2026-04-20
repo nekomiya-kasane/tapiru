@@ -4,14 +4,15 @@
  */
 
 #include "tapiru/core/live.h"
-#include "tapiru/core/console.h"
-#include "tapiru/core/canvas.h"
-#include "tapiru/core/unicode_width.h"
-#include "tapiru/core/terminal.h"
-#include "tapiru/layout/types.h"
+
 #include "detail/border_join.h"
 #include "detail/scene.h"
 #include "detail/widget_registry.h"
+#include "tapiru/core/canvas.h"
+#include "tapiru/core/console.h"
+#include "tapiru/core/terminal.h"
+#include "tapiru/core/unicode_width.h"
+#include "tapiru/layout/types.h"
 
 #include <string>
 
@@ -19,7 +20,7 @@ namespace tapiru {
 
 namespace {
 
-void append_utf8(std::string& out, char32_t cp) {
+void append_utf8(std::string &out, char32_t cp) {
     if (cp < 0x80) {
         out += static_cast<char>(cp);
     } else if (cp < 0x800) {
@@ -38,7 +39,7 @@ void append_utf8(std::string& out, char32_t cp) {
 }
 
 /** @brief Emit a single cell's codepoint to the output buffer. */
-void emit_cell(std::string& out, const cell& c) {
+void emit_cell(std::string &out, const cell &c) {
     if (c.codepoint == 0 || c.codepoint == U' ') {
         out += ' ';
     } else {
@@ -46,16 +47,13 @@ void emit_cell(std::string& out, const cell& c) {
     }
 }
 
-}  // anonymous namespace
+} // anonymous namespace
 
 // ── Constructor / Destructor ────────────────────────────────────────────
 
-live::live(console& con, uint32_t fps, uint32_t width)
-    : console_(con)
-    , width_(width)
-    , frame_interval_(fps > 0 ? std::chrono::milliseconds(1000 / fps)
-                               : std::chrono::milliseconds(83))
-{
+live::live(console &con, uint32_t fps, uint32_t width)
+    : console_(con), width_(width),
+      frame_interval_(fps > 0 ? std::chrono::milliseconds(1000 / fps) : std::chrono::milliseconds(83)) {
     if (width_ == 0) {
         auto sz = terminal::get_size();
         width_ = sz.width > 0 ? sz.width : 80;
@@ -78,7 +76,7 @@ live::~live() {
 
 void live::stop() {
     if (!render_thread_.joinable()) {
-        return;  // already stopped
+        return; // already stopped
     }
 
     render_thread_.request_stop();
@@ -115,7 +113,7 @@ void live::render_frame() {
     // 2. Handle canvas resize if dimensions changed
     if (m.width != canvas_.width() || m.height != canvas_.height()) {
         canvas_.resize(m.width, m.height);
-        first_frame_ = true;  // force full output after resize
+        first_frame_ = true; // force full output after resize
     }
 
     // Handle force_redraw request
@@ -145,12 +143,12 @@ void live::render_frame() {
 
     if (first_frame_) {
         // First frame or after resize/force_redraw: absolute position to top-left
-        buf += "\x1b[H";  // CUP: cursor to row 1, col 1
+        buf += "\x1b[H"; // CUP: cursor to row 1, col 1
 
         for (uint32_t y = 0; y < m.height; ++y) {
             buf += "\x1b[2K";
             for (uint32_t x = 0; x < m.width; ++x) {
-                const auto& c = canvas_.get(x, y);
+                const auto &c = canvas_.get(x, y);
                 if (c.width == 0) continue;
                 if (use_color) {
                     emitter.transition(sc.styles().lookup(c.sid), buf);
@@ -209,16 +207,14 @@ void live::render_frame() {
                     } else {
                         uint32_t gap = 0;
                         uint32_t peek = x;
-                        while (peek < m.width && gap < 3 &&
-                               canvas_.get(peek, y) == canvas_.get_current(peek, y)) {
+                        while (peek < m.width && gap < 3 && canvas_.get(peek, y) == canvas_.get_current(peek, y)) {
                             ++peek;
                             ++gap;
                         }
-                        if (peek < m.width && gap <= 2 &&
-                            canvas_.get(peek, y) != canvas_.get_current(peek, y)) {
-                            x = peek;  // bridge the gap
+                        if (peek < m.width && gap <= 2 && canvas_.get(peek, y) != canvas_.get_current(peek, y)) {
+                            x = peek; // bridge the gap
                         } else {
-                            break;  // end of run
+                            break; // end of run
                         }
                     }
                 }
@@ -228,10 +224,10 @@ void live::render_frame() {
                 buf += std::to_string(y + 1);
                 buf += ';';
                 buf += std::to_string(run_start + 1);
-                buf += 'H';  // CUP: Cursor Position (row;col)
+                buf += 'H'; // CUP: Cursor Position (row;col)
 
                 for (uint32_t rx = run_start; rx < x; ++rx) {
-                    const auto& c = canvas_.get(rx, y);
+                    const auto &c = canvas_.get(rx, y);
                     if (c.width == 0) continue;
                     if (use_color) {
                         emitter.transition(sc.styles().lookup(c.sid), buf);
@@ -262,4 +258,4 @@ void live::render_frame() {
     console_.write(buf);
 }
 
-}  // namespace tapiru
+} // namespace tapiru

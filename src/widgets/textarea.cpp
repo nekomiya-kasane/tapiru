@@ -4,8 +4,9 @@
  */
 
 #include "tapiru/widgets/textarea.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -14,7 +15,7 @@
 
 namespace tapiru {
 
-textarea_builder& textarea_builder::key(std::string_view k) {
+textarea_builder &textarea_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
@@ -27,15 +28,13 @@ struct styled_range {
     int col_start;
     int col_end;
     style sty;
-    int priority;  // higher = wins overlap
+    int priority; // higher = wins overlap
 };
 
 // Build text_fragment vector for a single line, applying styled ranges.
 // Ranges may overlap; higher priority wins.
-std::vector<text_fragment> build_line_fragments(
-    const std::string& line, const style& base_sty,
-    const std::vector<styled_range>& ranges)
-{
+std::vector<text_fragment> build_line_fragments(const std::string &line, const style &base_sty,
+                                                const std::vector<styled_range> &ranges) {
     int len = static_cast<int>(line.size());
     if (len == 0 && ranges.empty()) {
         return {{" ", base_sty}};
@@ -45,15 +44,15 @@ std::vector<text_fragment> build_line_fragments(
     // We use a simple approach: for short lines this is efficient enough.
     int extent = std::max(len, 1);
     // Extend extent to cover any range that goes past line end (e.g. cursor on empty line)
-    for (const auto& r : ranges) {
+    for (const auto &r : ranges) {
         if (r.col_end > extent) extent = r.col_end;
     }
 
     // Build per-column style array
     std::vector<style> col_styles(static_cast<size_t>(extent), base_sty);
-    std::vector<int>   col_prio(static_cast<size_t>(extent), -1);
+    std::vector<int> col_prio(static_cast<size_t>(extent), -1);
 
-    for (const auto& r : ranges) {
+    for (const auto &r : ranges) {
         int cs = std::max(r.col_start, 0);
         int ce = std::min(r.col_end, extent);
         for (int c = cs; c < ce; ++c) {
@@ -69,15 +68,15 @@ std::vector<text_fragment> build_line_fragments(
     int frag_start = 0;
     for (int c = 1; c <= extent; ++c) {
         bool same = (c < extent) &&
-            col_styles[static_cast<size_t>(c)].fg.kind == col_styles[static_cast<size_t>(frag_start)].fg.kind &&
-            col_styles[static_cast<size_t>(c)].fg.r == col_styles[static_cast<size_t>(frag_start)].fg.r &&
-            col_styles[static_cast<size_t>(c)].fg.g == col_styles[static_cast<size_t>(frag_start)].fg.g &&
-            col_styles[static_cast<size_t>(c)].fg.b == col_styles[static_cast<size_t>(frag_start)].fg.b &&
-            col_styles[static_cast<size_t>(c)].bg.kind == col_styles[static_cast<size_t>(frag_start)].bg.kind &&
-            col_styles[static_cast<size_t>(c)].bg.r == col_styles[static_cast<size_t>(frag_start)].bg.r &&
-            col_styles[static_cast<size_t>(c)].bg.g == col_styles[static_cast<size_t>(frag_start)].bg.g &&
-            col_styles[static_cast<size_t>(c)].bg.b == col_styles[static_cast<size_t>(frag_start)].bg.b &&
-            col_styles[static_cast<size_t>(c)].attrs == col_styles[static_cast<size_t>(frag_start)].attrs;
+                    col_styles[static_cast<size_t>(c)].fg.kind == col_styles[static_cast<size_t>(frag_start)].fg.kind &&
+                    col_styles[static_cast<size_t>(c)].fg.r == col_styles[static_cast<size_t>(frag_start)].fg.r &&
+                    col_styles[static_cast<size_t>(c)].fg.g == col_styles[static_cast<size_t>(frag_start)].fg.g &&
+                    col_styles[static_cast<size_t>(c)].fg.b == col_styles[static_cast<size_t>(frag_start)].fg.b &&
+                    col_styles[static_cast<size_t>(c)].bg.kind == col_styles[static_cast<size_t>(frag_start)].bg.kind &&
+                    col_styles[static_cast<size_t>(c)].bg.r == col_styles[static_cast<size_t>(frag_start)].bg.r &&
+                    col_styles[static_cast<size_t>(c)].bg.g == col_styles[static_cast<size_t>(frag_start)].bg.g &&
+                    col_styles[static_cast<size_t>(c)].bg.b == col_styles[static_cast<size_t>(frag_start)].bg.b &&
+                    col_styles[static_cast<size_t>(c)].attrs == col_styles[static_cast<size_t>(frag_start)].attrs;
 
         if (!same) {
             std::string text;
@@ -96,11 +95,10 @@ std::vector<text_fragment> build_line_fragments(
 }
 
 // Check if a line is within a selection range, and return column bounds.
-bool selection_cols_for_line(const text_range& sel, int line_idx, int line_len,
-                             int& col_start, int& col_end) {
+bool selection_cols_for_line(const text_range &sel, int line_idx, int line_len, int &col_start, int &col_end) {
     // Normalize selection direction
     int sr = sel.start_row, sc = sel.start_col;
-    int er = sel.end_row,   ec = sel.end_col;
+    int er = sel.end_row, ec = sel.end_col;
     if (sr > er || (sr == er && sc > ec)) {
         std::swap(sr, er);
         std::swap(sc, ec);
@@ -110,25 +108,25 @@ bool selection_cols_for_line(const text_range& sel, int line_idx, int line_len,
 
     if (sr == er) {
         col_start = sc;
-        col_end   = ec;
+        col_end = ec;
     } else if (line_idx == sr) {
         col_start = sc;
-        col_end   = line_len > 0 ? line_len : 1;
+        col_end = line_len > 0 ? line_len : 1;
     } else if (line_idx == er) {
         col_start = 0;
-        col_end   = ec;
+        col_end = ec;
     } else {
         col_start = 0;
-        col_end   = line_len > 0 ? line_len : 1;
+        col_end = line_len > 0 ? line_len : 1;
     }
     return col_start < col_end;
 }
 
-}  // anonymous namespace
+} // anonymous namespace
 
 // ── flatten_into ────────────────────────────────────────────────────────
 
-node_id textarea_builder::flatten_into(detail::scene& s) const {
+node_id textarea_builder::flatten_into(detail::scene &s) const {
     // Split text into lines
     std::vector<std::string> lines;
     if (text_ && !text_->empty()) {
@@ -150,8 +148,11 @@ node_id textarea_builder::flatten_into(detail::scene& s) const {
     if (line_numbers_ || relative_nums_) {
         int total = static_cast<int>(lines.size());
         gutter_w = 1;
-        while (total >= 10) { gutter_w++; total /= 10; }
-        gutter_w += 1;  // space after number
+        while (total >= 10) {
+            gutter_w++;
+            total /= 10;
+        }
+        gutter_w += 1; // space after number
     }
 
     // Build rows of visible lines
@@ -186,7 +187,7 @@ node_id textarea_builder::flatten_into(detail::scene& s) const {
 
         // ── Line content with per-character styling ─────────────────
         if (is_content) {
-            const auto& line = lines[static_cast<size_t>(line_idx)];
+            const auto &line = lines[static_cast<size_t>(line_idx)];
             int line_len = static_cast<int>(line.size());
 
             // Base style: cursor line or normal
@@ -205,7 +206,7 @@ node_id textarea_builder::flatten_into(detail::scene& s) const {
 
             // Search matches (priority 2)
             if (matches_) {
-                for (const auto& m : *matches_) {
+                for (const auto &m : *matches_) {
                     if (m.start_row == line_idx) {
                         ranges.push_back({m.start_col, m.end_col, match_sty_, 2});
                     }
@@ -215,7 +216,7 @@ node_id textarea_builder::flatten_into(detail::scene& s) const {
             // Block cursor (priority 3 — highest, always visible)
             if (show_cursor_ && is_cursor_line) {
                 int cc = cur_col;
-                if (cc >= line_len) cc = line_len;  // cursor at EOL
+                if (cc >= line_len) cc = line_len; // cursor at EOL
                 ranges.push_back({cc, cc + 1, cursor_char_sty_, 3});
             }
 
@@ -229,7 +230,7 @@ node_id textarea_builder::flatten_into(detail::scene& s) const {
             if (!gutter_text.empty()) {
                 td.fragments.push_back({std::move(gutter_text), line_num_sty_});
             }
-            for (auto& f : content_frags) {
+            for (auto &f : content_frags) {
                 td.fragments.push_back(std::move(f));
             }
 
@@ -279,4 +280,4 @@ node_id textarea_builder::flatten_into(detail::scene& s) const {
     return sb_id;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

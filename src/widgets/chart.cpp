@@ -4,6 +4,7 @@
  */
 
 #include "tapiru/widgets/chart.h"
+
 #include "detail/scene.h"
 #include "detail/widget_types.h"
 
@@ -20,7 +21,7 @@ namespace tapiru {
 //   (0,2)=0x04  (1,2)=0x20
 //   (0,3)=0x40  (1,3)=0x80
 
-static const uint8_t braille_left[4]  = {0x01, 0x02, 0x04, 0x40};
+static const uint8_t braille_left[4] = {0x01, 0x02, 0x04, 0x40};
 static const uint8_t braille_right[4] = {0x08, 0x10, 0x20, 0x80};
 
 static inline uint8_t braille_dot_bit(uint32_t dx, uint32_t dy) {
@@ -30,8 +31,7 @@ static inline uint8_t braille_dot_bit(uint32_t dx, uint32_t dy) {
 // ── braille_grid ───────────────────────────────────────────────────────
 
 braille_grid::braille_grid(uint32_t char_width, uint32_t char_height)
-    : char_w_(char_width), char_h_(char_height),
-      dots_(static_cast<size_t>(char_width) * char_height, 0) {}
+    : char_w_(char_width), char_h_(char_height), dots_(static_cast<size_t>(char_width) * char_height, 0) {}
 
 void braille_grid::set(uint32_t dot_x, uint32_t dot_y) {
     if (dot_x >= dot_width() || dot_y >= dot_height()) return;
@@ -64,7 +64,7 @@ std::string braille_grid::render() const {
 
 // ── line_chart_builder ─────────────────────────────────────────────────
 
-node_id line_chart_builder::flatten_into(detail::scene& s) const {
+node_id line_chart_builder::flatten_into(detail::scene &s) const {
     if (data_.empty() || width_ == 0 || height_ == 0) {
         return text_builder("").flatten_into(s);
     }
@@ -79,8 +79,8 @@ node_id line_chart_builder::flatten_into(detail::scene& s) const {
 
     for (uint32_t dx = 0; dx < dw && dx < static_cast<uint32_t>(data_.size()); ++dx) {
         // Map data index
-        size_t idx = static_cast<size_t>(
-            static_cast<float>(dx) / static_cast<float>(dw) * static_cast<float>(data_.size()));
+        size_t idx =
+            static_cast<size_t>(static_cast<float>(dx) / static_cast<float>(dw) * static_cast<float>(data_.size()));
         if (idx >= data_.size()) idx = data_.size() - 1;
 
         float val = data_[idx];
@@ -102,16 +102,22 @@ node_id line_chart_builder::flatten_into(detail::scene& s) const {
 
 // ── bar_chart_builder ──────────────────────────────────────────────────
 
-node_id bar_chart_builder::flatten_into(detail::scene& s) const {
+node_id bar_chart_builder::flatten_into(detail::scene &s) const {
     if (data_.empty()) {
         return text_builder("").flatten_into(s);
     }
 
     // Block characters: ▁▂▃▄▅▆▇█ (U+2581..U+2588)
-    static const char* blocks[] = {
+    static const char *blocks[] = {
         " ",
-        "\xe2\x96\x81", "\xe2\x96\x82", "\xe2\x96\x83", "\xe2\x96\x84",
-        "\xe2\x96\x85", "\xe2\x96\x86", "\xe2\x96\x87", "\xe2\x96\x88",
+        "\xe2\x96\x81",
+        "\xe2\x96\x82",
+        "\xe2\x96\x83",
+        "\xe2\x96\x84",
+        "\xe2\x96\x85",
+        "\xe2\x96\x86",
+        "\xe2\x96\x87",
+        "\xe2\x96\x88",
     };
 
     float hi = *std::max_element(data_.begin(), data_.end());
@@ -119,7 +125,7 @@ node_id bar_chart_builder::flatten_into(detail::scene& s) const {
 
     // Determine column width: max of 1 (bar char) and longest label
     size_t col_w = 1;
-    for (const auto& lbl : labels_) {
+    for (const auto &lbl : labels_) {
         if (lbl.size() > col_w) col_w = lbl.size();
     }
 
@@ -133,7 +139,7 @@ node_id bar_chart_builder::flatten_into(detail::scene& s) const {
             float level = bar_h - static_cast<float>(row - 1);
             int block_idx = 0;
             if (level >= 1.0f) {
-                block_idx = 8;  // full block
+                block_idx = 8; // full block
             } else if (level > 0.0f) {
                 block_idx = static_cast<int>(level * 8.0f + 0.5f);
                 if (block_idx < 1) block_idx = 1;
@@ -168,7 +174,7 @@ node_id bar_chart_builder::flatten_into(detail::scene& s) const {
 
 // ── scatter_builder ────────────────────────────────────────────────────
 
-node_id scatter_builder::flatten_into(detail::scene& s) const {
+node_id scatter_builder::flatten_into(detail::scene &s) const {
     if (points_.empty() || width_ == 0 || height_ == 0) {
         return text_builder("").flatten_into(s);
     }
@@ -176,7 +182,7 @@ node_id scatter_builder::flatten_into(detail::scene& s) const {
     // Find data bounds
     float x_lo = points_[0].x, x_hi = points_[0].x;
     float y_lo = points_[0].y, y_hi = points_[0].y;
-    for (const auto& p : points_) {
+    for (const auto &p : points_) {
         if (p.x < x_lo) x_lo = p.x;
         if (p.x > x_hi) x_hi = p.x;
         if (p.y < y_lo) y_lo = p.y;
@@ -189,7 +195,7 @@ node_id scatter_builder::flatten_into(detail::scene& s) const {
     uint32_t dw = grid.dot_width();
     uint32_t dh = grid.dot_height();
 
-    for (const auto& p : points_) {
+    for (const auto &p : points_) {
         float nx = (p.x - x_lo) / (x_hi - x_lo);
         float ny = (p.y - y_lo) / (y_hi - y_lo);
         uint32_t dx = static_cast<uint32_t>(nx * static_cast<float>(dw - 1) + 0.5f);
@@ -204,4 +210,4 @@ node_id scatter_builder::flatten_into(detail::scene& s) const {
     return tb.flatten_into(s);
 }
 
-}  // namespace tapiru
+} // namespace tapiru

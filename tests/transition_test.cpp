@@ -3,8 +3,9 @@
  * @brief Tests for typewriter, counter_animation, marquee, cross_fade, slide_transition.
  */
 
-#include <gtest/gtest.h>
 #include "tapiru/core/transition.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 

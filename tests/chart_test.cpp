@@ -3,14 +3,15 @@
  * @brief Tests for braille_grid, line_chart, bar_chart, scatter chart widgets.
  */
 
-#include <gtest/gtest.h>
-#include "tapiru/widgets/chart.h"
 #include "tapiru/core/console.h"
+#include "tapiru/widgets/chart.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
 class virtual_terminal {
-public:
+  public:
     [[nodiscard]] console make_console(bool color = false, uint32_t width = 80) {
         console_config cfg;
         cfg.sink = [this](std::string_view data) { buffer_ += data; };
@@ -19,9 +20,10 @@ public:
         cfg.no_color = !color;
         return console(cfg);
     }
-    [[nodiscard]] const std::string& raw() const noexcept { return buffer_; }
+    [[nodiscard]] const std::string &raw() const noexcept { return buffer_; }
     void clear() { buffer_.clear(); }
-private:
+
+  private:
     std::string buffer_;
 };
 
@@ -46,7 +48,7 @@ TEST(BrailleGridTest, EmptyGridRendersBlankBraille) {
 
 TEST(BrailleGridTest, SetDotProducesBraille) {
     braille_grid g(1, 1);
-    g.set(0, 0);  // top-left dot
+    g.set(0, 0); // top-left dot
     auto s = g.render();
     // U+2800 + 0x01 = U+2801
     EXPECT_EQ(s.size(), 3u);
@@ -66,7 +68,7 @@ TEST(BrailleGridTest, ClearResetsGrid) {
 
 TEST(BrailleGridTest, OutOfBoundsIgnored) {
     braille_grid g(1, 1);
-    g.set(999, 999);  // should not crash
+    g.set(999, 999); // should not crash
     auto s = g.render();
     EXPECT_EQ(s.size(), 3u);
 }
@@ -111,7 +113,7 @@ TEST(BarChartTest, RendersBlockChars) {
     auto con = vt.make_console(false, 80);
     std::vector<float> data = {1, 3, 5, 2, 4};
     con.print_widget(bar_chart_builder(data, 4), 80);
-    auto& out = vt.raw();
+    auto &out = vt.raw();
     EXPECT_FALSE(out.empty());
 }
 
@@ -121,7 +123,7 @@ TEST(BarChartTest, WithLabels) {
     std::vector<float> data = {3, 7, 5};
     auto bc = bar_chart_builder(data, 4).labels({"A", "B", "C"});
     con.print_widget(std::move(bc), 80);
-    auto& out = vt.raw();
+    auto &out = vt.raw();
     EXPECT_TRUE(out.find("A") != std::string::npos);
 }
 

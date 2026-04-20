@@ -4,6 +4,7 @@
  */
 
 #include "tapiru/core/decorator.h"
+
 #include "tapiru/widgets/builders.h"
 
 namespace tapiru {
@@ -74,7 +75,7 @@ decorator flex(uint32_t ratio) {
         // flex wraps the element in a columns_builder with the given ratio.
         // When used inside a columns/rows container, the flex ratio is
         // picked up during layout. For standalone use, just pass through.
-        (void)ratio;  // TODO: wire flex ratio into scene data
+        (void)ratio; // TODO: wire flex ratio into scene data
         return inner;
     };
 }
@@ -147,11 +148,11 @@ decorator focus_indicator() {
 
 // ── Conditional decorators ──────────────────────────────────────────────
 
-decorator maybe(const bool* show) {
+decorator maybe(const bool *show) {
     return [show](element inner) -> element {
         if (show && !*show) return element{};
         return inner;
     };
 }
 
-}  // namespace tapiru
+} // namespace tapiru

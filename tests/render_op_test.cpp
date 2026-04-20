@@ -1,24 +1,24 @@
-#include <gtest/gtest.h>
-
-#include "tapiru/text/render_op.h"
 #include "tapiru/core/console.h"
+#include "tapiru/text/render_op.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
 // Macro helper: compile_markup is consteval, so the string literal must appear
 // directly at the call site. This macro creates a local plan + context and
 // executes it, storing the result in `varname`.
-#define RENDER_NO_COLOR(varname, literal, w) \
-    std::string varname; \
-    do { \
-        constexpr auto _plan_ = compile_markup(literal); \
-        markup_render_context _ctx_; \
-        _ctx_.src      = literal; \
-        _ctx_.width    = (w); \
-        _ctx_.color_on = false; \
-        _ctx_.emitter  = nullptr; \
-        _ctx_.out      = &varname; \
-        execute_rich(_plan_, _ctx_); \
+#define RENDER_NO_COLOR(varname, literal, w)                                                                           \
+    std::string varname;                                                                                               \
+    do {                                                                                                               \
+        constexpr auto _plan_ = compile_markup(literal);                                                               \
+        markup_render_context _ctx_;                                                                                   \
+        _ctx_.src = literal;                                                                                           \
+        _ctx_.width = (w);                                                                                             \
+        _ctx_.color_on = false;                                                                                        \
+        _ctx_.emitter = nullptr;                                                                                       \
+        _ctx_.out = &varname;                                                                                          \
+        execute_rich(_plan_, _ctx_);                                                                                   \
     } while (0)
 
 // ── Pure compile-time ops ───────────────────────────────────────────────
@@ -48,11 +48,11 @@ TEST(RenderOpTest, LinkEmitsOSC8WhenColorOn) {
     std::string out;
     ansi_emitter em;
     markup_render_context ctx;
-    ctx.src      = "[link=https://x.com]click[/link]";
-    ctx.width    = 80;
+    ctx.src = "[link=https://x.com]click[/link]";
+    ctx.width = 80;
     ctx.color_on = true;
-    ctx.emitter  = &em;
-    ctx.out      = &out;
+    ctx.emitter = &em;
+    ctx.out = &out;
     execute_rich(plan, ctx);
     EXPECT_NE(out.find("\033]8;;https://x.com\033\\"), std::string::npos);
     EXPECT_NE(out.find("click"), std::string::npos);
@@ -76,7 +76,8 @@ TEST(RenderOpTest, BoxContainsText) {
     RENDER_NO_COLOR(out, "[box]Hello[/box]", 20);
     EXPECT_NE(out.find("Hello"), std::string::npos);
     size_t newlines = 0;
-    for (char c : out) if (c == '\n') ++newlines;
+    for (char c : out)
+        if (c == '\n') ++newlines;
     EXPECT_GE(newlines, 2u);
 }
 
@@ -102,8 +103,8 @@ TEST(RenderOpTest, CodeHasIndent) {
 TEST(RenderOpTest, ProgressBar50) {
     RENDER_NO_COLOR(out, "[progress=50]", 20);
     EXPECT_NE(out.find("50%"), std::string::npos);
-    EXPECT_NE(out.find("\xe2\x96\x88"), std::string::npos);  // █
-    EXPECT_NE(out.find("\xe2\x96\x91"), std::string::npos);  // ░
+    EXPECT_NE(out.find("\xe2\x96\x88"), std::string::npos); // █
+    EXPECT_NE(out.find("\xe2\x96\x91"), std::string::npos); // ░
 }
 
 TEST(RenderOpTest, FractionBar) {

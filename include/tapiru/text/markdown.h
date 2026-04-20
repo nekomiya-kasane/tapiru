@@ -18,17 +18,19 @@
  *   con.print_widget(builder, 80);
  */
 
+#include "tapiru/exports.h"
+#include "tapiru/text/markup.h"
+
 #include <cstdint>
 #include <string>
 #include <string_view>
 #include <vector>
 
-#include "tapiru/exports.h"
-#include "tapiru/text/markup.h"
-
 namespace tapiru {
 
-namespace detail { class scene; }
+namespace detail {
+class scene;
+}
 using node_id = uint32_t;
 
 // ── Markdown AST ────────────────────────────────────────────────────────
@@ -46,11 +48,11 @@ enum class md_block_type : uint8_t {
 
 struct md_block {
     md_block_type type = md_block_type::paragraph;
-    uint8_t       level = 0;  // heading level (1-3), or 0
-    std::string   content;    // inline markdown content
-    std::string   language;   // code_block language tag
-    bool          checked = false;  // task_list checked state
-    std::vector<std::vector<std::string>> table_rows;  // table rows×cols
+    uint8_t level = 0;                                // heading level (1-3), or 0
+    std::string content;                              // inline markdown content
+    std::string language;                             // code_block language tag
+    bool checked = false;                             // task_list checked state
+    std::vector<std::vector<std::string>> table_rows; // table rows×cols
 };
 
 /**
@@ -74,19 +76,22 @@ struct md_block {
  * Flattens markdown into text nodes with appropriate styling.
  */
 class TAPIRU_API markdown_builder {
-public:
+  public:
     explicit markdown_builder(std::string_view md, uint32_t max_depth = 32);
 
-    markdown_builder& key(std::string_view k);
-    markdown_builder& z_order(int16_t z) { z_order_ = z; return *this; }
+    markdown_builder &key(std::string_view k);
+    markdown_builder &z_order(int16_t z) {
+        z_order_ = z;
+        return *this;
+    }
 
-    node_id flatten_into(detail::scene& s) const;
+    node_id flatten_into(detail::scene &s) const;
 
-private:
+  private:
     std::vector<md_block> blocks_;
     uint32_t max_depth_ = 32;
-    uint64_t key_       = 0;
-    int16_t  z_order_   = 0;
+    uint64_t key_ = 0;
+    int16_t z_order_ = 0;
 };
 
 // ── Syntax highlighting ────────────────────────────────────────────────
@@ -99,4 +104,4 @@ private:
  */
 [[nodiscard]] TAPIRU_API std::string syntax_highlight(std::string_view code, std::string_view language);
 
-}  // namespace tapiru
+} // namespace tapiru

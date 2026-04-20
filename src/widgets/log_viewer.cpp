@@ -4,21 +4,22 @@
  */
 
 #include "tapiru/widgets/log_viewer.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 namespace tapiru {
 
-log_viewer_builder& log_viewer_builder::key(std::string_view k) {
+log_viewer_builder &log_viewer_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
-node_id log_viewer_builder::flatten_into(detail::scene& s) const {
+node_id log_viewer_builder::flatten_into(detail::scene &s) const {
     // Filter entries
-    std::vector<const log_entry*> visible;
+    std::vector<const log_entry *> visible;
     if (entries_) {
-        for (const auto& e : *entries_) {
+        for (const auto &e : *entries_) {
             if (e.level < min_level_) continue;
             if (filter_ && !filter_->empty()) {
                 if (e.message.find(*filter_) == std::string::npos) continue;
@@ -41,7 +42,7 @@ node_id log_viewer_builder::flatten_into(detail::scene& s) const {
         std::string line;
 
         if (idx < static_cast<int>(visible.size())) {
-            const auto& entry = *visible[static_cast<size_t>(idx)];
+            const auto &entry = *visible[static_cast<size_t>(idx)];
             if (show_ts_ && !entry.timestamp.empty()) {
                 line += "[" + entry.timestamp + "] ";
             }
@@ -72,4 +73,4 @@ node_id log_viewer_builder::flatten_into(detail::scene& s) const {
     return rows_id;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

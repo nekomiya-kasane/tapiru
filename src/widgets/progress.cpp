@@ -4,20 +4,21 @@
  */
 
 #include "tapiru/widgets/progress.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 #include <cstdio>
 #include <string>
 
 namespace tapiru {
 
-progress_builder& progress_builder::key(std::string_view k) {
+progress_builder &progress_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
-node_id progress_builder::flatten_into(detail::scene& s) const {
+node_id progress_builder::flatten_into(detail::scene &s) const {
     // Each task becomes a text node showing: "description  [████░░░░] 50%"
     // All tasks are stacked vertically via a columns_data with 1 column,
     // but simpler: we create a single text node with newlines for multi-task.
@@ -40,7 +41,7 @@ node_id progress_builder::flatten_into(detail::scene& s) const {
     // (columns is horizontal). Instead, create a padding wrapper with
     // children linked as siblings. We'll use a simple approach:
     // create a "columns" node with 1 child per task, but that's horizontal.
-    // 
+    //
     // Better: create multiple text nodes as siblings under a dummy padding node.
     // The padding widget only renders its single content child though.
     //
@@ -57,8 +58,7 @@ node_id progress_builder::flatten_into(detail::scene& s) const {
     return s.add_node(detail::widget_type::text, pi);
 }
 
-node_id progress_builder::build_task_node(detail::scene& s,
-                                           const progress_task& task) const {
+node_id progress_builder::build_task_node(detail::scene &s, const progress_task &task) const {
     detail::text_data td;
     build_task_fragments(td.fragments, task);
     td.overflow = overflow_mode::truncate;
@@ -66,9 +66,7 @@ node_id progress_builder::build_task_node(detail::scene& s,
     return s.add_node(detail::widget_type::text, pi);
 }
 
-void progress_builder::build_task_fragments(
-        std::vector<text_fragment>& frags,
-        const progress_task& task) const {
+void progress_builder::build_task_fragments(std::vector<text_fragment> &frags, const progress_task &task) const {
     // Description
     frags.push_back({task.description(), style{}});
     frags.push_back({"  ", style{}});
@@ -90,17 +88,16 @@ void progress_builder::build_task_fragments(
 
     // Percentage
     char pct_buf[16];
-    std::snprintf(pct_buf, sizeof(pct_buf), " %3d%%",
-                  static_cast<int>(frac * 100.0));
+    std::snprintf(pct_buf, sizeof(pct_buf), " %3d%%", static_cast<int>(frac * 100.0));
     frags.push_back({pct_buf, style{}});
 
     // Completed indicator
     if (task.completed()) {
-        frags.push_back({" \xe2\x9c\x93", style{}});  // ✓ in UTF-8
+        frags.push_back({" \xe2\x9c\x93", style{}}); // ✓ in UTF-8
     }
 }
 
-void progress_builder::append_char32(std::string& out, char32_t cp) {
+void progress_builder::append_char32(std::string &out, char32_t cp) {
     if (cp < 0x80) {
         out += static_cast<char>(cp);
     } else if (cp < 0x800) {
@@ -118,4 +115,4 @@ void progress_builder::append_char32(std::string& out, char32_t cp) {
     }
 }
 
-}  // namespace tapiru
+} // namespace tapiru

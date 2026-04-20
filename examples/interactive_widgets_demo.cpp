@@ -26,19 +26,19 @@
  */
 
 #ifdef _WIN32
-#  define WIN32_LEAN_AND_MEAN
-#  define NOMINMAX
-#  include <Windows.h>
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
 #else
-#  include <termios.h>
-#  include <unistd.h>
-#  include <sys/select.h>
+#include <sys/select.h>
+#include <termios.h>
+#include <unistd.h>
 #endif
 
 #include <chrono>
 #include <cmath>
-#include <cstdio>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <string>
 #include <thread>
@@ -52,9 +52,9 @@
 #include "tapiru/core/transition.h"
 
 // ── Widgets ─────────────────────────────────────────────────────────────
-#include "tapiru/widgets/builders.h"
 #include "tapiru/widgets/accordion.h"
 #include "tapiru/widgets/breadcrumb.h"
+#include "tapiru/widgets/builders.h"
 #include "tapiru/widgets/dropdown.h"
 #include "tapiru/widgets/grid.h"
 #include "tapiru/widgets/keybinding.h"
@@ -76,14 +76,26 @@ using namespace tapiru;
 // ═══════════════════════════════════════════════════════════════════════
 
 enum class input_ev : uint8_t {
-    none, up, down, left, right, enter, tab, shift_tab, quit, space,
-    key_1, key_2, key_3, key_4
+    none,
+    up,
+    down,
+    left,
+    right,
+    enter,
+    tab,
+    shift_tab,
+    quit,
+    space,
+    key_1,
+    key_2,
+    key_3,
+    key_4
 };
 
 #ifdef _WIN32
 
 static HANDLE g_stdin = INVALID_HANDLE_VALUE;
-static DWORD  g_old_mode = 0;
+static DWORD g_old_mode = 0;
 
 static void enable_raw_input() {
     g_stdin = GetStdHandle(STD_INPUT_HANDLE);
@@ -96,29 +108,27 @@ static void restore_input() {
 }
 
 static input_ev poll_input(int timeout_ms) {
-    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0)
-        return input_ev::none;
+    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0) return input_ev::none;
     INPUT_RECORD rec;
     DWORD count = 0;
-    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0)
-        return input_ev::none;
+    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0) return input_ev::none;
     if (rec.EventType == KEY_EVENT && rec.Event.KeyEvent.bKeyDown) {
         auto vk = rec.Event.KeyEvent.wVirtualKeyCode;
         auto ch = rec.Event.KeyEvent.uChar.UnicodeChar;
         bool shift = (rec.Event.KeyEvent.dwControlKeyState & SHIFT_PRESSED) != 0;
-        if (vk == VK_UP)     return input_ev::up;
-        if (vk == VK_DOWN)   return input_ev::down;
-        if (vk == VK_LEFT)   return input_ev::left;
-        if (vk == VK_RIGHT)  return input_ev::right;
+        if (vk == VK_UP) return input_ev::up;
+        if (vk == VK_DOWN) return input_ev::down;
+        if (vk == VK_LEFT) return input_ev::left;
+        if (vk == VK_RIGHT) return input_ev::right;
         if (vk == VK_RETURN) return input_ev::enter;
-        if (vk == VK_TAB)    return shift ? input_ev::shift_tab : input_ev::tab;
+        if (vk == VK_TAB) return shift ? input_ev::shift_tab : input_ev::tab;
         if (vk == VK_ESCAPE) return input_ev::quit;
         if (ch == L'q' || ch == L'Q') return input_ev::quit;
-        if (ch == L' ')      return input_ev::space;
-        if (ch == L'1')      return input_ev::key_1;
-        if (ch == L'2')      return input_ev::key_2;
-        if (ch == L'3')      return input_ev::key_3;
-        if (ch == L'4')      return input_ev::key_4;
+        if (ch == L' ') return input_ev::space;
+        if (ch == L'1') return input_ev::key_1;
+        if (ch == L'2') return input_ev::key_2;
+        if (ch == L'3') return input_ev::key_3;
+        if (ch == L'4') return input_ev::key_4;
     }
     return input_ev::none;
 }
@@ -147,8 +157,7 @@ static input_ev poll_input(int timeout_ms) {
     struct timeval tv;
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
-    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0)
-        return input_ev::none;
+    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0) return input_ev::none;
     char buf[16];
     int n = static_cast<int>(read(STDIN_FILENO, buf, sizeof(buf)));
     if (n <= 0) return input_ev::none;
@@ -178,68 +187,66 @@ static input_ev poll_input(int timeout_ms) {
 // ═══════════════════════════════════════════════════════════════════════
 
 static constexpr int NUM_PAGES = 7;
-static const char* page_names[NUM_PAGES] = {
-    "Tabs", "Menu", "Tree", "Form", "Notify", "Layout", "Anim"
-};
+static const char *page_names[NUM_PAGES] = {"Tabs", "Menu", "Tree", "Form", "Notify", "Layout", "Anim"};
 
 struct app_state {
     bool quit = false;
-    int  page = 0;
-    int  tick = 0;
+    int page = 0;
+    int tick = 0;
 
     // Page 0: Tabs & Accordion
-    int  active_tab = 0;
+    int active_tab = 0;
     std::vector<bool> accordion_expanded = {true, false, false};
-    int  accordion_cursor = 0;
+    int accordion_cursor = 0;
 
     // Page 1: Menu & Dropdown
-    int  menu_cursor = 0;
-    int  dropdown_selected = 1;
+    int menu_cursor = 0;
+    int dropdown_selected = 1;
     bool dropdown_open = false;
 
     // Page 2: Tree & Scroll
-    int  tree_cursor = 0;
+    int tree_cursor = 0;
     std::unordered_set<std::string> tree_expanded = {"src", "include"};
-    int  scroll_y = 0;
+    int scroll_y = 0;
 
     // Page 3: Form Controls
     bool toggle_dark_mode = true;
     bool toggle_notifications = false;
     bool toggle_autosave = true;
     std::string search_query = "widget";
-    int  search_match = 2;
-    int  search_total = 5;
-    std::string textarea_content =
-        "#include <tapiru/core/console.h>\n"
-        "\n"
-        "int main() {\n"
-        "    tapiru::console con;\n"
-        "    con.print(\"[bold]Hello![/]\");\n"
-        "    return 0;\n"
-        "}";
-    int  textarea_cursor_row = 3;
-    int  textarea_cursor_col = 4;
-    int  textarea_scroll_row = 0;
+    int search_match = 2;
+    int search_total = 5;
+    std::string textarea_content = "#include <tapiru/core/console.h>\n"
+                                   "\n"
+                                   "int main() {\n"
+                                   "    tapiru::console con;\n"
+                                   "    con.print(\"[bold]Hello![/]\");\n"
+                                   "    return 0;\n"
+                                   "}";
+    int textarea_cursor_row = 3;
+    int textarea_cursor_col = 4;
+    int textarea_scroll_row = 0;
 
     // Page 4: Notifications
     toast_state toast;
     std::vector<log_entry> logs = {
-        {log_level::info,    "12:00:01", "Application started"},
-        {log_level::info,    "12:00:02", "Loading configuration..."},
-        {log_level::warn,    "12:00:03", "Config key 'theme' not found"},
-        {log_level::info,    "12:00:04", "Server listening on :8080"},
-        {log_level::error,   "12:00:05", "Failed to connect to DB"},
-        {log_level::info,    "12:00:06", "Retrying connection..."},
-        {log_level::info,    "12:00:07", "Database connected"},
-        {log_level::debug,   "12:00:08", "Query executed in 12ms"},
+        {log_level::info, "12:00:01", "Application started"},
+        {log_level::info, "12:00:02", "Loading configuration..."},
+        {log_level::warn, "12:00:03", "Config key 'theme' not found"},
+        {log_level::info, "12:00:04", "Server listening on :8080"},
+        {log_level::error, "12:00:05", "Failed to connect to DB"},
+        {log_level::info, "12:00:06", "Retrying connection..."},
+        {log_level::info, "12:00:07", "Database connected"},
+        {log_level::debug, "12:00:08", "Query executed in 12ms"},
     };
-    int  log_scroll = 0;
-    int  breadcrumb_active = 3;
+    int log_scroll = 0;
+    int breadcrumb_active = 3;
 
     // Page 6: Animations
     typewriter tw{"Hello, tapiru world!", duration_ms(2000)};
     counter_animation counter{0.0, 1000.0, duration_ms(3000), easing::ease_out};
-    marquee mrq{"  tapiru — A modern C++ terminal UI library with rich widgets, animations, and adaptive rendering  ", 40, duration_ms(150)};
+    marquee mrq{"  tapiru — A modern C++ terminal UI library with rich widgets, animations, and adaptive rendering  ",
+                40, duration_ms(150)};
     bool anim_started = false;
     time_point anim_start;
 };
@@ -248,7 +255,7 @@ struct app_state {
 //  Shared UI helpers
 // ═══════════════════════════════════════════════════════════════════════
 
-static auto build_tab_bar(const app_state& st) {
+static auto build_tab_bar(const app_state &st) {
     std::string tabs = "  ";
     for (int i = 0; i < NUM_PAGES; ++i) {
         if (i == st.page)
@@ -260,13 +267,11 @@ static auto build_tab_bar(const app_state& st) {
     return text_builder(tabs);
 }
 
-static auto build_footer(const app_state& st) {
+static auto build_footer(const app_state &st) {
     (void)st;
-    return text_builder(
-        "  [dim]Tab[/] page  [dim]\xe2\x86\x91\xe2\x86\x93[/] navigate  "
-        "[dim]Enter[/] select  [dim]\xe2\x86\x90\xe2\x86\x92[/] adjust  "
-        "[dim]1-4[/] toast  [dim]q[/] quit"
-    );
+    return text_builder("  [dim]Tab[/] page  [dim]\xe2\x86\x91\xe2\x86\x93[/] navigate  "
+                        "[dim]Enter[/] select  [dim]\xe2\x86\x90\xe2\x86\x92[/] adjust  "
+                        "[dim]1-4[/] toast  [dim]q[/] quit");
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -274,10 +279,10 @@ static auto build_footer(const app_state& st) {
 // ═══════════════════════════════════════════════════════════════════════
 
 class tabs_page_view {
-public:
-    explicit tabs_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit tabs_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -288,22 +293,19 @@ public:
         // Tab widget
         {
             auto tb = tab_builder();
-            tb.add_tab("Overview", text_builder(
-                "  [bold]Overview[/]\n"
-                "  This demo showcases 17 new widgets added to tapiru.\n"
-                "  Use [bold cyan]Left/Right[/] to switch between tabs."));
-            tb.add_tab("Features", text_builder(
-                "  [bold]Features[/]\n"
-                "  \xe2\x80\xa2 sized_box, center, scroll_view\n"
-                "  \xe2\x80\xa2 multi-level menu, menu_bar, tab\n"
-                "  \xe2\x80\xa2 accordion, tree_view, dropdown\n"
-                "  \xe2\x80\xa2 toggle, toast, textarea\n"
-                "  \xe2\x80\xa2 log_viewer, search_input, breadcrumb\n"
-                "  \xe2\x80\xa2 keybinding, grid"));
-            tb.add_tab("About", text_builder(
-                "  [bold]About[/]\n"
-                "  tapiru is a modern C++ terminal UI library.\n"
-                "  Zero dependencies. Header-friendly. Beautiful output."));
+            tb.add_tab("Overview", text_builder("  [bold]Overview[/]\n"
+                                                "  This demo showcases 17 new widgets added to tapiru.\n"
+                                                "  Use [bold cyan]Left/Right[/] to switch between tabs."));
+            tb.add_tab("Features", text_builder("  [bold]Features[/]\n"
+                                                "  \xe2\x80\xa2 sized_box, center, scroll_view\n"
+                                                "  \xe2\x80\xa2 multi-level menu, menu_bar, tab\n"
+                                                "  \xe2\x80\xa2 accordion, tree_view, dropdown\n"
+                                                "  \xe2\x80\xa2 toggle, toast, textarea\n"
+                                                "  \xe2\x80\xa2 log_viewer, search_input, breadcrumb\n"
+                                                "  \xe2\x80\xa2 keybinding, grid"));
+            tb.add_tab("About", text_builder("  [bold]About[/]\n"
+                                             "  tapiru is a modern C++ terminal UI library.\n"
+                                             "  Zero dependencies. Header-friendly. Beautiful output."));
             tb.active(&st_.active_tab);
             tb.active_tab_style(style{colors::bright_white, colors::blue, attr::bold});
             tb.tab_style(style{colors::bright_black});
@@ -317,19 +319,18 @@ public:
         // Accordion
         {
             auto acc = accordion_builder();
-            acc.add_section("\xe2\x96\xb6 Getting Started", text_builder(
-                "    Install via CMake:\n"
-                "    [cyan]add_subdirectory(tapiru)[/]\n"
-                "    [cyan]target_link_libraries(myapp PRIVATE tapiru)[/]"));
-            acc.add_section("\xe2\x96\xb6 Configuration", text_builder(
-                "    [bold]console_config[/] options:\n"
-                "    \xe2\x80\xa2 sink — custom output function\n"
-                "    \xe2\x80\xa2 depth — color depth override\n"
-                "    \xe2\x80\xa2 force_color / no_color"));
-            acc.add_section("\xe2\x96\xb6 Advanced", text_builder(
-                "    [bold]Live engine[/] for real-time TUI:\n"
-                "    [cyan]tapiru::live lv(con);[/]\n"
-                "    [cyan]lv.set(my_widget);[/]"));
+            acc.add_section("\xe2\x96\xb6 Getting Started",
+                            text_builder("    Install via CMake:\n"
+                                         "    [cyan]add_subdirectory(tapiru)[/]\n"
+                                         "    [cyan]target_link_libraries(myapp PRIVATE tapiru)[/]"));
+            acc.add_section("\xe2\x96\xb6 Configuration",
+                            text_builder("    [bold]console_config[/] options:\n"
+                                         "    \xe2\x80\xa2 sink — custom output function\n"
+                                         "    \xe2\x80\xa2 depth — color depth override\n"
+                                         "    \xe2\x80\xa2 force_color / no_color"));
+            acc.add_section("\xe2\x96\xb6 Advanced", text_builder("    [bold]Live engine[/] for real-time TUI:\n"
+                                                                  "    [cyan]tapiru::live lv(con);[/]\n"
+                                                                  "    [cyan]lv.set(my_widget);[/]"));
             acc.expanded(&st_.accordion_expanded);
             acc.header_style(style{colors::bright_white, {}, attr::bold});
             acc.active_header_style(style{colors::bright_cyan, {}, attr::bold});
@@ -340,9 +341,9 @@ public:
             rows_builder acc_section;
             acc_section.gap(0);
             for (int i = 0; i < 3; ++i) {
-                std::string indicator = (i == st_.accordion_cursor)
-                    ? "[bold bright_yellow]\xe2\x96\xb8[/] " : "  ";
-                acc_section.add(text_builder(indicator + "Section " + std::to_string(i + 1) +
+                std::string indicator = (i == st_.accordion_cursor) ? "[bold bright_yellow]\xe2\x96\xb8[/] " : "  ";
+                acc_section.add(text_builder(
+                    indicator + "Section " + std::to_string(i + 1) +
                     (st_.accordion_expanded[static_cast<size_t>(i)] ? " [green](open)[/]" : " [dim](closed)[/]")));
             }
             page.add(std::move(acc_section));
@@ -352,8 +353,9 @@ public:
         page.key("tabs-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -361,10 +363,10 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class menu_page_view {
-public:
-    explicit menu_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit menu_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -379,10 +381,9 @@ public:
             auto mb = menu_builder();
             mb.add(menu_item_builder("New File").shortcut("Ctrl+N"));
             mb.add(menu_item_builder("Open Recent")
-                .add(menu_item_builder("project.cpp"))
-                .add(menu_item_builder("main.h"))
-                .add(menu_item_builder("CMakeLists.txt"))
-            );
+                       .add(menu_item_builder("project.cpp"))
+                       .add(menu_item_builder("main.h"))
+                       .add(menu_item_builder("CMakeLists.txt")));
             mb.add_separator();
             mb.add(menu_item_builder("Save").shortcut("Ctrl+S"));
             mb.add(menu_item_builder("Save As...").shortcut("Ctrl+Shift+S"));
@@ -427,17 +428,17 @@ public:
                 menu_bar_state bar_state;
                 auto bar = menu_bar_builder();
                 bar.add_menu("File", {
-                    menu_item_builder("New").shortcut("Ctrl+N"),
-                    menu_item_builder("Open").shortcut("Ctrl+O"),
-                });
+                                         menu_item_builder("New").shortcut("Ctrl+N"),
+                                         menu_item_builder("Open").shortcut("Ctrl+O"),
+                                     });
                 bar.add_menu("Edit", {
-                    menu_item_builder("Undo").shortcut("Ctrl+Z"),
-                    menu_item_builder("Redo").shortcut("Ctrl+Y"),
-                });
+                                         menu_item_builder("Undo").shortcut("Ctrl+Z"),
+                                         menu_item_builder("Redo").shortcut("Ctrl+Y"),
+                                     });
                 bar.add_menu("View", {
-                    menu_item_builder("Zoom In").shortcut("Ctrl++"),
-                    menu_item_builder("Zoom Out").shortcut("Ctrl+-"),
-                });
+                                         menu_item_builder("Zoom In").shortcut("Ctrl++"),
+                                         menu_item_builder("Zoom Out").shortcut("Ctrl+-"),
+                                     });
                 bar.state(&bar_state);
                 bar.bar_style(style{colors::white, color::from_rgb(40, 40, 60)});
                 bar.active_style(style{colors::bright_white, colors::blue, attr::bold});
@@ -456,8 +457,9 @@ public:
         page.key("menu-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -465,10 +467,10 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class tree_page_view {
-public:
-    explicit tree_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit tree_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -483,26 +485,31 @@ public:
             tree_node root;
             root.label = "project";
             root.children = {
-                {"src", {
-                    {"main.cpp", {}},
-                    {"console.cpp", {}},
-                    {"canvas.cpp", {}},
-                    {"live.cpp", {}},
-                }},
-                {"include", {
-                    {"tapiru", {
-                        {"core", {
-                            {"console.h", {}},
-                            {"style.h", {}},
-                            {"canvas.h", {}},
-                        }},
-                        {"widgets", {
-                            {"builders.h", {}},
-                            {"menu.h", {}},
-                            {"tab.h", {}},
-                        }},
-                    }},
-                }},
+                {"src",
+                 {
+                     {"main.cpp", {}},
+                     {"console.cpp", {}},
+                     {"canvas.cpp", {}},
+                     {"live.cpp", {}},
+                 }},
+                {"include",
+                 {
+                     {"tapiru",
+                      {
+                          {"core",
+                           {
+                               {"console.h", {}},
+                               {"style.h", {}},
+                               {"canvas.h", {}},
+                           }},
+                          {"widgets",
+                           {
+                               {"builders.h", {}},
+                               {"menu.h", {}},
+                               {"tab.h", {}},
+                           }},
+                      }},
+                 }},
                 {"CMakeLists.txt", {}},
                 {"README.md", {}},
             };
@@ -527,10 +534,9 @@ public:
             rows_builder content;
             for (int i = 0; i < 30; ++i) {
                 char buf[80];
-                std::snprintf(buf, sizeof(buf),
-                    "  [dim]%3d[/] %s", i + 1,
-                    (i % 5 == 0) ? "[bold cyan]// Section header[/]"
-                    : "    Lorem ipsum dolor sit amet, consectetur");
+                std::snprintf(buf, sizeof(buf), "  [dim]%3d[/] %s", i + 1,
+                              (i % 5 == 0) ? "[bold cyan]// Section header[/]"
+                                           : "    Lorem ipsum dolor sit amet, consectetur");
                 content.add(text_builder(buf));
             }
 
@@ -561,8 +567,9 @@ public:
         page.key("tree-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -570,10 +577,10 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class form_page_view {
-public:
-    explicit form_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit form_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -663,8 +670,9 @@ public:
         page.key("form-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -672,15 +680,16 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class notify_page_view {
-public:
-    explicit notify_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit notify_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
         page.add(text_builder("[bold bright_cyan]  Notifications & Logs[/]"));
-        page.add(text_builder("  [dim]1=info 2=success 3=warning 4=error toast, Up/Down scroll log, Left/Right breadcrumb[/]"));
+        page.add(text_builder(
+            "  [dim]1=info 2=success 3=warning 4=error toast, Up/Down scroll log, Left/Right breadcrumb[/]"));
         page.add(text_builder(""));
 
         // Breadcrumb
@@ -753,8 +762,9 @@ public:
         page.key("notify-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -762,10 +772,10 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class layout_page_view {
-public:
-    explicit layout_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit layout_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -821,13 +831,13 @@ public:
         {
             page.add(text_builder("[bold]Keyboard Shortcuts:[/]"));
             auto kb = keybinding_builder();
-            kb.add("Tab",         "Next page");
-            kb.add("Shift+Tab",   "Previous page");
-            kb.add("\xe2\x86\x91\xe2\x86\x93",           "Navigate");
-            kb.add("Enter",       "Select / Toggle");
-            kb.add("\xe2\x86\x90\xe2\x86\x92",           "Adjust value");
-            kb.add("1-4",         "Trigger toast");
-            kb.add("q / Esc",     "Quit");
+            kb.add("Tab", "Next page");
+            kb.add("Shift+Tab", "Previous page");
+            kb.add("\xe2\x86\x91\xe2\x86\x93", "Navigate");
+            kb.add("Enter", "Select / Toggle");
+            kb.add("\xe2\x86\x90\xe2\x86\x92", "Adjust value");
+            kb.add("1-4", "Trigger toast");
+            kb.add("q / Esc", "Quit");
             kb.key_style(style{colors::bright_cyan, color::from_rgb(30, 40, 60), attr::bold});
             kb.desc_style(style{colors::white});
             kb.key("shortcut-ref");
@@ -837,8 +847,9 @@ public:
         page.key("layout-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -846,10 +857,10 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class anim_page_view {
-public:
-    explicit anim_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit anim_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -863,9 +874,8 @@ public:
         {
             std::string tw_text = st_.tw.started() ? st_.tw.value(now) : "";
             bool done = st_.tw.started() && st_.tw.finished(now);
-            std::string label = done
-                ? "  [bold]Typewriter:[/] [bold green]" + tw_text + "[/] [dim]\xe2\x9c\x93[/]"
-                : "  [bold]Typewriter:[/] [bold cyan]" + tw_text + "[/][dim]\xe2\x96\x8c[/]";
+            std::string label = done ? "  [bold]Typewriter:[/] [bold green]" + tw_text + "[/] [dim]\xe2\x9c\x93[/]"
+                                     : "  [bold]Typewriter:[/] [bold cyan]" + tw_text + "[/][dim]\xe2\x96\x8c[/]";
             page.add(text_builder(label));
         }
 
@@ -876,9 +886,8 @@ public:
             int val = st_.counter.started() ? st_.counter.int_value(now) : 0;
             bool done = st_.counter.started() && st_.counter.finished(now);
             char buf[80];
-            std::snprintf(buf, sizeof(buf),
-                "  [bold]Counter:[/] [bold bright_yellow]%d[/]%s",
-                val, done ? " [dim]\xe2\x9c\x93[/]" : "");
+            std::snprintf(buf, sizeof(buf), "  [bold]Counter:[/] [bold bright_yellow]%d[/]%s", val,
+                          done ? " [dim]\xe2\x9c\x93[/]" : "");
             page.add(text_builder(buf));
         }
 
@@ -913,8 +922,9 @@ public:
         page.key("anim-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -922,10 +932,10 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class app_view {
-public:
-    explicit app_view(const app_state& st) : st_(st) {}
+  public:
+    explicit app_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder root;
         root.gap(0);
 
@@ -938,13 +948,41 @@ public:
 
         // Page content
         switch (st_.page) {
-        case 0: { auto v = tabs_page_view(st_);    root.add(std::move(v)); break; }
-        case 1: { auto v = menu_page_view(st_);    root.add(std::move(v)); break; }
-        case 2: { auto v = tree_page_view(st_);    root.add(std::move(v)); break; }
-        case 3: { auto v = form_page_view(st_);    root.add(std::move(v)); break; }
-        case 4: { auto v = notify_page_view(st_);  root.add(std::move(v)); break; }
-        case 5: { auto v = layout_page_view(st_);  root.add(std::move(v)); break; }
-        case 6: { auto v = anim_page_view(st_);    root.add(std::move(v)); break; }
+        case 0: {
+            auto v = tabs_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 1: {
+            auto v = menu_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 2: {
+            auto v = tree_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 3: {
+            auto v = form_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 4: {
+            auto v = notify_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 5: {
+            auto v = layout_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 6: {
+            auto v = anim_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
         }
 
         // Footer
@@ -955,8 +993,9 @@ public:
         root.key("app-root");
         return root.flatten_into(s);
     }
-private:
-    app_state st_;  // COPY — render gets its own snapshot
+
+  private:
+    app_state st_; // COPY — render gets its own snapshot
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -964,15 +1003,12 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 // Tree node labels in DFS order for cursor mapping
-static const char* tree_labels[] = {
-    "project", "src", "main.cpp", "console.cpp", "canvas.cpp", "live.cpp",
-    "include", "tapiru", "core", "console.h", "style.h", "canvas.h",
-    "widgets", "builders.h", "menu.h", "tab.h",
-    "CMakeLists.txt", "README.md"
-};
+static const char *tree_labels[] = {"project", "src",        "main.cpp", "console.cpp", "canvas.cpp",     "live.cpp",
+                                    "include", "tapiru",     "core",     "console.h",   "style.h",        "canvas.h",
+                                    "widgets", "builders.h", "menu.h",   "tab.h",       "CMakeLists.txt", "README.md"};
 static constexpr int TREE_NODE_COUNT = 18;
 
-static void handle_input(app_state& st, input_ev ev) {
+static void handle_input(app_state &st, input_ev ev) {
     // Toast tick (always)
     st.toast.tick(std::chrono::milliseconds(50));
 
@@ -1007,43 +1043,83 @@ static void handle_input(app_state& st, input_ev ev) {
 
     case input_ev::up:
         switch (st.page) {
-        case 0: if (st.accordion_cursor > 0) --st.accordion_cursor; break;
-        case 1: if (st.menu_cursor > 0) --st.menu_cursor; break;
-        case 2: if (st.tree_cursor > 0) --st.tree_cursor; break;
-        case 4: if (st.log_scroll > 0) --st.log_scroll; break;
-        default: break;
+        case 0:
+            if (st.accordion_cursor > 0) --st.accordion_cursor;
+            break;
+        case 1:
+            if (st.menu_cursor > 0) --st.menu_cursor;
+            break;
+        case 2:
+            if (st.tree_cursor > 0) --st.tree_cursor;
+            break;
+        case 4:
+            if (st.log_scroll > 0) --st.log_scroll;
+            break;
+        default:
+            break;
         }
         break;
 
     case input_ev::down:
         switch (st.page) {
-        case 0: if (st.accordion_cursor < 2) ++st.accordion_cursor; break;
-        case 1: if (st.menu_cursor < 7) ++st.menu_cursor; break;
-        case 2: if (st.tree_cursor < TREE_NODE_COUNT - 1) ++st.tree_cursor; break;
-        case 4: if (st.log_scroll < static_cast<int>(st.logs.size()) - 1) ++st.log_scroll; break;
-        default: break;
+        case 0:
+            if (st.accordion_cursor < 2) ++st.accordion_cursor;
+            break;
+        case 1:
+            if (st.menu_cursor < 7) ++st.menu_cursor;
+            break;
+        case 2:
+            if (st.tree_cursor < TREE_NODE_COUNT - 1) ++st.tree_cursor;
+            break;
+        case 4:
+            if (st.log_scroll < static_cast<int>(st.logs.size()) - 1) ++st.log_scroll;
+            break;
+        default:
+            break;
         }
         break;
 
     case input_ev::left:
         switch (st.page) {
-        case 0: if (st.active_tab > 0) --st.active_tab; break;
-        case 1: if (st.dropdown_selected > 0) --st.dropdown_selected; break;
-        case 2: if (st.scroll_y > 0) --st.scroll_y; break;
-        case 3: if (st.search_match > 0) --st.search_match; break;
-        case 4: if (st.breadcrumb_active > 0) --st.breadcrumb_active; break;
-        default: break;
+        case 0:
+            if (st.active_tab > 0) --st.active_tab;
+            break;
+        case 1:
+            if (st.dropdown_selected > 0) --st.dropdown_selected;
+            break;
+        case 2:
+            if (st.scroll_y > 0) --st.scroll_y;
+            break;
+        case 3:
+            if (st.search_match > 0) --st.search_match;
+            break;
+        case 4:
+            if (st.breadcrumb_active > 0) --st.breadcrumb_active;
+            break;
+        default:
+            break;
         }
         break;
 
     case input_ev::right:
         switch (st.page) {
-        case 0: if (st.active_tab < 2) ++st.active_tab; break;
-        case 1: if (st.dropdown_selected < 4) ++st.dropdown_selected; break;
-        case 2: if (st.scroll_y < 25) ++st.scroll_y; break;
-        case 3: if (st.search_match < st.search_total - 1) ++st.search_match; break;
-        case 4: if (st.breadcrumb_active < 3) ++st.breadcrumb_active; break;
-        default: break;
+        case 0:
+            if (st.active_tab < 2) ++st.active_tab;
+            break;
+        case 1:
+            if (st.dropdown_selected < 4) ++st.dropdown_selected;
+            break;
+        case 2:
+            if (st.scroll_y < 25) ++st.scroll_y;
+            break;
+        case 3:
+            if (st.search_match < st.search_total - 1) ++st.search_match;
+            break;
+        case 4:
+            if (st.breadcrumb_active < 3) ++st.breadcrumb_active;
+            break;
+        default:
+            break;
         }
         break;
 
@@ -1053,8 +1129,7 @@ static void handle_input(app_state& st, input_ev ev) {
         case 0: {
             // Toggle accordion section
             auto idx = static_cast<size_t>(st.accordion_cursor);
-            if (idx < st.accordion_expanded.size())
-                st.accordion_expanded[idx] = !st.accordion_expanded[idx];
+            if (idx < st.accordion_expanded.size()) st.accordion_expanded[idx] = !st.accordion_expanded[idx];
             break;
         }
         case 1:
@@ -1081,7 +1156,9 @@ static void handle_input(app_state& st, input_ev ev) {
             auto now = std::chrono::steady_clock::now();
             st.tw = typewriter("Hello, tapiru world!", duration_ms(2000));
             st.counter = counter_animation(0.0, 1000.0, duration_ms(3000), easing::ease_out);
-            st.mrq = marquee("  tapiru \xe2\x80\x94 A modern C++ terminal UI library with rich widgets, animations, and adaptive rendering  ", 40, duration_ms(150));
+            st.mrq = marquee("  tapiru \xe2\x80\x94 A modern C++ terminal UI library with rich widgets, animations, "
+                             "and adaptive rendering  ",
+                             40, duration_ms(150));
             st.tw.start(now);
             st.counter.start(now);
             st.mrq.start(now);
@@ -1089,7 +1166,8 @@ static void handle_input(app_state& st, input_ev ev) {
             st.anim_start = now;
             break;
         }
-        default: break;
+        default:
+            break;
         }
         break;
 

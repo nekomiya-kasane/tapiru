@@ -4,18 +4,19 @@
  */
 
 #include "tapiru/widgets/dropdown.h"
+
+#include "detail/scene.h"
 #include "tapiru/widgets/builders.h"
 #include "tapiru/widgets/menu.h"
-#include "detail/scene.h"
 
 namespace tapiru {
 
-dropdown_builder& dropdown_builder::key(std::string_view k) {
+dropdown_builder &dropdown_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
-node_id dropdown_builder::flatten_into(detail::scene& s) const {
+node_id dropdown_builder::flatten_into(detail::scene &s) const {
     int sel = selected_ ? *selected_ : -1;
     bool is_open = open_ ? *open_ : false;
 
@@ -28,7 +29,7 @@ node_id dropdown_builder::flatten_into(detail::scene& s) const {
     }
 
     // Add dropdown arrow
-    std::string button_text = label + (is_open ? " \xe2\x96\xb4" : " \xe2\x96\xbe");  // ▴ or ▾
+    std::string button_text = label + (is_open ? " \xe2\x96\xb4" : " \xe2\x96\xbe"); // ▴ or ▾
 
     if (!is_open) {
         // Just show the button (optionally in a panel)
@@ -50,7 +51,7 @@ node_id dropdown_builder::flatten_into(detail::scene& s) const {
 
     // Open: compose button + dropdown list using rows (button on top, menu below)
     auto menu = menu_builder();
-    for (const auto& opt : options_) {
+    for (const auto &opt : options_) {
         menu.add_item(opt);
     }
     menu.border(border_);
@@ -78,4 +79,4 @@ node_id dropdown_builder::flatten_into(detail::scene& s) const {
     return id;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

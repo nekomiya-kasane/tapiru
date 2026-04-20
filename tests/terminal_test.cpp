@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #include "tapiru/core/terminal.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 

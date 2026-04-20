@@ -3,27 +3,28 @@
  * @brief Tests for canvas_widget_builder and make_canvas.
  */
 
-#include <gtest/gtest.h>
-
-#include "tapiru/widgets/canvas_widget.h"
 #include "tapiru/core/console.h"
 #include "tapiru/widgets/builders.h"
+#include "tapiru/widgets/canvas_widget.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
 // ── Helper ──────────────────────────────────────────────────────────────
 
 class virtual_terminal {
-public:
+  public:
     [[nodiscard]] console make_console() {
         console_config cfg;
         cfg.sink = [this](std::string_view data) { buffer_ += data; };
         cfg.depth = color_depth::true_color;
         return console(cfg);
     }
-    [[nodiscard]] const std::string& raw() const noexcept { return buffer_; }
+    [[nodiscard]] const std::string &raw() const noexcept { return buffer_; }
     void clear() { buffer_.clear(); }
-private:
+
+  private:
     std::string buffer_;
 };
 
@@ -148,7 +149,7 @@ TEST(CanvasWidgetTest, DrawBlockLine) {
 // ── make_canvas ─────────────────────────────────────────────────────────
 
 TEST(CanvasWidgetTest, CanvasAsElement) {
-    auto e = make_canvas(20, 8, [](canvas_widget_builder& c) {
+    auto e = make_canvas(20, 8, [](canvas_widget_builder &c) {
         c.draw_point(5, 3);
         c.draw_line(0, 0, 19, 7);
     });
@@ -158,9 +159,7 @@ TEST(CanvasWidgetTest, CanvasAsElement) {
 }
 
 TEST(CanvasWidgetTest, CanvasInLayout) {
-    auto cvs = make_canvas(20, 8, [](canvas_widget_builder& c) {
-        c.draw_circle(10, 4, 3);
-    });
+    auto cvs = make_canvas(20, 8, [](canvas_widget_builder &c) { c.draw_circle(10, 4, 3); });
     auto txt = element(text_builder("Label"));
     auto rb = rows_builder();
     rb.add(std::move(cvs));
@@ -191,13 +190,11 @@ TEST(CanvasWidgetTest, OutOfBoundsPointsIgnored) {
 }
 
 TEST(CanvasWidgetTest, FluentChaining) {
-    auto e = element(
-        canvas_widget_builder(20, 16)
-            .draw_point(5, 5)
-            .draw_line(0, 0, 19, 15)
-            .draw_circle(10, 8, 5)
-            .draw_rect(1, 1, 18, 14)
-            .draw_text(2, 0, "Hi")
-    );
+    auto e = element(canvas_widget_builder(20, 16)
+                         .draw_point(5, 5)
+                         .draw_line(0, 0, 19, 15)
+                         .draw_circle(10, 8, 5)
+                         .draw_rect(1, 1, 18, 14)
+                         .draw_text(2, 0, "Hi"));
     EXPECT_FALSE(e.empty());
 }

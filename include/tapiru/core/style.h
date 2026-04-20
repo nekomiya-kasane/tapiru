@@ -11,12 +11,12 @@
 
 namespace tapiru {
 
-using tapioca::color_kind;
-using tapioca::color;
 using tapioca::attr;
+using tapioca::color;
+using tapioca::color_kind;
 using tapioca::has_attr;
 using tapioca::style;
 
 namespace colors = tapioca::colors;
 
-}  // namespace tapiru
+} // namespace tapiru

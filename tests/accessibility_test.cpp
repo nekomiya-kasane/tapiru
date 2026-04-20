@@ -3,9 +3,9 @@
  * @brief Tests for WAI-ARIA role annotations and accessibility properties.
  */
 
-#include <gtest/gtest.h>
-
 #include "tapiru/core/accessibility.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
@@ -122,7 +122,7 @@ TEST(AccessibilityTest, RoleNameTable) {
 // ── accessible_component mixin ──────────────────────────────────────────
 
 class test_button : public accessible_component {
-public:
+  public:
     [[nodiscard]] a11y_props get_a11y_props() const override {
         return {.role = aria_role::button, .label = std::string(a11y_label())};
     }

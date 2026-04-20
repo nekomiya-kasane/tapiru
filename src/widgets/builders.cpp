@@ -4,24 +4,25 @@
  */
 
 #include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
 
 namespace tapiru {
 
 // ── text_builder ────────────────────────────────────────────────────────
 
-node_id text_builder::flatten_into(detail::scene& s) const {
+node_id text_builder::flatten_into(detail::scene &s) const {
     detail::text_data td;
     td.fragments = parse_markup(markup_);
 
     if (has_style_) {
         // Override all fragment styles
-        for (auto& f : td.fragments) {
+        for (auto &f : td.fragments) {
             f.sty = style_;
         }
     }
 
-    td.align    = align_;
+    td.align = align_;
     td.overflow = overflow_;
 
     auto pi = s.add_text(std::move(td));
@@ -32,12 +33,12 @@ node_id text_builder::flatten_into(detail::scene& s) const {
 
 // ── rule_builder ────────────────────────────────────────────────────────
 
-node_id rule_builder::flatten_into(detail::scene& s) const {
+node_id rule_builder::flatten_into(detail::scene &s) const {
     detail::rule_data rd;
-    rd.title    = title_;
+    rd.title = title_;
     rd.rule_sty = style_;
-    rd.align    = align_;
-    rd.ch       = ch_;
+    rd.align = align_;
+    rd.ch = ch_;
     rd.gradient = gradient_;
 
     auto pi = s.add_rule(std::move(rd));
@@ -48,12 +49,12 @@ node_id rule_builder::flatten_into(detail::scene& s) const {
 
 // ── padding_builder ─────────────────────────────────────────────────────
 
-node_id padding_builder::flatten_into(detail::scene& s) const {
+node_id padding_builder::flatten_into(detail::scene &s) const {
     detail::padding_data pd;
-    pd.top    = top_;
-    pd.right  = right_;
+    pd.top = top_;
+    pd.right = right_;
     pd.bottom = bottom_;
-    pd.left   = left_;
+    pd.left = left_;
 
     auto pi = s.add_padding(std::move(pd));
     auto pad_id = s.add_node(detail::widget_type::padding, pi, detail::no_node, key_);
@@ -69,19 +70,17 @@ node_id padding_builder::flatten_into(detail::scene& s) const {
 
 // ── panel_builder ───────────────────────────────────────────────────────
 
-node_id panel_builder::flatten_into(detail::scene& s) const {
+node_id panel_builder::flatten_into(detail::scene &s) const {
     detail::panel_data pd;
-    pd.border     = border_;
+    pd.border = border_;
     pd.border_sty = border_sty_;
-    pd.title      = title_;
-    pd.title_sty  = title_sty_;
-    pd.alpha      = alpha_;
+    pd.title = title_;
+    pd.title_sty = title_sty_;
+    pd.alpha = alpha_;
     pd.bg_gradient = bg_gradient_;
     if (shadow_) {
-        pd.shadow = detail::shadow_config{
-            shadow_->offset_x, shadow_->offset_y, shadow_->blur,
-            shadow_->shadow_color, shadow_->opacity
-        };
+        pd.shadow = detail::shadow_config{shadow_->offset_x, shadow_->offset_y, shadow_->blur, shadow_->shadow_color,
+                                          shadow_->opacity};
     }
     if (shader_) pd.shader = shader_;
 
@@ -99,9 +98,9 @@ node_id panel_builder::flatten_into(detail::scene& s) const {
 
 // ── columns_builder ─────────────────────────────────────────────────────
 
-node_id columns_builder::flatten_into(detail::scene& s) const {
+node_id columns_builder::flatten_into(detail::scene &s) const {
     detail::columns_data cd;
-    cd.gap   = gap_;
+    cd.gap = gap_;
     cd.alpha = alpha_;
 
     auto pi = s.add_columns(std::move(cd));
@@ -119,26 +118,24 @@ node_id columns_builder::flatten_into(detail::scene& s) const {
 
 // ── table_builder ───────────────────────────────────────────────────────
 
-node_id table_builder::flatten_into(detail::scene& s) const {
+node_id table_builder::flatten_into(detail::scene &s) const {
     detail::table_data td;
-    td.border      = border_;
-    td.border_sty  = border_sty_;
-    td.header_sty  = header_sty_;
+    td.border = border_;
+    td.border_sty = border_sty_;
+    td.header_sty = header_sty_;
     td.show_header = show_header_;
     if (shadow_) {
-        td.shadow = detail::shadow_config{
-            shadow_->offset_x, shadow_->offset_y, shadow_->blur,
-            shadow_->shadow_color, shadow_->opacity
-        };
+        td.shadow = detail::shadow_config{shadow_->offset_x, shadow_->offset_y, shadow_->blur, shadow_->shadow_color,
+                                          shadow_->opacity};
     }
     td.border_gradient = border_gradient_;
 
-    for (const auto& col : columns_) {
+    for (const auto &col : columns_) {
         td.column_defs.push_back({col.header, col.align, col.min_width, col.max_width});
     }
 
     size_t ncols = columns_.size();
-    for (const auto& row : rows_) {
+    for (const auto &row : rows_) {
         for (size_t c = 0; c < ncols; ++c) {
             if (c < row.size()) {
                 td.cells.push_back(parse_markup(row[c]));
@@ -156,7 +153,7 @@ node_id table_builder::flatten_into(detail::scene& s) const {
 
 // ── overlay_builder ─────────────────────────────────────────────────────
 
-node_id overlay_builder::flatten_into(detail::scene& s) const {
+node_id overlay_builder::flatten_into(detail::scene &s) const {
     detail::overlay_data od;
     od.alpha = alpha_;
 
@@ -178,9 +175,9 @@ node_id overlay_builder::flatten_into(detail::scene& s) const {
 
 // ── rows_builder ───────────────────────────────────────────────────────
 
-node_id rows_builder::flatten_into(detail::scene& s) const {
+node_id rows_builder::flatten_into(detail::scene &s) const {
     detail::rows_data rd;
-    rd.gap   = gap_;
+    rd.gap = gap_;
     rd.alpha = alpha_;
 
     auto pi = s.add_rows(std::move(rd));
@@ -198,7 +195,7 @@ node_id rows_builder::flatten_into(detail::scene& s) const {
 
 // ── spacer_builder ─────────────────────────────────────────────────────
 
-node_id spacer_builder::flatten_into(detail::scene& s) const {
+node_id spacer_builder::flatten_into(detail::scene &s) const {
     auto id = s.add_node(detail::widget_type::spacer, 0, detail::no_node, key_);
     if (z_order_ != 0) s.set_z_order(id, z_order_);
     return id;
@@ -206,14 +203,14 @@ node_id spacer_builder::flatten_into(detail::scene& s) const {
 
 // ── sized_box_builder ──────────────────────────────────────────────────
 
-node_id sized_box_builder::flatten_into(detail::scene& s) const {
+node_id sized_box_builder::flatten_into(detail::scene &s) const {
     detail::sized_box_data sd;
     sd.fixed_w = fixed_w_;
     sd.fixed_h = fixed_h_;
-    sd.min_w   = min_w_;
-    sd.min_h   = min_h_;
-    sd.max_w   = max_w_;
-    sd.max_h   = max_h_;
+    sd.min_w = min_w_;
+    sd.min_h = min_h_;
+    sd.max_w = max_w_;
+    sd.max_h = max_h_;
 
     auto pi = s.add_sized_box(std::move(sd));
     auto id = s.add_node(detail::widget_type::sized_box, pi, detail::no_node, key_);
@@ -229,10 +226,10 @@ node_id sized_box_builder::flatten_into(detail::scene& s) const {
 
 // ── center_builder ────────────────────────────────────────────────────
 
-node_id center_builder::flatten_into(detail::scene& s) const {
+node_id center_builder::flatten_into(detail::scene &s) const {
     detail::center_data cd;
     cd.horizontal = horizontal_;
-    cd.vertical   = vertical_;
+    cd.vertical = vertical_;
 
     auto pi = s.add_center(std::move(cd));
     auto id = s.add_node(detail::widget_type::center, pi, detail::no_node, key_);
@@ -246,4 +243,4 @@ node_id center_builder::flatten_into(detail::scene& s) const {
     return id;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

@@ -4,17 +4,18 @@
  */
 
 #include "tapiru/widgets/accordion.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 namespace tapiru {
 
-accordion_builder& accordion_builder::key(std::string_view k) {
+accordion_builder &accordion_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
-node_id accordion_builder::flatten_into(detail::scene& s) const {
+node_id accordion_builder::flatten_into(detail::scene &s) const {
     // Compose as rows: for each section, add header + (optionally) content
     detail::rows_data rd;
     rd.gap = 0;
@@ -63,4 +64,4 @@ node_id accordion_builder::flatten_into(detail::scene& s) const {
     return rows_id;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

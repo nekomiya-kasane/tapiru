@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #include "tapiru/text/emoji.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 

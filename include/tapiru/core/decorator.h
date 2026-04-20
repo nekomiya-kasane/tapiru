@@ -8,13 +8,13 @@
  *   auto styled = element(text_builder("hello")) | border() | bold() | fg_color(colors::cyan);
  */
 
-#include <cstdint>
-#include <string_view>
-
 #include "tapiru/core/element.h"
 #include "tapiru/core/style.h"
 #include "tapiru/exports.h"
 #include "tapiru/layout/types.h"
+
+#include <cstdint>
+#include <string_view>
 
 namespace tapiru {
 
@@ -45,6 +45,6 @@ TAPIRU_API decorator focus_indicator();
 
 // ── Conditional decorators ──────────────────────────────────────────────
 
-TAPIRU_API decorator maybe(const bool* show);
+TAPIRU_API decorator maybe(const bool *show);
 
-}  // namespace tapiru
+} // namespace tapiru

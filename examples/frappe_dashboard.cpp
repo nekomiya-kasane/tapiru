@@ -8,33 +8,31 @@
  *   .\build\bin\Release\frappe_dashboard.exe
  */
 
+#include "tapiru/core/console.h"
+#include "tapiru/core/decorator.h"
+#include "tapiru/core/element.h"
+#include "tapiru/core/style.h"
+#include "tapiru/text/emoji.h"
+#include "tapiru/widgets/builders.h"
+#include "tapiru/widgets/canvas_widget.h"
+#include "tapiru/widgets/chart.h"
+#include "tapiru/widgets/gauge.h"
+#include "tapiru/widgets/progress.h"
+#include "tapiru/widgets/status_bar.h"
+
 #include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <string>
 #include <vector>
 
-#include "tapiru/core/console.h"
-#include "tapiru/core/style.h"
-#include "tapiru/core/element.h"
-#include "tapiru/core/decorator.h"
-#include "tapiru/text/emoji.h"
-
-#include "tapiru/widgets/builders.h"
-#include "tapiru/widgets/chart.h"
-#include "tapiru/widgets/gauge.h"
-#include "tapiru/widgets/progress.h"
-#include "tapiru/widgets/status_bar.h"
-#include "tapiru/widgets/canvas_widget.h"
-
 using namespace tapiru;
 
 static constexpr int W = 78;
 
-static void section(console& con, const char* title) {
+static void section(console &con, const char *title) {
     con.newline();
-    con.print_widget(rule_builder(title)
-        .rule_style(style{colors::bright_cyan, {}, attr::bold}), W);
+    con.print_widget(rule_builder(title).rule_style(style{colors::bright_cyan, {}, attr::bold}), W);
     con.newline();
 }
 
@@ -42,12 +40,12 @@ static void section(console& con, const char* title) {
 //  Header
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_header(console& con) {
+static void show_header(console &con) {
     con.newline();
-    con.print_widget(
-        rule_builder(" frappe — Feature & Performance Dashboard ")
-            .rule_style(style{colors::bright_yellow, {}, attr::bold})
-            .character(U'\x2550'), W);
+    con.print_widget(rule_builder(" frappe — Feature & Performance Dashboard ")
+                         .rule_style(style{colors::bright_yellow, {}, attr::bold})
+                         .character(U'\x2550'),
+                     W);
     con.newline();
 
     rows_builder info;
@@ -67,27 +65,27 @@ static void show_header(console& con) {
 //  Module Overview
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_modules(console& con) {
+static void show_modules(console &con) {
     section(con, " Module Overview ");
 
     table_builder tb;
-    tb.add_column("Module",      {justify::left,   14, 18});
-    tb.add_column("Description",  {justify::left,   30, 40});
-    tb.add_column("Key APIs",    {justify::left,   20, 28});
+    tb.add_column("Module", {justify::left, 14, 18});
+    tb.add_column("Description", {justify::left, 30, 40});
+    tb.add_column("Key APIs", {justify::left, 20, 28});
     tb.border(border_style::rounded);
     tb.header_style(style{colors::bright_cyan, {}, attr::bold});
     tb.shadow();
 
-    tb.add_row({"path",        "Extended path utilities",         "home_path, glob, regex"});
-    tb.add_row({"status",      "File status & timestamps",       "get_status, file_size"});
-    tb.add_row({"find",        "Powerful file search engine",    "find, find_count, find_each"});
-    tb.add_row({"permissions", "POSIX perms, ACL, SID",         "get_permissions, get_acl"});
-    tb.add_row({"attributes",  "xattr, MIME, file type",        "get_xattr, get_attributes"});
-    tb.add_row({"filesystem",  "FS type, volumes, network",     "get_filesystem_type"});
-    tb.add_row({"disk",        "Partitions, S.M.A.R.T.",       "list_disks, list_mounts"});
-    tb.add_row({"file_lock",   "Cross-platform file locking",   "scoped_file_lock"});
-    tb.add_row({"watcher",     "Real-time file monitoring",     "file_watcher, on_change"});
-    tb.add_row({"async",       "stdexec sender/receiver",       "find_sender, sync_wait"});
+    tb.add_row({"path", "Extended path utilities", "home_path, glob, regex"});
+    tb.add_row({"status", "File status & timestamps", "get_status, file_size"});
+    tb.add_row({"find", "Powerful file search engine", "find, find_count, find_each"});
+    tb.add_row({"permissions", "POSIX perms, ACL, SID", "get_permissions, get_acl"});
+    tb.add_row({"attributes", "xattr, MIME, file type", "get_xattr, get_attributes"});
+    tb.add_row({"filesystem", "FS type, volumes, network", "get_filesystem_type"});
+    tb.add_row({"disk", "Partitions, S.M.A.R.T.", "list_disks, list_mounts"});
+    tb.add_row({"file_lock", "Cross-platform file locking", "scoped_file_lock"});
+    tb.add_row({"watcher", "Real-time file monitoring", "file_watcher, on_change"});
+    tb.add_row({"async", "stdexec sender/receiver", "find_sender, sync_wait"});
 
     con.print_widget(tb, W);
 }
@@ -96,47 +94,47 @@ static void show_modules(console& con) {
 //  Feature Matrix
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_features(console& con) {
+static void show_features(console &con) {
     section(con, " Feature Matrix ");
 
     table_builder tb;
-    tb.add_column("Category",    {justify::left,   14, 18});
-    tb.add_column("Feature",     {justify::left,   30, 38});
-    tb.add_column("Status",      {justify::center,  8, 12});
+    tb.add_column("Category", {justify::left, 14, 18});
+    tb.add_column("Feature", {justify::left, 30, 38});
+    tb.add_column("Status", {justify::center, 8, 12});
     tb.border(border_style::rounded);
     tb.header_style(style{colors::bright_cyan, {}, attr::bold});
 
     auto ok = "[green]Ready[/]";
     auto win = "[cyan]Win[/]";
 
-    tb.add_row({"Path",         "Home/documents/executable path",    ok});
-    tb.add_row({"Path",         "Glob pattern matching",             ok});
-    tb.add_row({"Path",         "Regex file matching",               ok});
-    tb.add_row({"Status",       "File size / timestamps",            ok});
-    tb.add_row({"Status",       "Symlink resolution",                ok});
-    tb.add_row({"Find",         "Recursive file search",             ok});
-    tb.add_row({"Find",         "Filter by name/size/type",          ok});
-    tb.add_row({"Find",         "find_each callback iteration",     ok});
-    tb.add_row({"Permissions",  "POSIX permission bits",             ok});
-    tb.add_row({"Permissions",  "Windows ACL / SID support",         win});
-    tb.add_row({"Permissions",  "File owner / group",                ok});
-    tb.add_row({"Attributes",   "Extended attributes (xattr)",       ok});
-    tb.add_row({"Attributes",   "MIME type detection",               ok});
-    tb.add_row({"Attributes",   "Hidden file detection",             ok});
-    tb.add_row({"Filesystem",   "FS type detection (NTFS/ext4)",     ok});
-    tb.add_row({"Filesystem",   "Volume info / space query",         ok});
-    tb.add_row({"Filesystem",   "Network path detection",            ok});
-    tb.add_row({"Disk",         "Disk enumeration",                  ok});
-    tb.add_row({"Disk",         "Partition table listing",           ok});
-    tb.add_row({"Disk",         "Mount point listing",               ok});
-    tb.add_row({"Disk",         "Boot disk detection",               ok});
-    tb.add_row({"Locking",      "Exclusive / shared locks",          ok});
-    tb.add_row({"Locking",      "RAII scoped_file_lock",             ok});
-    tb.add_row({"Locking",      "Timeout-based locking",             ok});
-    tb.add_row({"Watcher",      "File change monitoring",            ok});
-    tb.add_row({"Watcher",      "on_add / on_change / on_delete",    ok});
-    tb.add_row({"Async",        "stdexec sender/receiver model",     ok});
-    tb.add_row({"Async",        "Thread pool execution",             ok});
+    tb.add_row({"Path", "Home/documents/executable path", ok});
+    tb.add_row({"Path", "Glob pattern matching", ok});
+    tb.add_row({"Path", "Regex file matching", ok});
+    tb.add_row({"Status", "File size / timestamps", ok});
+    tb.add_row({"Status", "Symlink resolution", ok});
+    tb.add_row({"Find", "Recursive file search", ok});
+    tb.add_row({"Find", "Filter by name/size/type", ok});
+    tb.add_row({"Find", "find_each callback iteration", ok});
+    tb.add_row({"Permissions", "POSIX permission bits", ok});
+    tb.add_row({"Permissions", "Windows ACL / SID support", win});
+    tb.add_row({"Permissions", "File owner / group", ok});
+    tb.add_row({"Attributes", "Extended attributes (xattr)", ok});
+    tb.add_row({"Attributes", "MIME type detection", ok});
+    tb.add_row({"Attributes", "Hidden file detection", ok});
+    tb.add_row({"Filesystem", "FS type detection (NTFS/ext4)", ok});
+    tb.add_row({"Filesystem", "Volume info / space query", ok});
+    tb.add_row({"Filesystem", "Network path detection", ok});
+    tb.add_row({"Disk", "Disk enumeration", ok});
+    tb.add_row({"Disk", "Partition table listing", ok});
+    tb.add_row({"Disk", "Mount point listing", ok});
+    tb.add_row({"Disk", "Boot disk detection", ok});
+    tb.add_row({"Locking", "Exclusive / shared locks", ok});
+    tb.add_row({"Locking", "RAII scoped_file_lock", ok});
+    tb.add_row({"Locking", "Timeout-based locking", ok});
+    tb.add_row({"Watcher", "File change monitoring", ok});
+    tb.add_row({"Watcher", "on_add / on_change / on_delete", ok});
+    tb.add_row({"Async", "stdexec sender/receiver model", ok});
+    tb.add_row({"Async", "Thread pool execution", ok});
 
     con.print_widget(tb, W);
 }
@@ -145,36 +143,31 @@ static void show_features(console& con) {
 //  Performance Metrics (simulated)
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_performance(console& con) {
+static void show_performance(console &con) {
     section(con, " Performance Metrics ");
 
     con.print("[dim]Simulated benchmarks based on typical filesystem operations:[/]");
     con.newline();
 
-    struct perf_entry { const char* name; double us; };
+    struct perf_entry {
+        const char *name;
+        double us;
+    };
     perf_entry entries[] = {
-        {"home_path()",              0.8},
-        {"executable_path()",        1.2},
-        {"get_status(file)",         3.5},
-        {"file_size(file)",          2.8},
-        {"exists(path)",             2.0},
-        {"glob(\"*.cpp\", 100)",    45.0},
-        {"find(dir, opts, 50)",     85.0},
-        {"get_permissions(file)",    4.2},
-        {"get_xattr(file)",          5.5},
-        {"list_disks()",            12.0},
-        {"list_mounts()",            8.5},
-        {"scoped_file_lock",        15.0},
+        {"home_path()", 0.8},          {"executable_path()", 1.2},     {"get_status(file)", 3.5},
+        {"file_size(file)", 2.8},      {"exists(path)", 2.0},          {"glob(\"*.cpp\", 100)", 45.0},
+        {"find(dir, opts, 50)", 85.0}, {"get_permissions(file)", 4.2}, {"get_xattr(file)", 5.5},
+        {"list_disks()", 12.0},        {"list_mounts()", 8.5},         {"scoped_file_lock", 15.0},
     };
 
     table_builder tb;
-    tb.add_column("Operation",       {justify::left,   26, 32});
-    tb.add_column("Latency (us)",    {justify::right,  12, 16});
-    tb.add_column("Throughput",      {justify::right,  14, 18});
+    tb.add_column("Operation", {justify::left, 26, 32});
+    tb.add_column("Latency (us)", {justify::right, 12, 16});
+    tb.add_column("Throughput", {justify::right, 14, 18});
     tb.border(border_style::rounded);
     tb.header_style(style{colors::bright_yellow, {}, attr::bold});
 
-    for (auto& e : entries) {
+    for (auto &e : entries) {
         char lat[16], thr[32];
         std::snprintf(lat, sizeof(lat), "%.1f", e.us);
         double ops_per_sec = 1000000.0 / e.us;
@@ -193,7 +186,7 @@ static void show_performance(console& con) {
     con.print("[dim]Operation latency comparison (us, lower = better):[/]");
     std::vector<float> latencies;
     std::vector<std::string> labels;
-    for (auto& e : entries) {
+    for (auto &e : entries) {
         latencies.push_back(static_cast<float>(e.us));
         std::string l(e.name);
         auto paren = l.find('(');
@@ -201,18 +194,14 @@ static void show_performance(console& con) {
         if (l.size() > 6) l = l.substr(0, 6);
         labels.push_back(l);
     }
-    con.print_widget(
-        bar_chart_builder(latencies, 6)
-            .labels(labels)
-            .style_override(style{colors::bright_cyan}),
-        W);
+    con.print_widget(bar_chart_builder(latencies, 6).labels(labels).style_override(style{colors::bright_cyan}), W);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 //  Range Adapters
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_range_adapters(console& con) {
+static void show_range_adapters(console &con) {
     section(con, " Range Adapter Pipeline ");
 
     con.print("[dim]frappe provides composable range adapters for file entries:[/]");
@@ -279,7 +268,7 @@ static void show_range_adapters(console& con) {
 //  Test Coverage
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_test_coverage(console& con) {
+static void show_test_coverage(console &con) {
     section(con, " Test Coverage ");
 
     columns_builder cols;
@@ -304,27 +293,27 @@ static void show_test_coverage(console& con) {
 
     {
         table_builder tb;
-        tb.add_column("Test File",      {justify::left,   22, 28});
-        tb.add_column("Tests",          {justify::right,   6, 10});
+        tb.add_column("Test File", {justify::left, 22, 28});
+        tb.add_column("Tests", {justify::right, 6, 10});
         tb.border(border_style::rounded);
         tb.header_style(style{colors::bright_cyan, {}, attr::bold});
 
-        tb.add_row({"test_path",          "28"});
-        tb.add_row({"test_status",        "24"});
-        tb.add_row({"test_find",          "32"});
-        tb.add_row({"test_permissions",   "26"});
-        tb.add_row({"test_attributes",    "22"});
-        tb.add_row({"test_filesystem",    "18"});
-        tb.add_row({"test_disk",          "20"});
-        tb.add_row({"test_file_lock",     "16"});
-        tb.add_row({"test_watcher",       "14"});
-        tb.add_row({"test_filters",       "22"});
-        tb.add_row({"test_sorters",       "15"});
-        tb.add_row({"test_aggregators",   "30"});
-        tb.add_row({"test_transforms",    "17"});
-        tb.add_row({"test_projections",   "27"});
-        tb.add_row({"test_entry",         "18"});
-        tb.add_row({"[bold]Total[/]",     "[bold]465[/]"});
+        tb.add_row({"test_path", "28"});
+        tb.add_row({"test_status", "24"});
+        tb.add_row({"test_find", "32"});
+        tb.add_row({"test_permissions", "26"});
+        tb.add_row({"test_attributes", "22"});
+        tb.add_row({"test_filesystem", "18"});
+        tb.add_row({"test_disk", "20"});
+        tb.add_row({"test_file_lock", "16"});
+        tb.add_row({"test_watcher", "14"});
+        tb.add_row({"test_filters", "22"});
+        tb.add_row({"test_sorters", "15"});
+        tb.add_row({"test_aggregators", "30"});
+        tb.add_row({"test_transforms", "17"});
+        tb.add_row({"test_projections", "27"});
+        tb.add_row({"test_entry", "18"});
+        tb.add_row({"[bold]Total[/]", "[bold]465[/]"});
 
         cols.add(std::move(tb), 1);
     }
@@ -348,18 +337,17 @@ int main() {
     show_test_coverage(con);
 
     con.newline();
-    con.print_widget(
-        status_bar_builder()
-            .left("[bold] frappe [/]")
-            .center("Cross-Platform Filesystem Library")
-            .right("28 features | 465 tests")
-            .style_override(style{colors::bright_white, color::from_rgb(30, 30, 60)}),
-        W);
+    con.print_widget(status_bar_builder()
+                         .left("[bold] frappe [/]")
+                         .center("Cross-Platform Filesystem Library")
+                         .right("28 features | 465 tests")
+                         .style_override(style{colors::bright_white, color::from_rgb(30, 30, 60)}),
+                     W);
     con.newline();
-    con.print_widget(
-        rule_builder(" frappe Dashboard Complete ")
-            .rule_style(style{colors::bright_green, {}, attr::bold})
-            .character(U'\x2550'), W);
+    con.print_widget(rule_builder(" frappe Dashboard Complete ")
+                         .rule_style(style{colors::bright_green, {}, attr::bold})
+                         .character(U'\x2550'),
+                     W);
     con.newline();
 
     return 0;

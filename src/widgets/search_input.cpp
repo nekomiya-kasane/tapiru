@@ -4,17 +4,18 @@
  */
 
 #include "tapiru/widgets/search_input.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 namespace tapiru {
 
-search_input_builder& search_input_builder::key(std::string_view k) {
+search_input_builder &search_input_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
-node_id search_input_builder::flatten_into(detail::scene& s) const {
+node_id search_input_builder::flatten_into(detail::scene &s) const {
     std::string query_text = query_ ? *query_ : "";
     std::string display = query_text.empty() ? placeholder_ : query_text;
 
@@ -33,7 +34,7 @@ node_id search_input_builder::flatten_into(detail::scene& s) const {
     // Compose: columns([icon] [input] [match_info])
     auto cols = columns_builder();
 
-    auto icon_tb = text_builder("\xf0\x9f\x94\x8d ");  // 🔍
+    auto icon_tb = text_builder("\xf0\x9f\x94\x8d "); // 🔍
     cols.add(std::move(icon_tb));
 
     auto input_tb = text_builder(display);
@@ -59,4 +60,4 @@ node_id search_input_builder::flatten_into(detail::scene& s) const {
     return id;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

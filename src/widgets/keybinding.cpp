@@ -4,17 +4,18 @@
  */
 
 #include "tapiru/widgets/keybinding.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 namespace tapiru {
 
-keybinding_builder& keybinding_builder::key(std::string_view k) {
+keybinding_builder &keybinding_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
-node_id keybinding_builder::flatten_into(detail::scene& s) const {
+node_id keybinding_builder::flatten_into(detail::scene &s) const {
     // Each entry is a row: [key_badge] [separator] [description]
     detail::rows_data rd;
     rd.gap = 0;
@@ -22,7 +23,7 @@ node_id keybinding_builder::flatten_into(detail::scene& s) const {
     auto rows_id = s.add_node(detail::widget_type::rows, rows_pi, detail::no_node, key_);
     if (z_order_ != 0) s.set_z_order(rows_id, z_order_);
 
-    for (const auto& entry : entries_) {
+    for (const auto &entry : entries_) {
         auto cols = columns_builder();
 
         auto key_tb = text_builder("[" + entry.keys + "]");
@@ -44,4 +45,4 @@ node_id keybinding_builder::flatten_into(detail::scene& s) const {
     return rows_id;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

@@ -4,17 +4,18 @@
  */
 
 #include "tapiru/widgets/breadcrumb.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 namespace tapiru {
 
-breadcrumb_builder& breadcrumb_builder::key(std::string_view k) {
+breadcrumb_builder &breadcrumb_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
-node_id breadcrumb_builder::flatten_into(detail::scene& s) const {
+node_id breadcrumb_builder::flatten_into(detail::scene &s) const {
     int act = active_ ? *active_ : static_cast<int>(items_.size()) - 1;
 
     auto cols = columns_builder();
@@ -38,4 +39,4 @@ node_id breadcrumb_builder::flatten_into(detail::scene& s) const {
     return id;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

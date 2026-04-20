@@ -7,29 +7,30 @@
  * Provides typewriter, counter, marquee, and cross-fade transition helpers.
  */
 
+#include "tapiru/core/animation.h"
+
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <string>
 #include <string_view>
 
-#include "tapiru/core/animation.h"
-
 namespace tapiru {
 
 // ── Typewriter effect ────────────────────────────────────────────────
 
 class typewriter {
-public:
+  public:
     typewriter() = default;
 
     explicit typewriter(std::string_view text, duration_ms dur = duration_ms(1000),
                         duration_ms char_delay = duration_ms(0))
-        : text_(text)
-        , total_dur_(dur)
-        , char_delay_(char_delay) {}
+        : text_(text), total_dur_(dur), char_delay_(char_delay) {}
 
-    void start(time_point now) { start_ = now; started_ = true; }
+    void start(time_point now) {
+        start_ = now;
+        started_ = true;
+    }
 
     [[nodiscard]] std::string value(time_point now) const {
         if (!started_) return "";
@@ -64,54 +65,49 @@ public:
 
     [[nodiscard]] bool started() const noexcept { return started_; }
 
-private:
+  private:
     std::string text_;
     duration_ms total_dur_{1000};
     duration_ms char_delay_{0};
-    time_point  start_;
-    bool        started_ = false;
+    time_point start_;
+    bool started_ = false;
 };
 
 // ── Counter animation ────────────────────────────────────────────────
 
 class counter_animation {
-public:
+  public:
     counter_animation() = default;
 
-    counter_animation(double from, double to, duration_ms dur,
-                      easing_fn ease = easing::ease_out)
+    counter_animation(double from, double to, duration_ms dur, easing_fn ease = easing::ease_out)
         : tw_(static_cast<float>(from), static_cast<float>(to), dur, std::move(ease)) {}
 
     void start(time_point now) { tw_.start(now); }
 
-    [[nodiscard]] double value(time_point now) const {
-        return static_cast<double>(tw_.value(now));
-    }
+    [[nodiscard]] double value(time_point now) const { return static_cast<double>(tw_.value(now)); }
 
-    [[nodiscard]] int int_value(time_point now) const {
-        return static_cast<int>(std::round(tw_.value(now)));
-    }
+    [[nodiscard]] int int_value(time_point now) const { return static_cast<int>(std::round(tw_.value(now))); }
 
     [[nodiscard]] bool finished(time_point now) const { return tw_.finished(now); }
     [[nodiscard]] bool started() const noexcept { return tw_.started(); }
 
-private:
+  private:
     tween tw_;
 };
 
 // ── Marquee (scrolling text) ─────────────────────────────────────────
 
 class marquee {
-public:
+  public:
     marquee() = default;
 
-    explicit marquee(std::string_view text, uint32_t visible_width,
-                     duration_ms scroll_interval = duration_ms(200))
-        : text_(text)
-        , visible_w_(visible_width)
-        , interval_(scroll_interval) {}
+    explicit marquee(std::string_view text, uint32_t visible_width, duration_ms scroll_interval = duration_ms(200))
+        : text_(text), visible_w_(visible_width), interval_(scroll_interval) {}
 
-    void start(time_point now) { start_ = now; started_ = true; }
+    void start(time_point now) {
+        start_ = now;
+        started_ = true;
+    }
 
     [[nodiscard]] std::string value(time_point now) const {
         if (!started_ || text_.empty() || visible_w_ == 0) return "";
@@ -132,18 +128,18 @@ public:
 
     [[nodiscard]] bool started() const noexcept { return started_; }
 
-private:
+  private:
     std::string text_;
-    uint32_t    visible_w_ = 0;
+    uint32_t visible_w_ = 0;
     duration_ms interval_{200};
-    time_point  start_;
-    bool        started_ = false;
+    time_point start_;
+    bool started_ = false;
 };
 
 // ── Cross-fade transition ────────────────────────────────────────────
 
 class cross_fade {
-public:
+  public:
     cross_fade() = default;
 
     explicit cross_fade(duration_ms dur, easing_fn ease = easing::ease_in_out)
@@ -151,9 +147,7 @@ public:
 
     void start(time_point now) { tw_.start(now); }
 
-    [[nodiscard]] float progress(time_point now) const {
-        return tw_.value(now);
-    }
+    [[nodiscard]] float progress(time_point now) const { return tw_.value(now); }
 
     [[nodiscard]] uint8_t old_alpha(time_point now) const {
         float p = progress(now);
@@ -168,22 +162,19 @@ public:
     [[nodiscard]] bool finished(time_point now) const { return tw_.finished(now); }
     [[nodiscard]] bool started() const noexcept { return tw_.started(); }
 
-private:
+  private:
     tween tw_;
 };
 
 // ── Slide transition ─────────────────────────────────────────────────
 
-enum class slide_direction : uint8_t {
-    left, right, up, down
-};
+enum class slide_direction : uint8_t { left, right, up, down };
 
 class slide_transition {
-public:
+  public:
     slide_transition() = default;
 
-    slide_transition(slide_direction dir, float distance, duration_ms dur,
-                     easing_fn ease = easing::ease_out)
+    slide_transition(slide_direction dir, float distance, duration_ms dur, easing_fn ease = easing::ease_out)
         : dir_(dir), tw_(distance, 0.0f, dur, std::move(ease)) {}
 
     void start(time_point now) { tw_.start(now); }
@@ -191,27 +182,33 @@ public:
     [[nodiscard]] int offset_x(time_point now) const {
         float v = tw_.value(now);
         switch (dir_) {
-            case slide_direction::left:  return -static_cast<int>(v);
-            case slide_direction::right: return  static_cast<int>(v);
-            default: return 0;
+        case slide_direction::left:
+            return -static_cast<int>(v);
+        case slide_direction::right:
+            return static_cast<int>(v);
+        default:
+            return 0;
         }
     }
 
     [[nodiscard]] int offset_y(time_point now) const {
         float v = tw_.value(now);
         switch (dir_) {
-            case slide_direction::up:   return -static_cast<int>(v);
-            case slide_direction::down: return  static_cast<int>(v);
-            default: return 0;
+        case slide_direction::up:
+            return -static_cast<int>(v);
+        case slide_direction::down:
+            return static_cast<int>(v);
+        default:
+            return 0;
         }
     }
 
     [[nodiscard]] bool finished(time_point now) const { return tw_.finished(now); }
     [[nodiscard]] bool started() const noexcept { return tw_.started(); }
 
-private:
+  private:
     slide_direction dir_ = slide_direction::left;
     tween tw_;
 };
 
-}  // namespace tapiru
+} // namespace tapiru

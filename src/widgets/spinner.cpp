@@ -4,23 +4,24 @@
  */
 
 #include "tapiru/widgets/spinner.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 namespace tapiru {
 
-spinner_builder& spinner_builder::key(std::string_view k) {
+spinner_builder &spinner_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
-node_id spinner_builder::flatten_into(detail::scene& s) const {
+node_id spinner_builder::flatten_into(detail::scene &s) const {
     detail::text_data td;
 
     if (state_->done()) {
         // Show done text + message (parse markup in done_text_)
         auto done_frags = parse_markup(done_text_);
-        for (auto& f : done_frags) {
+        for (auto &f : done_frags) {
             td.fragments.push_back(std::move(f));
         }
         if (!message_.empty()) {
@@ -46,4 +47,4 @@ node_id spinner_builder::flatten_into(detail::scene& s) const {
     return s.add_node(detail::widget_type::text, pi);
 }
 
-}  // namespace tapiru
+} // namespace tapiru

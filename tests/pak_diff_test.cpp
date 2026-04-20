@@ -3,17 +3,17 @@
  * @brief Tests for incremental .lpak diff/patch types and header format.
  */
 
-#include <gtest/gtest.h>
-
 #include "smoothie/resource/pak_diff.h"
+
+#include <gtest/gtest.h>
 
 using namespace smoothie::resource;
 
 // ── patch_op enum ───────────────────────────────────────────────────────
 
 TEST(PakDiffTest, PatchOpValues) {
-    EXPECT_EQ(static_cast<uint8_t>(patch_op::keep),   0u);
-    EXPECT_EQ(static_cast<uint8_t>(patch_op::add),    1u);
+    EXPECT_EQ(static_cast<uint8_t>(patch_op::keep), 0u);
+    EXPECT_EQ(static_cast<uint8_t>(patch_op::add), 1u);
     EXPECT_EQ(static_cast<uint8_t>(patch_op::modify), 2u);
     EXPECT_EQ(static_cast<uint8_t>(patch_op::remove), 3u);
 }
@@ -39,7 +39,7 @@ TEST(PakDiffTest, PatchEntryAddOp) {
     EXPECT_EQ(e.op, patch_op::add);
     EXPECT_EQ(e.semantic_hash, 0xDEADBEEF);
     EXPECT_EQ(e.new_data_size, 1024u);
-    EXPECT_EQ(e.old_data_size, 0u);  // new entry has no old data
+    EXPECT_EQ(e.old_data_size, 0u); // new entry has no old data
 }
 
 TEST(PakDiffTest, PatchEntryModifyOp) {
@@ -61,7 +61,7 @@ TEST(PakDiffTest, PatchEntryRemoveOp) {
     e.semantic_hash = 0x12345678;
     e.old_data_size = 256;
     EXPECT_EQ(e.op, patch_op::remove);
-    EXPECT_EQ(e.new_data_size, 0u);  // remove has no new data
+    EXPECT_EQ(e.new_data_size, 0u); // remove has no new data
 }
 
 // ── patch_header format ─────────────────────────────────────────────────
@@ -79,7 +79,10 @@ TEST(PakDiffTest, LpatchVersion) {
 
 TEST(PakDiffTest, PatchHeaderLayout) {
     patch_header hdr{};
-    hdr.magic[0] = 'L'; hdr.magic[1] = 'P'; hdr.magic[2] = 'C'; hdr.magic[3] = 'H';
+    hdr.magic[0] = 'L';
+    hdr.magic[1] = 'P';
+    hdr.magic[2] = 'C';
+    hdr.magic[3] = 'H';
     hdr.version = lpatch_version;
     hdr.entry_count = 10;
     hdr.old_data_checksum = 0xAAAABBBBCCCCDDDD;

@@ -36,15 +36,15 @@
  *   .\build\bin\Release\tapiru_showcase_demo.exe
  */
 
-#include <cstdio>
 #include <csignal>
+#include <cstdio>
 #include <cstdlib>
 #include <string>
 
 #ifdef _WIN32
 #define NOMINMAX
-#include <windows.h>
 #include <crtdbg.h>
+#include <windows.h>
 #endif
 
 #include "tapiru/core/ansi.h"
@@ -62,12 +62,10 @@ using namespace tapiru;
 //  Helpers
 // ════════════════════════════════════════════════════════════════════════
 
-static void section_header(console& con, const char* number, const char* title) {
+static void section_header(console &con, const char *number, const char *title) {
     con.newline();
-    con.print_widget(
-        rule_builder(std::string("[bold bright_cyan]") + number + ". " + title + "[/]")
-            .rule_style(style{colors::bright_black})
-    );
+    con.print_widget(rule_builder(std::string("[bold bright_cyan]") + number + ". " + title + "[/]")
+                         .rule_style(style{colors::bright_black}));
     con.newline();
 }
 
@@ -75,7 +73,7 @@ static void section_header(console& con, const char* number, const char* title) 
 //  1. Terminal Detection
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_terminal_detection(console& con) {
+static void demo_terminal_detection(console &con) {
     section_header(con, "1", "Terminal Detection");
 
     auto sz = terminal::get_size();
@@ -83,22 +81,19 @@ static void demo_terminal_detection(console& con) {
     bool tty = terminal::is_tty();
     auto osc = terminal::detect_osc_support();
 
-    const char* depth_names[] = {"none", "16-color", "256-color", "true-color"};
+    const char *depth_names[] = {"none", "16-color", "256-color", "true-color"};
 
     char buf[256];
     std::snprintf(buf, sizeof(buf),
-        "  Size: [bold cyan]%u[/] x [bold cyan]%u[/]    "
-        "Color depth: [bold green]%s[/]    "
-        "TTY: %s",
-        sz.width, sz.height,
-        depth_names[static_cast<int>(depth)],
-        tty ? "[bold green]yes[/]" : "[dim]no[/]");
+                  "  Size: [bold cyan]%u[/] x [bold cyan]%u[/]    "
+                  "Color depth: [bold green]%s[/]    "
+                  "TTY: %s",
+                  sz.width, sz.height, depth_names[static_cast<int>(depth)], tty ? "[bold green]yes[/]" : "[dim]no[/]");
     con.print(buf);
 
     std::string osc_line = "  OSC support: ";
-    auto flag = [&](const char* name, bool v) {
-        osc_line += v ? (std::string("[green]") + name + "[/] ")
-                      : (std::string("[dim]") + name + "[/] ");
+    auto flag = [&](const char *name, bool v) {
+        osc_line += v ? (std::string("[green]") + name + "[/] ") : (std::string("[dim]") + name + "[/] ");
     };
     flag("title", osc.title);
     flag("hyperlink", osc.hyperlink);
@@ -114,24 +109,20 @@ static void demo_terminal_detection(console& con) {
 //  2. Style System
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_style_system(console& con) {
+static void demo_style_system(console &con) {
     section_header(con, "2", "Style System (color + attr + style)");
 
     // Named 16-color palette
     con.print("  [bold]16-color ANSI palette:[/]");
     {
         std::string line = "  ";
-        const char* names[] = {
-            "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"
-        };
+        const char *names[] = {"black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"};
         for (int i = 0; i < 8; ++i) {
             line += std::string("[on_") + names[i] + "]  [/]";
         }
         line += " ";
-        const char* bright_names[] = {
-            "bright_black", "bright_red", "bright_green", "bright_yellow",
-            "bright_blue", "bright_magenta", "bright_cyan", "bright_white"
-        };
+        const char *bright_names[] = {"bright_black", "bright_red",     "bright_green", "bright_yellow",
+                                      "bright_blue",  "bright_magenta", "bright_cyan",  "bright_white"};
         for (int i = 0; i < 8; ++i) {
             line += std::string("[on_") + bright_names[i] + "]  [/]";
         }
@@ -183,7 +174,7 @@ static void demo_style_system(console& con) {
 //  3. ANSI Emitter (minimal-delta transitions)
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_ansi_emitter(console& con) {
+static void demo_ansi_emitter(console &con) {
     section_header(con, "3", "ANSI Emitter (minimal-delta SGR)");
 
     con.print("  The [bold]ansi_emitter[/] tracks hardware state and computes the");
@@ -198,9 +189,12 @@ static void demo_ansi_emitter(console& con) {
     style s2{colors::green, {}, attr::bold | attr::italic};
     style s3{colors::blue, {}, attr::underline};
 
-    em.transition(s1, out); out += "Red Bold";
-    em.transition(s2, out); out += " -> Green Bold Italic";
-    em.transition(s3, out); out += " -> Blue Underline";
+    em.transition(s1, out);
+    out += "Red Bold";
+    em.transition(s2, out);
+    out += " -> Green Bold Italic";
+    em.transition(s3, out);
+    out += " -> Blue Underline";
     em.reset(out);
     out += " -> Reset";
 
@@ -213,7 +207,7 @@ static void demo_ansi_emitter(console& con) {
 //  4. Inline Markup
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_inline_markup(console& con) {
+static void demo_inline_markup(console &con) {
     section_header(con, "4", "Inline Markup Tags");
 
     con.print("  [bold]Basic colors:[/]  [red]red[/] [green]green[/] [blue]blue[/] "
@@ -242,7 +236,7 @@ static void demo_inline_markup(console& con) {
 //  5. Constexpr Markup
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_constexpr_markup(console& con) {
+static void demo_constexpr_markup(console &con) {
     section_header(con, "5", "Constexpr Markup (compile-time parsing)");
 
     // markup_style: resolve tag string to style at compile time
@@ -270,13 +264,12 @@ static void demo_constexpr_markup(console& con) {
 
     // compile_markup: rich block-level parsing at compile time
     constexpr auto r = compile_markup("[box]Content[/box]");
-    static_assert(r.count >= 2);  // box_open + text + box_close
+    static_assert(r.count >= 2); // box_open + text + box_close
 
     con.newline();
     con.print("  [bold]compile_markup(\"[box]Content[/box]\")[/]:");
     char buf[64];
-    std::snprintf(buf, sizeof(buf), "    fragment count == %zu  [green]\xe2\x9c\x93[/]",
-                  r.count);
+    std::snprintf(buf, sizeof(buf), "    fragment count == %zu  [green]\xe2\x9c\x93[/]", r.count);
     con.print(buf);
     con.print("  [dim](All parsing happens at compile time — zero runtime overhead)[/]");
 }
@@ -285,7 +278,7 @@ static void demo_constexpr_markup(console& con) {
 //  6. Rich Markup (runtime)
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_rich_markup_runtime(console& con) {
+static void demo_rich_markup_runtime(console &con) {
     section_header(con, "6", "Rich Markup \xe2\x80\x94 Runtime (print_rich)");
 
     con.print("  [bold]Boxes:[/]");
@@ -331,7 +324,7 @@ static void demo_rich_markup_runtime(console& con) {
 //  7. Rich Markup (compile-time via TAPIRU_PRINT_RICH)
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_rich_markup_constexpr(console& con) {
+static void demo_rich_markup_constexpr(console &con) {
     section_header(con, "7", "Rich Markup \xe2\x80\x94 Compile-time (TAPIRU_PRINT_RICH)");
 
     con.print("  [dim]The TAPIRU_PRINT_RICH macro compiles markup at compile time[/]");
@@ -349,16 +342,14 @@ static void demo_rich_markup_constexpr(console& con) {
 //  8. Widget: text_builder
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_text_builder(console& con) {
+static void demo_text_builder(console &con) {
     section_header(con, "8", "Widget: text_builder");
 
     {
         rows_builder rb;
         rb.add(text_builder("[bold]Left-aligned (default):[/] The quick brown fox"));
-        rb.add(text_builder("[bold]Center-aligned:[/] The quick brown fox")
-                   .align(justify::center));
-        rb.add(text_builder("[bold]Right-aligned:[/] The quick brown fox")
-                   .align(justify::right));
+        rb.add(text_builder("[bold]Center-aligned:[/] The quick brown fox").align(justify::center));
+        rb.add(text_builder("[bold]Right-aligned:[/] The quick brown fox").align(justify::right));
         rb.add(text_builder("[bold]Style override:[/] This text has a style override")
                    .style_override(style{colors::bright_yellow, {}, attr::italic}));
         rb.gap(0);
@@ -370,7 +361,7 @@ static void demo_text_builder(console& con) {
 //  9. Widget: rule_builder
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_rule_builder(console& con) {
+static void demo_rule_builder(console &con) {
     section_header(con, "9", "Widget: rule_builder");
 
     con.print("  [bold]Plain rule:[/]");
@@ -380,26 +371,22 @@ static void demo_rule_builder(console& con) {
     con.print_widget(padding_builder(rule_builder("Section Title")).pad(0, 2));
 
     con.print("  [bold]Styled rule:[/]");
-    con.print_widget(padding_builder(
-        rule_builder("Styled").rule_style(style{colors::bright_magenta, {}, attr::bold})
-    ).pad(0, 2));
+    con.print_widget(
+        padding_builder(rule_builder("Styled").rule_style(style{colors::bright_magenta, {}, attr::bold})).pad(0, 2));
 
     con.print("  [bold]Gradient rule:[/]");
-    con.print_widget(padding_builder(
-        rule_builder("Gradient")
-            .gradient(linear_gradient{
-                color::from_rgb(255, 0, 0),
-                color::from_rgb(0, 0, 255),
-                gradient_direction::horizontal
-            })
-    ).pad(0, 2));
+    con.print_widget(
+        padding_builder(rule_builder("Gradient")
+                            .gradient(linear_gradient{color::from_rgb(255, 0, 0), color::from_rgb(0, 0, 255),
+                                                      gradient_direction::horizontal}))
+            .pad(0, 2));
 }
 
 // ════════════════════════════════════════════════════════════════════════
 // 10. Widget: panel_builder
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_panel_builder(console& con) {
+static void demo_panel_builder(console &con) {
     section_header(con, "10", "Widget: panel_builder");
 
     // Border styles
@@ -463,11 +450,8 @@ static void demo_panel_builder(console& con) {
     {
         panel_builder pb(text_builder("[bold bright_white]Gradient background[/]"));
         pb.title("Gradient");
-        pb.background_gradient(linear_gradient{
-            color::from_rgb(30, 30, 80),
-            color::from_rgb(80, 30, 30),
-            gradient_direction::horizontal
-        });
+        pb.background_gradient(
+            linear_gradient{color::from_rgb(30, 30, 80), color::from_rgb(80, 30, 30), gradient_direction::horizontal});
         con.print_widget(padding_builder(std::move(pb)).pad(0, 2));
     }
 }
@@ -476,7 +460,7 @@ static void demo_panel_builder(console& con) {
 // 11. Widget: table_builder
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_table_builder(console& con) {
+static void demo_table_builder(console &con) {
     section_header(con, "11", "Widget: table_builder");
 
     // Basic table
@@ -489,14 +473,14 @@ static void demo_table_builder(console& con) {
         tb.header_style(style{colors::bright_cyan, {}, attr::bold});
         tb.border(border_style::rounded);
 
-        tb.add_row({"Style system",     "[green]Done[/]",  "color + attr + style"});
-        tb.add_row({"ANSI emitter",     "[green]Done[/]",  "Minimal-delta SGR"});
-        tb.add_row({"Markup parser",    "[green]Done[/]",  "Runtime + constexpr"});
-        tb.add_row({"Widget builders",  "[green]Done[/]",  "12 widget types"});
-        tb.add_row({"Gradients",        "[green]Done[/]",  "Linear H/V"});
-        tb.add_row({"Shaders",          "[green]Done[/]",  "4 built-in effects"});
-        tb.add_row({"Color downgrade",  "[green]Done[/]",  "RGB->256->16->none"});
-        tb.add_row({"OSC sequences",    "[green]Done[/]",  "Hyperlinks, title, etc."});
+        tb.add_row({"Style system", "[green]Done[/]", "color + attr + style"});
+        tb.add_row({"ANSI emitter", "[green]Done[/]", "Minimal-delta SGR"});
+        tb.add_row({"Markup parser", "[green]Done[/]", "Runtime + constexpr"});
+        tb.add_row({"Widget builders", "[green]Done[/]", "12 widget types"});
+        tb.add_row({"Gradients", "[green]Done[/]", "Linear H/V"});
+        tb.add_row({"Shaders", "[green]Done[/]", "4 built-in effects"});
+        tb.add_row({"Color downgrade", "[green]Done[/]", "RGB->256->16->none"});
+        tb.add_row({"OSC sequences", "[green]Done[/]", "Hyperlinks, title, etc."});
 
         con.print_widget(padding_builder(std::move(tb)).pad(0, 2));
     }
@@ -510,16 +494,13 @@ static void demo_table_builder(console& con) {
         tb.add_column("RGB", {justify::center, 16, 20});
         tb.header_style(style{colors::bright_white, {}, attr::bold});
         tb.border(border_style::heavy);
-        tb.border_gradient(linear_gradient{
-            color::from_rgb(255, 100, 0),
-            color::from_rgb(0, 100, 255),
-            gradient_direction::vertical
-        });
+        tb.border_gradient(
+            linear_gradient{color::from_rgb(255, 100, 0), color::from_rgb(0, 100, 255), gradient_direction::vertical});
 
-        tb.add_row({"[red]Red[/]",         "#FF0000", "(255, 0, 0)"});
-        tb.add_row({"[green]Green[/]",     "#00FF00", "(0, 255, 0)"});
-        tb.add_row({"[blue]Blue[/]",       "#0000FF", "(0, 0, 255)"});
-        tb.add_row({"[yellow]Yellow[/]",   "#FFFF00", "(255, 255, 0)"});
+        tb.add_row({"[red]Red[/]", "#FF0000", "(255, 0, 0)"});
+        tb.add_row({"[green]Green[/]", "#00FF00", "(0, 255, 0)"});
+        tb.add_row({"[blue]Blue[/]", "#0000FF", "(0, 0, 255)"});
+        tb.add_row({"[yellow]Yellow[/]", "#FFFF00", "(255, 255, 0)"});
         tb.add_row({"[magenta]Magenta[/]", "#FF00FF", "(255, 0, 255)"});
 
         con.print_widget(padding_builder(std::move(tb)).pad(0, 2));
@@ -530,7 +511,7 @@ static void demo_table_builder(console& con) {
 // 12. Widget: columns_builder + rows_builder
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_layout_builders(console& con) {
+static void demo_layout_builders(console &con) {
     section_header(con, "12", "Layout: columns_builder + rows_builder");
 
     con.print("  [bold]Three-column layout with flex ratios:[/]");
@@ -585,7 +566,7 @@ static void demo_layout_builders(console& con) {
 // 13. Widget: padding, center, sized_box, overlay
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_utility_builders(console& con) {
+static void demo_utility_builders(console &con) {
     section_header(con, "13", "Utility Widgets: padding, center, sized_box, overlay");
 
     con.print("  [bold]padding_builder — pad(1, 3):[/]");
@@ -628,18 +609,15 @@ static void demo_utility_builders(console& con) {
 // 14. Gradients
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_gradients(console& con) {
+static void demo_gradients(console &con) {
     section_header(con, "14", "Linear Gradients");
 
     con.print("  [bold]Horizontal gradient (red -> blue):[/]");
-    con.print_widget(padding_builder(
-        rule_builder("Horizontal")
-            .gradient(linear_gradient{
-                color::from_rgb(255, 0, 0),
-                color::from_rgb(0, 0, 255),
-                gradient_direction::horizontal
-            })
-    ).pad(0, 2));
+    con.print_widget(
+        padding_builder(rule_builder("Horizontal")
+                            .gradient(linear_gradient{color::from_rgb(255, 0, 0), color::from_rgb(0, 0, 255),
+                                                      gradient_direction::horizontal}))
+            .pad(0, 2));
 
     con.print("  [bold]Panel with vertical gradient background:[/]");
     {
@@ -650,11 +628,8 @@ static void demo_gradients(console& con) {
         rb.gap(0);
         panel_builder pb(std::move(rb));
         pb.title("Vertical Gradient");
-        pb.background_gradient(linear_gradient{
-            color::from_rgb(0, 40, 80),
-            color::from_rgb(80, 0, 40),
-            gradient_direction::vertical
-        });
+        pb.background_gradient(
+            linear_gradient{color::from_rgb(0, 40, 80), color::from_rgb(80, 0, 40), gradient_direction::vertical});
         con.print_widget(padding_builder(std::move(pb)).pad(0, 2));
     }
 
@@ -665,11 +640,8 @@ static void demo_gradients(console& con) {
         tb.add_column("Direction", {justify::center, 15, 20});
         tb.border(border_style::heavy);
         tb.header_style(style{colors::bright_white, {}, attr::bold});
-        tb.border_gradient(linear_gradient{
-            color::from_rgb(0, 255, 128),
-            color::from_rgb(128, 0, 255),
-            gradient_direction::vertical
-        });
+        tb.border_gradient(
+            linear_gradient{color::from_rgb(0, 255, 128), color::from_rgb(128, 0, 255), gradient_direction::vertical});
         tb.add_row({"Green -> Purple", "Vertical"});
         con.print_widget(padding_builder(std::move(tb)).pad(0, 2));
     }
@@ -679,7 +651,7 @@ static void demo_gradients(console& con) {
 // 15. Shaders
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_shaders(console& con) {
+static void demo_shaders(console &con) {
     section_header(con, "15", "Shaders (post-processing effects)");
 
     con.print("  [bold]Built-in shaders:[/]");
@@ -722,19 +694,18 @@ static void demo_shaders(console& con) {
 // 16. Color Downgrade
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_color_downgrade(console& con) {
+static void demo_color_downgrade(console &con) {
     section_header(con, "16", "Color Downgrade");
 
     con.print("  [bold]color::downgrade(depth)[/] converts RGB to lower color depths:");
     con.newline();
 
-    struct entry { const char* name; uint8_t r, g, b; };
+    struct entry {
+        const char *name;
+        uint8_t r, g, b;
+    };
     entry colors_list[] = {
-        {"Red",     255, 0,   0},
-        {"Green",   0,   255, 0},
-        {"Blue",    0,   0,   255},
-        {"Orange",  255, 128, 0},
-        {"Cyan",    0,   255, 255},
+        {"Red", 255, 0, 0}, {"Green", 0, 255, 0}, {"Blue", 0, 0, 255}, {"Orange", 255, 128, 0}, {"Cyan", 0, 255, 255},
     };
 
     table_builder tb;
@@ -746,11 +717,11 @@ static void demo_color_downgrade(console& con) {
     tb.header_style(style{colors::bright_cyan, {}, attr::bold});
     tb.border(border_style::rounded);
 
-    for (auto& e : colors_list) {
+    for (auto &e : colors_list) {
         auto c = color::from_rgb(e.r, e.g, e.b);
         auto d256 = c.downgrade(2);
-        auto d16  = c.downgrade(1);
-        auto d0   = c.downgrade(0);
+        auto d16 = c.downgrade(1);
+        auto d0 = c.downgrade(0);
 
         char orig[24], s256[24], s16[24], s0[24];
         std::snprintf(orig, sizeof(orig), "(%u,%u,%u)", e.r, e.g, e.b);
@@ -774,7 +745,7 @@ static void demo_color_downgrade(console& con) {
 // 17. OSC Sequences
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_osc_sequences(console& con) {
+static void demo_osc_sequences(console &con) {
     section_header(con, "17", "OSC Sequences (Operating System Commands)");
 
     con.print("  [bold]Available OSC builders in tapiru::ansi namespace:[/]");
@@ -787,24 +758,24 @@ static void demo_osc_sequences(console& con) {
     tb.header_style(style{colors::bright_cyan, {}, attr::bold});
     tb.border(border_style::rounded);
 
-    tb.add_row({"set_title(text)",              "0",   "Set window title + icon"});
-    tb.add_row({"set_icon_name(name)",          "1",   "Set icon name only"});
-    tb.add_row({"set_window_title(text)",       "2",   "Set window title only"});
-    tb.add_row({"set_palette_color(i,r,g,b)",   "4",   "Set 256-palette entry"});
-    tb.add_row({"query_palette_color(i)",       "4",   "Query palette entry"});
-    tb.add_row({"reset_palette_color(i)",       "104", "Reset palette entry"});
-    tb.add_row({"report_cwd(host, path)",       "7",   "Report working directory"});
-    tb.add_row({"hyperlink_open(url, id)",      "8",   "Open clickable hyperlink"});
-    tb.add_row({"hyperlink_close",              "8",   "Close hyperlink"});
-    tb.add_row({"notify(message)",              "9",   "Desktop notification"});
-    tb.add_row({"set_foreground_color(r,g,b)",  "10",  "Set terminal fg color"});
-    tb.add_row({"set_background_color(r,g,b)",  "11",  "Set terminal bg color"});
-    tb.add_row({"set_cursor_color(r,g,b)",      "12",  "Set cursor color"});
-    tb.add_row({"clipboard_write(sel, b64)",    "52",  "Write to clipboard"});
-    tb.add_row({"clipboard_query(sel)",         "52",  "Query clipboard"});
-    tb.add_row({"prompt_start",                 "133", "Shell integration: prompt"});
-    tb.add_row({"command_start",                "133", "Shell integration: cmd"});
-    tb.add_row({"command_finished(code)",       "133", "Shell integration: done"});
+    tb.add_row({"set_title(text)", "0", "Set window title + icon"});
+    tb.add_row({"set_icon_name(name)", "1", "Set icon name only"});
+    tb.add_row({"set_window_title(text)", "2", "Set window title only"});
+    tb.add_row({"set_palette_color(i,r,g,b)", "4", "Set 256-palette entry"});
+    tb.add_row({"query_palette_color(i)", "4", "Query palette entry"});
+    tb.add_row({"reset_palette_color(i)", "104", "Reset palette entry"});
+    tb.add_row({"report_cwd(host, path)", "7", "Report working directory"});
+    tb.add_row({"hyperlink_open(url, id)", "8", "Open clickable hyperlink"});
+    tb.add_row({"hyperlink_close", "8", "Close hyperlink"});
+    tb.add_row({"notify(message)", "9", "Desktop notification"});
+    tb.add_row({"set_foreground_color(r,g,b)", "10", "Set terminal fg color"});
+    tb.add_row({"set_background_color(r,g,b)", "11", "Set terminal bg color"});
+    tb.add_row({"set_cursor_color(r,g,b)", "12", "Set cursor color"});
+    tb.add_row({"clipboard_write(sel, b64)", "52", "Write to clipboard"});
+    tb.add_row({"clipboard_query(sel)", "52", "Query clipboard"});
+    tb.add_row({"prompt_start", "133", "Shell integration: prompt"});
+    tb.add_row({"command_start", "133", "Shell integration: cmd"});
+    tb.add_row({"command_finished(code)", "133", "Shell integration: done"});
 
     con.print_widget(padding_builder(std::move(tb)).pad(0, 2));
 
@@ -813,7 +784,7 @@ static void demo_osc_sequences(console& con) {
     {
         std::string out = "    ";
         out += ansi::hyperlink_open("https://github.com");
-        out += "\033[4;94m";  // underline bright blue
+        out += "\033[4;94m"; // underline bright blue
         out += "Click here to visit GitHub";
         out += "\033[0m";
         out += ansi::hyperlink_close;
@@ -826,7 +797,7 @@ static void demo_osc_sequences(console& con) {
 // 18. Low-level ANSI
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_low_level_ansi(console& con) {
+static void demo_low_level_ansi(console &con) {
     section_header(con, "18", "Low-level ANSI Utilities");
 
     con.print("  [bold]Cursor control:[/]");
@@ -857,11 +828,13 @@ static void demo_low_level_ansi(console& con) {
         auto sgr2 = ansi::sgr(s2);
 
         // Escape the ESC character for display
-        auto escape_esc = [](const std::string& s) -> std::string {
+        auto escape_esc = [](const std::string &s) -> std::string {
             std::string out;
             for (char c : s) {
-                if (c == '\033') out += "\\033";
-                else out += c;
+                if (c == '\033')
+                    out += "\\033";
+                else
+                    out += c;
             }
             return out;
         };
@@ -875,17 +848,12 @@ static void demo_low_level_ansi(console& con) {
 //  Grand Finale
 // ════════════════════════════════════════════════════════════════════════
 
-static void demo_finale(console& con) {
+static void demo_finale(console &con) {
     con.newline();
-    con.print_widget(
-        rule_builder("[bold bright_white]Grand Finale[/]")
-            .rule_style(style{colors::bright_cyan, {}, attr::bold})
-            .gradient(linear_gradient{
-                color::from_rgb(255, 0, 128),
-                color::from_rgb(0, 128, 255),
-                gradient_direction::horizontal
-            })
-    );
+    con.print_widget(rule_builder("[bold bright_white]Grand Finale[/]")
+                         .rule_style(style{colors::bright_cyan, {}, attr::bold})
+                         .gradient(linear_gradient{color::from_rgb(255, 0, 128), color::from_rgb(0, 128, 255),
+                                                   gradient_direction::horizontal}));
     con.newline();
 
     // Everything combined in one layout
@@ -936,12 +904,8 @@ static void demo_finale(console& con) {
         rows_builder body;
         body.add(text_builder("[bold bright_white]tapiru[/] [dim]\xe2\x80\x94 Modern C++23 Terminal UI Library[/]")
                      .align(justify::center));
-        body.add(rule_builder()
-                     .gradient(linear_gradient{
-                         color::from_rgb(255, 100, 0),
-                         color::from_rgb(0, 100, 255),
-                         gradient_direction::horizontal
-                     }));
+        body.add(rule_builder().gradient(linear_gradient{color::from_rgb(255, 100, 0), color::from_rgb(0, 100, 255),
+                                                         gradient_direction::horizontal}));
         body.add(std::move(summary_cols));
         body.gap(1);
 
@@ -963,18 +927,18 @@ static void demo_finale(console& con) {
 // ════════════════════════════════════════════════════════════════════════
 
 #ifdef _WIN32
-static int crt_report_hook(int reportType, char* message, int* returnValue) {
-    const char* type_str = "UNKNOWN";
-    if (reportType == _CRT_WARN)   type_str = "WARNING";
-    if (reportType == _CRT_ERROR)  type_str = "ERROR";
+static int crt_report_hook(int reportType, char *message, int *returnValue) {
+    const char *type_str = "UNKNOWN";
+    if (reportType == _CRT_WARN) type_str = "WARNING";
+    if (reportType == _CRT_ERROR) type_str = "ERROR";
     if (reportType == _CRT_ASSERT) type_str = "ASSERT";
     std::fprintf(stderr, "\n*** CRT %s: %s\n", type_str, message ? message : "(null)");
     std::fflush(stderr);
-    *returnValue = 0;  // don't trigger debugger break
+    *returnValue = 0; // don't trigger debugger break
     if (reportType == _CRT_ASSERT) {
         std::_Exit(3);
     }
-    return 1;  // handled, don't show dialog
+    return 1; // handled, don't show dialog
 }
 #endif
 
@@ -984,30 +948,33 @@ static void abort_handler(int sig) {
     std::_Exit(3);
 }
 
-
 #ifdef _WIN32
-static LONG WINAPI vectored_handler(EXCEPTION_POINTERS* ep) {
+static LONG WINAPI vectored_handler(EXCEPTION_POINTERS *ep) {
     DWORD code = ep->ExceptionRecord->ExceptionCode;
-    void* addr = ep->ExceptionRecord->ExceptionAddress;
-    const char* desc = "unknown";
-    if (code == EXCEPTION_ACCESS_VIOLATION)    desc = "ACCESS_VIOLATION";
-    else if (code == EXCEPTION_STACK_OVERFLOW) desc = "STACK_OVERFLOW";
-    else if (code == EXCEPTION_INT_DIVIDE_BY_ZERO) desc = "INT_DIVIDE_BY_ZERO";
-    else if (code == EXCEPTION_BREAKPOINT)     desc = "BREAKPOINT";
-    else return EXCEPTION_CONTINUE_SEARCH;  // not ours
+    void *addr = ep->ExceptionRecord->ExceptionAddress;
+    const char *desc = "unknown";
+    if (code == EXCEPTION_ACCESS_VIOLATION)
+        desc = "ACCESS_VIOLATION";
+    else if (code == EXCEPTION_STACK_OVERFLOW)
+        desc = "STACK_OVERFLOW";
+    else if (code == EXCEPTION_INT_DIVIDE_BY_ZERO)
+        desc = "INT_DIVIDE_BY_ZERO";
+    else if (code == EXCEPTION_BREAKPOINT)
+        desc = "BREAKPOINT";
+    else
+        return EXCEPTION_CONTINUE_SEARCH; // not ours
 
     std::fprintf(stderr, "\n*** SEH EXCEPTION 0x%08lX (%s) at %p\n", code, desc, addr);
     std::fflush(stderr);
     std::_Exit(3);
 }
 
-static void invalid_param_handler(
-    const wchar_t* expression, const wchar_t* function,
-    const wchar_t* file, unsigned int line, uintptr_t) {
+static void invalid_param_handler(const wchar_t *expression, const wchar_t *function, const wchar_t *file,
+                                  unsigned int line, uintptr_t) {
     std::fprintf(stderr, "\n*** CRT INVALID PARAMETER:\n");
     if (expression) std::fwprintf(stderr, L"  Expression: %s\n", expression);
-    if (function)   std::fwprintf(stderr, L"  Function:   %s\n", function);
-    if (file)       std::fwprintf(stderr, L"  File:       %s (line %u)\n", file, line);
+    if (function) std::fwprintf(stderr, L"  Function:   %s\n", function);
+    if (file) std::fwprintf(stderr, L"  File:       %s (line %u)\n", file, line);
     std::fflush(stderr);
     std::_Exit(3);
 }
@@ -1044,8 +1011,7 @@ int main() {
 
     con.newline();
     {
-        panel_builder title_pb(text_builder("[bold bright_white]tapiru Feature Showcase[/]")
-                                  .align(justify::center));
+        panel_builder title_pb(text_builder("[bold bright_white]tapiru Feature Showcase[/]").align(justify::center));
         title_pb.border(border_style::double_);
         title_pb.border_style_override(style{colors::bright_cyan, {}, attr::bold});
         con.print_widget(std::move(title_pb));

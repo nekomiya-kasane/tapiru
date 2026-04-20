@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #include "tapiru/text/constexpr_markup.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
@@ -316,7 +316,7 @@ TEST(ConstexprMarkupTest, CompileMarkupBox) {
     constexpr auto plan = compile_markup("[box]Hi[/box]");
     static_assert(plan.count == 3);
     static_assert(plan.fragments[0].block.kind == block_kind::box_open);
-    static_assert(plan.fragments[1].block.kind == block_kind::none);  // text "Hi"
+    static_assert(plan.fragments[1].block.kind == block_kind::none); // text "Hi"
     static_assert(plan.fragments[2].block.kind == block_kind::box_close);
     SUCCEED();
 }
@@ -325,7 +325,7 @@ TEST(ConstexprMarkupTest, CompileMarkupBoxHeavy) {
     constexpr auto plan = compile_markup("[box.heavy]X[/box]");
     static_assert(plan.count == 3);
     static_assert(plan.fragments[0].block.kind == block_kind::box_open);
-    static_assert(plan.fragments[0].block.border == 3);  // heavy
+    static_assert(plan.fragments[0].block.border == 3); // heavy
     SUCCEED();
 }
 
@@ -334,7 +334,7 @@ TEST(ConstexprMarkupTest, CompileMarkupHeading) {
     static_assert(plan.count == 3);
     static_assert(plan.fragments[0].block.kind == block_kind::heading);
     static_assert(plan.fragments[0].block.level == 1);
-    static_assert(plan.fragments[1].block.kind == block_kind::none);  // text
+    static_assert(plan.fragments[1].block.kind == block_kind::none); // text
     static_assert(plan.fragments[2].block.kind == block_kind::heading_close);
     SUCCEED();
 }
@@ -351,7 +351,7 @@ TEST(ConstexprMarkupTest, CompileMarkupRuleWithTitle) {
     constexpr auto plan = compile_markup("[rule=Section]");
     static_assert(plan.count == 1);
     static_assert(plan.fragments[0].block.kind == block_kind::rule);
-    static_assert(plan.fragments[0].block.title_length == 7);  // "Section"
+    static_assert(plan.fragments[0].block.title_length == 7); // "Section"
     SUCCEED();
 }
 
@@ -375,9 +375,9 @@ TEST(ConstexprMarkupTest, CompileMarkupBar) {
 TEST(ConstexprMarkupTest, CompileMarkupMixed) {
     constexpr auto plan = compile_markup("[bold]A[/][box]B[/box]");
     static_assert(plan.count == 4);
-    static_assert(plan.fragments[0].block.kind == block_kind::none);  // "A" bold
+    static_assert(plan.fragments[0].block.kind == block_kind::none); // "A" bold
     static_assert(plan.fragments[1].block.kind == block_kind::box_open);
-    static_assert(plan.fragments[2].block.kind == block_kind::none);  // "B"
+    static_assert(plan.fragments[2].block.kind == block_kind::none); // "B"
     static_assert(plan.fragments[3].block.kind == block_kind::box_close);
     SUCCEED();
 }
@@ -392,7 +392,7 @@ TEST(ConstexprMarkupTest, CompileMarkupEmoji) {
     constexpr auto plan = compile_markup("[emoji=fire]");
     static_assert(plan.count == 1);
     static_assert(plan.fragments[0].block.kind == block_kind::emoji);
-    static_assert(plan.fragments[0].block.name_length == 4);  // "fire"
+    static_assert(plan.fragments[0].block.name_length == 4); // "fire"
     SUCCEED();
 }
 
@@ -400,8 +400,8 @@ TEST(ConstexprMarkupTest, CompileMarkupLink) {
     constexpr auto plan = compile_markup("[link=https://x.com]click[/link]");
     static_assert(plan.count == 3);
     static_assert(plan.fragments[0].block.kind == block_kind::link_open);
-    static_assert(plan.fragments[0].block.url_length == 13);  // "https://x.com"
-    static_assert(plan.fragments[1].block.kind == block_kind::none);  // "click"
+    static_assert(plan.fragments[0].block.url_length == 13);         // "https://x.com"
+    static_assert(plan.fragments[1].block.kind == block_kind::none); // "click"
     static_assert(plan.fragments[2].block.kind == block_kind::link_close);
     SUCCEED();
 }
@@ -433,7 +433,7 @@ TEST(ConstexprMarkupTest, CompileMarkupHr) {
 
 TEST(ConstexprMarkupTest, FragmentTextExtraction) {
     constexpr auto m = ct_parse_markup("[bold]Hello[/] World");
-    constexpr const char* src = "[bold]Hello[/] World";
+    constexpr const char *src = "[bold]Hello[/] World";
     // Verify we can extract text from fragments at runtime
     std::string_view full(src);
     auto f0 = full.substr(m.fragments[0].offset, m.fragments[0].length);

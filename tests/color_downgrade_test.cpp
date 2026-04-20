@@ -3,10 +3,10 @@
  * @brief Tests for color::downgrade and double_underline attr.
  */
 
-#include <gtest/gtest.h>
-
 #include "tapiru/core/style.h"
 #include "tapiru/core/terminal.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
@@ -22,13 +22,13 @@ TEST(ColorDowngradeTest, DefaultColorUnchanged) {
 
 TEST(ColorDowngradeTest, RgbTo256) {
     auto c = color::from_rgb(255, 0, 0);
-    auto d = c.downgrade(2);  // palette_256
+    auto d = c.downgrade(2); // palette_256
     EXPECT_EQ(d.kind, color_kind::indexed_256);
 }
 
 TEST(ColorDowngradeTest, RgbTo16) {
     auto c = color::from_rgb(255, 0, 0);
-    auto d = c.downgrade(1);  // basic_16
+    auto d = c.downgrade(1); // basic_16
     EXPECT_EQ(d.kind, color_kind::indexed_16);
     // Should map to red (index 1 or 9)
     EXPECT_TRUE(d.r == 1 || d.r == 9);
@@ -41,7 +41,7 @@ TEST(ColorDowngradeTest, RgbToNone) {
 }
 
 TEST(ColorDowngradeTest, Idx256To16) {
-    auto c = color::from_index_256(196);  // bright red in 256 palette
+    auto c = color::from_index_256(196); // bright red in 256 palette
     auto d = c.downgrade(1);
     EXPECT_EQ(d.kind, color_kind::indexed_16);
 }
@@ -86,7 +86,7 @@ TEST(ColorDowngradeTest, BlackRgbTo16) {
     auto c = color::from_rgb(0, 0, 0);
     auto d = c.downgrade(1);
     EXPECT_EQ(d.kind, color_kind::indexed_16);
-    EXPECT_EQ(d.r, 0u);  // black
+    EXPECT_EQ(d.r, 0u); // black
 }
 
 // ── double_underline attr ───────────────────────────────────────────────

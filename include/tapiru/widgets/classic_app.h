@@ -10,13 +10,6 @@
  * definitions, a content builder callback, and a status builder callback.
  */
 
-#include <cstdint>
-#include <functional>
-#include <memory>
-#include <string>
-#include <string_view>
-#include <vector>
-
 #include "tapiru/core/input.h"
 #include "tapiru/core/style.h"
 #include "tapiru/exports.h"
@@ -24,6 +17,13 @@
 #include "tapiru/widgets/menu.h"
 #include "tapiru/widgets/menu_bar.h"
 #include "tapiru/widgets/status_bar.h"
+
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace tapiru {
 
@@ -55,15 +55,13 @@ struct TAPIRU_API classic_app_theme {
 // ── Callback types ─────────────────────────────────────────────────────
 
 /** @brief Called when a menu item is activated (clicked or Enter). */
-using menu_action_handler = std::function<void(int menu_index, int item_global_index,
-                                               const std::string& label)>;
+using menu_action_handler = std::function<void(int menu_index, int item_global_index, const std::string &label)>;
 
 /** @brief Called each frame to build the content area. */
-using content_builder_fn = std::function<void(rows_builder& content,
-                                              int scroll_y, int viewport_h)>;
+using content_builder_fn = std::function<void(rows_builder &content, int scroll_y, int viewport_h)>;
 
 /** @brief Called each frame to build the status bar. */
-using status_builder_fn = std::function<void(status_bar_builder& sb)>;
+using status_builder_fn = std::function<void(status_bar_builder &sb)>;
 
 /**
  * @brief Called each frame after widget render to write raw ANSI overlays.
@@ -72,8 +70,8 @@ using status_builder_fn = std::function<void(status_bar_builder& sb)>;
  * that cannot go through the widget pipeline.  The string is written directly
  * to stdout via console::write.
  */
-using overlay_fn = std::function<void(std::string& buf, uint32_t term_w, uint32_t term_h,
-                                      int scroll_y, int viewport_h)>;
+using overlay_fn =
+    std::function<void(std::string &buf, uint32_t term_w, uint32_t term_h, int scroll_y, int viewport_h)>;
 
 // ── classic_app ────────────────────────────────────────────────────────
 
@@ -93,20 +91,20 @@ using overlay_fn = std::function<void(std::string& buf, uint32_t term_w, uint32_
  *   - Alternate screen + hidden cursor
  */
 class TAPIRU_API classic_app {
-public:
+  public:
     struct config {
         std::vector<menu_bar_entry> menus;
-        classic_app_theme           theme = classic_app_theme::dark();
-        int                         poll_interval_ms = 50;
+        classic_app_theme theme = classic_app_theme::dark();
+        int poll_interval_ms = 50;
     };
 
     explicit classic_app(config cfg);
     ~classic_app();
 
-    classic_app(const classic_app&) = delete;
-    classic_app& operator=(const classic_app&) = delete;
-    classic_app(classic_app&&) noexcept;
-    classic_app& operator=(classic_app&&) noexcept;
+    classic_app(const classic_app &) = delete;
+    classic_app &operator=(const classic_app &) = delete;
+    classic_app(classic_app &&) noexcept;
+    classic_app &operator=(classic_app &&) noexcept;
 
     // ── Callbacks ──────────────────────────────────────────────────────
 
@@ -126,7 +124,7 @@ public:
      * @brief Register a handler for key events not consumed by the shell.
      * Return true from the callback to indicate the event was handled.
      */
-    void on_key(std::function<bool(const key_event&)> fn);
+    void on_key(std::function<bool(const key_event &)> fn);
 
     // ── Lifecycle ──────────────────────────────────────────────────────
 
@@ -138,25 +136,25 @@ public:
 
     // ── State queries (for use inside callbacks) ───────────────────────
 
-    [[nodiscard]] int      scroll_y()    const;
-    [[nodiscard]] int      viewport_h()  const;
-    [[nodiscard]] int      cursor_line() const;
-    [[nodiscard]] int      cursor_col()  const;
-    [[nodiscard]] bool     has_selection() const;
-    void                   selection_range(int& sl, int& sc, int& el, int& ec) const;
-    [[nodiscard]] uint32_t term_width()  const;
+    [[nodiscard]] int scroll_y() const;
+    [[nodiscard]] int viewport_h() const;
+    [[nodiscard]] int cursor_line() const;
+    [[nodiscard]] int cursor_col() const;
+    [[nodiscard]] bool has_selection() const;
+    void selection_range(int &sl, int &sc, int &el, int &ec) const;
+    [[nodiscard]] uint32_t term_width() const;
     [[nodiscard]] uint32_t term_height() const;
 
     // ── State mutation (for use inside callbacks) ──────────────────────
 
     void scroll_to(int line);
-    void set_status_message(const std::string& msg);
+    void set_status_message(const std::string &msg);
     void set_content_lines(int total);
-    void set_document_lines(const std::vector<std::string>& lines);
+    void set_document_lines(const std::vector<std::string> &lines);
 
-private:
+  private:
     struct impl;
     std::unique_ptr<impl> impl_;
 };
 
-}  // namespace tapiru
+} // namespace tapiru

@@ -1,11 +1,10 @@
-#include <gtest/gtest.h>
+#include "tapiru/core/console.h"
+#include "tapiru/widgets/progress.h"
 
+#include <gtest/gtest.h>
 #include <memory>
 #include <mutex>
 #include <string>
-
-#include "tapiru/core/console.h"
-#include "tapiru/widgets/progress.h"
 
 using namespace tapiru;
 
@@ -55,7 +54,7 @@ TEST(ProgressTaskTest, SetTotal) {
 
 TEST(ProgressTaskTest, FractionClamps) {
     progress_task task("Work", 100);
-    task.set_current(150);  // over total
+    task.set_current(150); // over total
     EXPECT_DOUBLE_EQ(task.fraction(), 1.0);
 }
 
@@ -67,7 +66,7 @@ TEST(ProgressTaskTest, ZeroTotal) {
 // ── progress_builder rendering tests ────────────────────────────────────
 
 class capture_sink {
-public:
+  public:
     void operator()(std::string_view data) {
         std::lock_guard lk(mu_);
         buffer_ += data;
@@ -76,7 +75,8 @@ public:
         std::lock_guard lk(mu_);
         return buffer_;
     }
-private:
+
+  private:
     mutable std::mutex mu_;
     std::string buffer_;
 };
@@ -92,9 +92,7 @@ TEST(ProgressBuilderTest, SingleTask) {
     auto task = std::make_shared<progress_task>("Loading", 100);
     task->advance(50);
 
-    con.print_widget(
-        progress_builder().add_task(task).bar_width(20).complete_char('#').remaining_char('.'),
-        80);
+    con.print_widget(progress_builder().add_task(task).bar_width(20).complete_char('#').remaining_char('.'), 80);
 
     auto out = sink->snapshot();
     EXPECT_TRUE(out.find("Loading") != std::string::npos);
@@ -114,9 +112,7 @@ TEST(ProgressBuilderTest, CompletedTask) {
     auto task = std::make_shared<progress_task>("Done", 100);
     task->set_completed();
 
-    con.print_widget(
-        progress_builder().add_task(task).bar_width(10).complete_char('#').remaining_char('.'),
-        80);
+    con.print_widget(progress_builder().add_task(task).bar_width(10).complete_char('#').remaining_char('.'), 80);
 
     auto out = sink->snapshot();
     EXPECT_TRUE(out.find("Done") != std::string::npos);
@@ -136,9 +132,8 @@ TEST(ProgressBuilderTest, MultipleTasks) {
     t1->advance(25);
     t2->advance(100);
 
-    con.print_widget(
-        progress_builder().add_task(t1).add_task(t2).bar_width(10).complete_char('#').remaining_char('.'),
-        80);
+    con.print_widget(progress_builder().add_task(t1).add_task(t2).bar_width(10).complete_char('#').remaining_char('.'),
+                     80);
 
     auto out = sink->snapshot();
     EXPECT_TRUE(out.find("Task A") != std::string::npos);

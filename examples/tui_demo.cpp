@@ -23,22 +23,14 @@
  */
 
 #ifdef _WIN32
-#  define WIN32_LEAN_AND_MEAN
-#  define NOMINMAX
-#  include <Windows.h>
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
 #else
-#  include <termios.h>
-#  include <unistd.h>
-#  include <sys/select.h>
+#include <sys/select.h>
+#include <termios.h>
+#include <unistd.h>
 #endif
-
-#include <chrono>
-#include <cmath>
-#include <cstdio>
-#include <cstdint>
-#include <string>
-#include <thread>
-#include <vector>
 
 #include "tapiru/core/console.h"
 #include "tapiru/core/gradient.h"
@@ -55,20 +47,26 @@
 #include "tapiru/widgets/interactive.h"
 #include "tapiru/widgets/progress.h"
 
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <cstdio>
+#include <string>
+#include <thread>
+#include <vector>
+
 using namespace tapiru;
 
 // ═══════════════════════════════════════════════════════════════════════
 //  Input abstraction
 // ═══════════════════════════════════════════════════════════════════════
 
-enum class input_event : uint8_t {
-    none, up, down, left, right, enter, tab, shift_tab, quit
-};
+enum class input_event : uint8_t { none, up, down, left, right, enter, tab, shift_tab, quit };
 
 #ifdef _WIN32
 
 static HANDLE g_stdin = INVALID_HANDLE_VALUE;
-static DWORD  g_old_mode = 0;
+static DWORD g_old_mode = 0;
 
 static void enable_raw_input() {
     g_stdin = GetStdHandle(STD_INPUT_HANDLE);
@@ -81,25 +79,23 @@ static void restore_input() {
 }
 
 static input_event poll_input(int timeout_ms) {
-    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0)
-        return input_event::none;
+    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0) return input_event::none;
     INPUT_RECORD rec;
     DWORD count = 0;
-    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0)
-        return input_event::none;
+    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0) return input_event::none;
     if (rec.EventType == KEY_EVENT && rec.Event.KeyEvent.bKeyDown) {
         auto vk = rec.Event.KeyEvent.wVirtualKeyCode;
         auto ch = rec.Event.KeyEvent.uChar.UnicodeChar;
         bool shift = (rec.Event.KeyEvent.dwControlKeyState & SHIFT_PRESSED) != 0;
-        if (vk == VK_UP)     return input_event::up;
-        if (vk == VK_DOWN)   return input_event::down;
-        if (vk == VK_LEFT)   return input_event::left;
-        if (vk == VK_RIGHT)  return input_event::right;
+        if (vk == VK_UP) return input_event::up;
+        if (vk == VK_DOWN) return input_event::down;
+        if (vk == VK_LEFT) return input_event::left;
+        if (vk == VK_RIGHT) return input_event::right;
         if (vk == VK_RETURN) return input_event::enter;
-        if (vk == VK_TAB)    return shift ? input_event::shift_tab : input_event::tab;
+        if (vk == VK_TAB) return shift ? input_event::shift_tab : input_event::tab;
         if (vk == VK_ESCAPE) return input_event::quit;
         if (ch == L'q' || ch == L'Q') return input_event::quit;
-        if (ch == L' ')      return input_event::enter;
+        if (ch == L' ') return input_event::enter;
     }
     return input_event::none;
 }
@@ -128,8 +124,7 @@ static input_event poll_input(int timeout_ms) {
     struct timeval tv;
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
-    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0)
-        return input_event::none;
+    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0) return input_event::none;
     char buf[16];
     int n = read(STDIN_FILENO, buf, sizeof(buf));
     if (n <= 0) return input_event::none;
@@ -155,9 +150,7 @@ static input_event poll_input(int timeout_ms) {
 
 static constexpr int NUM_PAGES = 5;
 
-static const char* page_names[NUM_PAGES] = {
-    "Dashboard", "Widgets", "Charts", "Themes", "Logging"
-};
+static const char *page_names[NUM_PAGES] = {"Dashboard", "Widgets", "Charts", "Themes", "Logging"};
 
 struct todo_item {
     std::string text;
@@ -166,31 +159,31 @@ struct todo_item {
 
 struct app_state {
     bool quit = false;
-    int  page = 0;       // 0..4
-    int  cursor = 0;     // per-page cursor
-    int  tick = 0;        // frame counter for animation
+    int page = 0;   // 0..4
+    int cursor = 0; // per-page cursor
+    int tick = 0;   // frame counter for animation
 
     // Page 0: Dashboard
     std::vector<todo_item> todos = {
-        {"Canvas swap optimization",   true},
-        {"Live engine diff",           true},
-        {"Gradient engine",            true},
-        {"Border join algorithm",      true},
-        {"Event routing",              true},
-        {"Animation system",           true},
-        {"Interactive widgets",        true},
-        {"Braille charts",             true},
-        {"Image character art",        true},
-        {"Theme system",               false},
-        {"Structured logging",         false},
-        {"API documentation",          false},
+        {"Canvas swap optimization", true},
+        {"Live engine diff", true},
+        {"Gradient engine", true},
+        {"Border join algorithm", true},
+        {"Event routing", true},
+        {"Animation system", true},
+        {"Interactive widgets", true},
+        {"Braille charts", true},
+        {"Image character art", true},
+        {"Theme system", false},
+        {"Structured logging", false},
+        {"API documentation", false},
     };
 
     // Page 1: Interactive widgets
-    bool  cb_bold = true;
-    bool  cb_italic = false;
-    bool  cb_underline = false;
-    int   radio_sel = 0;
+    bool cb_bold = true;
+    bool cb_italic = false;
+    bool cb_underline = false;
+    int radio_sel = 0;
     float slider_val = 0.65f;
 
     // Page 4: Logging
@@ -202,7 +195,7 @@ struct app_state {
 //  Page renderers — each returns a markup string
 // ═══════════════════════════════════════════════════════════════════════
 
-static std::string render_tab_bar(const app_state& st) {
+static std::string render_tab_bar(const app_state &st) {
     std::string out = "  ";
     for (int i = 0; i < NUM_PAGES; ++i) {
         if (i == st.page) {
@@ -222,16 +215,20 @@ static std::string render_tab_bar(const app_state& st) {
 // Dynamically set based on terminal height minus header/footer overhead
 static int g_fixed_height = 30;
 
-static int count_newlines(const std::string& s) {
+static int count_newlines(const std::string &s) {
     int n = 0;
-    for (char c : s) if (c == '\n') ++n;
+    for (char c : s)
+        if (c == '\n') ++n;
     return n;
 }
 
-static void pad_to_height(std::string& ui, int target = 0) {
+static void pad_to_height(std::string &ui, int target = 0) {
     if (target <= 0) target = g_fixed_height;
     int lines = count_newlines(ui);
-    while (lines < target) { ui += '\n'; ++lines; }
+    while (lines < target) {
+        ui += '\n';
+        ++lines;
+    }
 }
 
 static std::string render_separator() {
@@ -250,25 +247,26 @@ static std::string render_separator() {
 
 // ── Page 0: Dashboard ──────────────────────────────────────────────────
 
-static std::string render_dashboard(const app_state& st) {
+static std::string render_dashboard(const app_state &st) {
     std::string ui;
 
     // Count done
     int done = 0;
-    for (auto& t : st.todos) if (t.done) ++done;
+    for (auto &t : st.todos)
+        if (t.done) ++done;
     int total = static_cast<int>(st.todos.size());
     float pct = total > 0 ? static_cast<float>(done) / static_cast<float>(total) : 0.0f;
 
     // Progress summary
     char buf[64];
-    std::snprintf(buf, sizeof(buf), "  [bold cyan]Progress:[/] %d/%d tasks  [bold green]%.0f%%[/]\n\n",
-                  done, total, pct * 100.0f);
+    std::snprintf(buf, sizeof(buf), "  [bold cyan]Progress:[/] %d/%d tasks  [bold green]%.0f%%[/]\n\n", done, total,
+                  pct * 100.0f);
     ui += buf;
 
     // Todo list
     for (int i = 0; i < total; ++i) {
         bool sel = (i == st.cursor);
-        const auto& item = st.todos[i];
+        const auto &item = st.todos[i];
         if (sel) {
             ui += "  [bold bright_white on_blue] ";
             ui += item.done ? "\xe2\x9c\x93" : " ";
@@ -300,13 +298,13 @@ static std::string render_dashboard(const app_state& st) {
 
 // ── Page 1: Interactive Widgets ────────────────────────────────────────
 
-static std::string render_widgets(const app_state& st) {
+static std::string render_widgets(const app_state &st) {
     std::string ui;
 
     ui += "  [bold bright_cyan]Style Options[/]\n\n";
 
     // Checkboxes
-    auto cb = [&](const char* label, bool val, int idx) {
+    auto cb = [&](const char *label, bool val, int idx) {
         bool sel = (st.cursor == idx);
         std::string prefix = sel ? "[bold bright_white on_blue] " : "    ";
         std::string suffix = sel ? " [/]" : "";
@@ -316,15 +314,15 @@ static std::string render_widgets(const app_state& st) {
         ui += suffix;
         ui += "\n";
     };
-    cb("Bold",      st.cb_bold,      0);
-    cb("Italic",    st.cb_italic,    1);
+    cb("Bold", st.cb_bold, 0);
+    cb("Italic", st.cb_italic, 1);
     cb("Underline", st.cb_underline, 2);
 
     // Preview
     ui += "\n  [dim]Preview:[/] ";
     std::string tags;
-    if (st.cb_bold)      tags += "bold ";
-    if (st.cb_italic)    tags += "italic ";
+    if (st.cb_bold) tags += "bold ";
+    if (st.cb_italic) tags += "italic ";
     if (st.cb_underline) tags += "underline ";
     if (tags.empty()) tags = "";
     if (!tags.empty()) {
@@ -336,7 +334,7 @@ static std::string render_widgets(const app_state& st) {
 
     // Radio group
     ui += "  [bold bright_cyan]Border Style[/]\n\n";
-    const char* radio_opts[] = {"Rounded", "Heavy", "Double", "ASCII"};
+    const char *radio_opts[] = {"Rounded", "Heavy", "Double", "ASCII"};
     for (int i = 0; i < 4; ++i) {
         bool sel = (st.cursor == 3 + i);
         std::string prefix = sel ? "[bold bright_white on_blue] " : "    ";
@@ -379,14 +377,14 @@ static std::string render_widgets(const app_state& st) {
 
 // ── Page 2: Charts & Image ─────────────────────────────────────────────
 
-static std::string render_charts_text(const app_state& st) {
+static std::string render_charts_text(const app_state &st) {
     std::string ui;
     ui += "  [bold bright_yellow]Braille Line Chart[/] [dim](sine wave, animated)[/]\n\n";
     // Chart is rendered as a widget below
-    ui += "\n\n\n\n\n\n\n\n";  // placeholder space for chart
+    ui += "\n\n\n\n\n\n\n\n"; // placeholder space for chart
 
     ui += "  [bold bright_yellow]Bar Chart[/] [dim](weekly data)[/]\n\n";
-    ui += "\n\n\n\n\n\n\n\n\n";  // placeholder for bar chart
+    ui += "\n\n\n\n\n\n\n\n\n"; // placeholder for bar chart
 
     ui += "  [bold bright_yellow]Half-Block Image[/] [dim](16x16 gradient)[/]\n";
     return ui;
@@ -394,32 +392,32 @@ static std::string render_charts_text(const app_state& st) {
 
 // ── Page 3: Theme Gallery ──────────────────────────────────────────────
 
-static std::string render_theme_gallery(const app_state& st) {
+static std::string render_theme_gallery(const app_state &st) {
     std::string ui;
 
-    auto show_theme = [&](const char* name, tapiru::theme th) {
+    auto show_theme = [&](const char *name, tapiru::theme th) {
         ui += "  [bold bright_white]";
         ui += name;
         ui += "[/]\n";
 
-        const char* keys[] = {"text", "danger", "success", "warning", "info", "accent", "muted"};
+        const char *keys[] = {"text", "danger", "success", "warning", "info", "accent", "muted"};
         for (auto k : keys) {
-            auto* s = th.lookup(k);
+            auto *s = th.lookup(k);
             if (!s) continue;
             char buf[80];
-            std::snprintf(buf, sizeof(buf), "    [#%02X%02X%02X]%-10s[/]  fg=(%3u,%3u,%3u)",
-                          s->fg.r, s->fg.g, s->fg.b, k, s->fg.r, s->fg.g, s->fg.b);
+            std::snprintf(buf, sizeof(buf), "    [#%02X%02X%02X]%-10s[/]  fg=(%3u,%3u,%3u)", s->fg.r, s->fg.g, s->fg.b,
+                          k, s->fg.r, s->fg.g, s->fg.b);
             ui += buf;
             if (has_attr(s->attrs, attr::bold)) ui += " [dim]+bold[/]";
-            if (has_attr(s->attrs, attr::dim))  ui += " [dim]+dim[/]";
+            if (has_attr(s->attrs, attr::dim)) ui += " [dim]+dim[/]";
             if (has_attr(s->attrs, attr::underline)) ui += " [dim]+underline[/]";
             ui += "\n";
         }
         ui += "\n";
     };
 
-    show_theme("Dark Theme",    tapiru::theme::dark());
-    show_theme("Light Theme",   tapiru::theme::light());
+    show_theme("Dark Theme", tapiru::theme::dark());
+    show_theme("Light Theme", tapiru::theme::light());
     show_theme("Monokai Theme", tapiru::theme::monokai());
 
     return ui;
@@ -427,7 +425,7 @@ static std::string render_theme_gallery(const app_state& st) {
 
 // ── Page 4: Structured Logging ─────────────────────────────────────────
 
-static std::string render_logging_text(const app_state& st) {
+static std::string render_logging_text(const app_state &st) {
     std::string ui;
     ui += "  [bold bright_magenta]Live Log Stream[/] [dim](auto-generated)[/]\n\n";
     // Log panel rendered as widget below
@@ -439,10 +437,10 @@ static std::string render_logging_text(const app_state& st) {
 // ═══════════════════════════════════════════════════════════════════════
 
 class app_view {
-public:
-    explicit app_view(app_state& st) : st_(st) {}
+  public:
+    explicit app_view(app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         std::string ui;
 
         // Header
@@ -456,11 +454,21 @@ public:
 
         // Page content
         switch (st_.page) {
-        case 0: ui += render_dashboard(st_); break;
-        case 1: ui += render_widgets(st_); break;
-        case 2: ui += render_charts_text(st_); break;
-        case 3: ui += render_theme_gallery(st_); break;
-        case 4: ui += render_logging_text(st_); break;
+        case 0:
+            ui += render_dashboard(st_);
+            break;
+        case 1:
+            ui += render_widgets(st_);
+            break;
+        case 2:
+            ui += render_charts_text(st_);
+            break;
+        case 3:
+            ui += render_theme_gallery(st_);
+            break;
+        case 4:
+            ui += render_logging_text(st_);
+            break;
         }
 
         // Footer
@@ -475,16 +483,16 @@ public:
         return text_builder(ui).overflow(overflow_mode::truncate).flatten_into(s);
     }
 
-private:
-    app_state& st_;
+  private:
+    app_state &st_;
 };
 
 // Widget-based view for pages that need real widget rendering
 class chart_page_view {
-public:
-    explicit chart_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit chart_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         std::string ui;
 
         // Header
@@ -502,8 +510,7 @@ public:
         std::vector<float> sine_data;
         for (int i = 0; i < 60; ++i) {
             float phase = static_cast<float>(st_.tick) * 0.1f;
-            sine_data.push_back(static_cast<float>(
-                std::sin((i + phase) * 0.15) * 40 + 50));
+            sine_data.push_back(static_cast<float>(std::sin((i + phase) * 0.15) * 40 + 50));
         }
 
         // Build as text with chart embedded
@@ -513,14 +520,12 @@ public:
         braille_grid grid(30, 5);
         float mn = 0.0f, mx = 100.0f;
         for (size_t i = 0; i < sine_data.size(); ++i) {
-            uint32_t dx = static_cast<uint32_t>(
-                static_cast<float>(i) / static_cast<float>(sine_data.size()) *
-                static_cast<float>(grid.dot_width()));
+            uint32_t dx = static_cast<uint32_t>(static_cast<float>(i) / static_cast<float>(sine_data.size()) *
+                                                static_cast<float>(grid.dot_width()));
             float norm = (sine_data[i] - mn) / (mx - mn);
             if (norm < 0.0f) norm = 0.0f;
             if (norm > 1.0f) norm = 1.0f;
-            uint32_t dy = static_cast<uint32_t>(
-                (1.0f - norm) * static_cast<float>(grid.dot_height() - 1));
+            uint32_t dy = static_cast<uint32_t>((1.0f - norm) * static_cast<float>(grid.dot_height() - 1));
             grid.set(dx, dy);
         }
         std::string chart_str = grid.render();
@@ -539,7 +544,7 @@ public:
 
         // Bar chart using block characters
         float bar_data[] = {3, 7, 2, 9, 5, 8, 1, 6};
-        const char* bar_labels[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Avg"};
+        const char *bar_labels[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Avg"};
         float bar_max = 9.0f;
         int bar_h = 6;
         for (int row = bar_h; row >= 1; --row) {
@@ -582,15 +587,15 @@ public:
         return text_builder(ui).overflow(overflow_mode::truncate).flatten_into(s);
     }
 
-private:
-    const app_state& st_;
+  private:
+    const app_state &st_;
 };
 
 class logging_page_view {
-public:
-    explicit logging_page_view(app_state& st) : st_(st) {}
+  public:
+    explicit logging_page_view(app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         std::string ui;
 
         // Header
@@ -605,9 +610,9 @@ public:
         ui += "  [bold bright_magenta]Live Log Stream[/] [dim](auto-generated every 500ms)[/]\n\n";
 
         // Render actual log entries with auto-scroll
-        auto& lines = st_.log_panel.lines();
+        auto &lines = st_.log_panel.lines();
         // Calculate how many lines we can show (total height minus header/footer overhead)
-        int avail = g_fixed_height - 12;  // ~12 lines for header + footer + padding
+        int avail = g_fixed_height - 12; // ~12 lines for header + footer + padding
         if (avail < 3) avail = 3;
         size_t start = 0;
         size_t count = lines.size();
@@ -636,27 +641,21 @@ public:
         return text_builder(ui).overflow(overflow_mode::truncate).flatten_into(s);
     }
 
-private:
-    app_state& st_;
+  private:
+    app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
 //  Log generation
 // ═══════════════════════════════════════════════════════════════════════
 
-static void generate_log(app_state& st) {
-    static const char* modules[] = {"http", "db", "auth", "cache", "worker"};
-    static const char* messages[] = {
-        "Request handled", "Query executed", "Token validated",
-        "Cache miss", "Job completed", "Connection opened",
-        "Timeout warning", "Rate limit hit", "Session expired",
-        "Index rebuilt", "Backup started", "Health check OK"
-    };
-    static const log_level levels[] = {
-        log_level::trace, log_level::debug, log_level::info,
-        log_level::info, log_level::info, log_level::warn,
-        log_level::warn, log_level::error
-    };
+static void generate_log(app_state &st) {
+    static const char *modules[] = {"http", "db", "auth", "cache", "worker"};
+    static const char *messages[] = {"Request handled", "Query executed",    "Token validated", "Cache miss",
+                                     "Job completed",   "Connection opened", "Timeout warning", "Rate limit hit",
+                                     "Session expired", "Index rebuilt",     "Backup started",  "Health check OK"};
+    static const log_level levels[] = {log_level::trace, log_level::debug, log_level::info, log_level::info,
+                                       log_level::info,  log_level::warn,  log_level::warn, log_level::error};
 
     int idx = st.log_tick;
     log_record rec;
@@ -682,18 +681,24 @@ static void generate_log(app_state& st) {
 //  Input handling
 // ═══════════════════════════════════════════════════════════════════════
 
-static int max_cursor_for_page(const app_state& st) {
+static int max_cursor_for_page(const app_state &st) {
     switch (st.page) {
-    case 0: return static_cast<int>(st.todos.size()) - 1;
-    case 1: return 7;  // 3 checkboxes + 4 radio + 1 slider
-    case 2: return 0;
-    case 3: return 0;
-    case 4: return 0;
-    default: return 0;
+    case 0:
+        return static_cast<int>(st.todos.size()) - 1;
+    case 1:
+        return 7; // 3 checkboxes + 4 radio + 1 slider
+    case 2:
+        return 0;
+    case 3:
+        return 0;
+    case 4:
+        return 0;
+    default:
+        return 0;
     }
 }
 
-static void handle_input(app_state& st, input_event ev) {
+static void handle_input(app_state &st, input_event ev) {
     switch (ev) {
     case input_event::tab:
         st.page = (st.page + 1) % NUM_PAGES;
@@ -713,10 +718,14 @@ static void handle_input(app_state& st, input_event ev) {
         if (st.page == 0 && st.cursor < static_cast<int>(st.todos.size())) {
             st.todos[st.cursor].done = !st.todos[st.cursor].done;
         } else if (st.page == 1) {
-            if (st.cursor == 0) st.cb_bold = !st.cb_bold;
-            else if (st.cursor == 1) st.cb_italic = !st.cb_italic;
-            else if (st.cursor == 2) st.cb_underline = !st.cb_underline;
-            else if (st.cursor >= 3 && st.cursor <= 6) st.radio_sel = st.cursor - 3;
+            if (st.cursor == 0)
+                st.cb_bold = !st.cb_bold;
+            else if (st.cursor == 1)
+                st.cb_italic = !st.cb_italic;
+            else if (st.cursor == 2)
+                st.cb_underline = !st.cb_underline;
+            else if (st.cursor >= 3 && st.cursor <= 6)
+                st.radio_sel = st.cursor - 3;
         }
         break;
     case input_event::left:

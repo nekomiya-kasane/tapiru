@@ -3,16 +3,15 @@
  * @brief Tests for the form validation component.
  */
 
-#include <gtest/gtest.h>
-
-#include "tapiru/widgets/form.h"
 #include "tapiru/core/input.h"
+#include "tapiru/widgets/form.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
 // Helper: send a key event to a component
-static bool send_key(component& c, char32_t cp, special_key sk = special_key::none,
-                     key_mod mods = key_mod::none) {
+static bool send_key(component &c, char32_t cp, special_key sk = special_key::none, key_mod mods = key_mod::none) {
     input_event ev = key_event{cp, sk, mods};
     return c->on_event(ev);
 }
@@ -24,10 +23,11 @@ TEST(FormTest, FormRendersFields) {
     std::string email = "alice@example.com";
 
     auto form = make_form({
-        .fields = {
-            {.label = "Name", .value = &name},
-            {.label = "Email", .value = &email},
-        },
+        .fields =
+            {
+                {.label = "Name", .value = &name},
+                {.label = "Email", .value = &email},
+            },
     });
 
     // Render should not crash and should produce a valid element
@@ -43,11 +43,12 @@ TEST(FormTest, FormTabNavigation) {
     std::string f3 = "ccc";
 
     auto form = make_form({
-        .fields = {
-            {.label = "F1", .value = &f1},
-            {.label = "F2", .value = &f2},
-            {.label = "F3", .value = &f3},
-        },
+        .fields =
+            {
+                {.label = "F1", .value = &f1},
+                {.label = "F2", .value = &f2},
+                {.label = "F3", .value = &f3},
+            },
     });
 
     // Initially focused on field 0. Type 'X' → goes into f1
@@ -77,11 +78,13 @@ TEST(FormTest, FormValidationPass) {
     bool submitted = false;
 
     auto form = make_form({
-        .fields = {
-            {.label = "Name", .value = &name,
-             .validator = [](std::string_view v) { return !v.empty(); },
-             .error_message = "Name required"},
-        },
+        .fields =
+            {
+                {.label = "Name",
+                 .value = &name,
+                 .validator = [](std::string_view v) { return !v.empty(); },
+                 .error_message = "Name required"},
+            },
         .on_submit = [&]() { submitted = true; },
     });
 
@@ -93,15 +96,17 @@ TEST(FormTest, FormValidationPass) {
 // ── FormValidationFail ──────────────────────────────────────────────────
 
 TEST(FormTest, FormValidationFail) {
-    std::string name;  // empty
+    std::string name; // empty
     bool submitted = false;
 
     auto form = make_form({
-        .fields = {
-            {.label = "Name", .value = &name,
-             .validator = [](std::string_view v) { return !v.empty(); },
-             .error_message = "Name required"},
-        },
+        .fields =
+            {
+                {.label = "Name",
+                 .value = &name,
+                 .validator = [](std::string_view v) { return !v.empty(); },
+                 .error_message = "Name required"},
+            },
         .on_submit = [&]() { submitted = true; },
     });
 
@@ -122,14 +127,17 @@ TEST(FormTest, FormSubmitOnValid) {
     bool submitted = false;
 
     auto form = make_form({
-        .fields = {
-            {.label = "Name", .value = &name,
-             .validator = [](std::string_view v) { return v.size() >= 2; },
-             .error_message = "Min 2 chars"},
-            {.label = "Email", .value = &email,
-             .validator = [](std::string_view v) { return v.find('@') != std::string_view::npos; },
-             .error_message = "Must contain @"},
-        },
+        .fields =
+            {
+                {.label = "Name",
+                 .value = &name,
+                 .validator = [](std::string_view v) { return v.size() >= 2; },
+                 .error_message = "Min 2 chars"},
+                {.label = "Email",
+                 .value = &email,
+                 .validator = [](std::string_view v) { return v.find('@') != std::string_view::npos; },
+                 .error_message = "Must contain @"},
+            },
         .on_submit = [&]() { submitted = true; },
     });
 
@@ -140,19 +148,22 @@ TEST(FormTest, FormSubmitOnValid) {
 // ── FormSubmitBlockedOnInvalid ──────────────────────────────────────────
 
 TEST(FormTest, FormSubmitBlockedOnInvalid) {
-    std::string name = "A";  // too short
-    std::string email = "nope";  // no @
+    std::string name = "A";     // too short
+    std::string email = "nope"; // no @
     bool submitted = false;
 
     auto form = make_form({
-        .fields = {
-            {.label = "Name", .value = &name,
-             .validator = [](std::string_view v) { return v.size() >= 2; },
-             .error_message = "Min 2 chars"},
-            {.label = "Email", .value = &email,
-             .validator = [](std::string_view v) { return v.find('@') != std::string_view::npos; },
-             .error_message = "Must contain @"},
-        },
+        .fields =
+            {
+                {.label = "Name",
+                 .value = &name,
+                 .validator = [](std::string_view v) { return v.size() >= 2; },
+                 .error_message = "Min 2 chars"},
+                {.label = "Email",
+                 .value = &email,
+                 .validator = [](std::string_view v) { return v.find('@') != std::string_view::npos; },
+                 .error_message = "Must contain @"},
+            },
         .on_submit = [&]() { submitted = true; },
     });
 
@@ -162,7 +173,7 @@ TEST(FormTest, FormSubmitBlockedOnInvalid) {
     // Fix name
     name = "Alice";
     send_key(form, 0, special_key::enter);
-    EXPECT_FALSE(submitted);  // email still invalid
+    EXPECT_FALSE(submitted); // email still invalid
 
     // Fix email
     email = "alice@test.com";

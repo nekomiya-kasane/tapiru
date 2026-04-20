@@ -16,4 +16,4 @@ namespace ansi = tapioca::ansi;
 
 using tapioca::ansi_emitter;
 
-}  // namespace tapiru
+} // namespace tapiru

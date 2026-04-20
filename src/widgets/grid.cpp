@@ -4,17 +4,18 @@
  */
 
 #include "tapiru/widgets/grid.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 namespace tapiru {
 
-grid_builder& grid_builder::key(std::string_view k) {
+grid_builder &grid_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
-node_id grid_builder::flatten_into(detail::scene& s) const {
+node_id grid_builder::flatten_into(detail::scene &s) const {
     if (cells_.empty() || columns_ == 0) {
         return spacer_builder().flatten_into(s);
     }
@@ -43,7 +44,7 @@ node_id grid_builder::flatten_into(detail::scene& s) const {
 
                 // Flatten cell directly into scene, then add to columns via manual scene manipulation
                 // This requires building the columns manually.
-                break;  // Fall through to manual approach
+                break; // Fall through to manual approach
             }
         }
 
@@ -72,4 +73,4 @@ node_id grid_builder::flatten_into(detail::scene& s) const {
     return rows_id;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

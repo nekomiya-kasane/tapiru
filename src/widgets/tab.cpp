@@ -4,17 +4,18 @@
  */
 
 #include "tapiru/widgets/tab.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 namespace tapiru {
 
-tab_builder& tab_builder::key(std::string_view k) {
+tab_builder &tab_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
-node_id tab_builder::flatten_into(detail::scene& s) const {
+node_id tab_builder::flatten_into(detail::scene &s) const {
     if (tabs_.empty()) {
         return text_builder("").flatten_into(s);
     }
@@ -39,7 +40,7 @@ node_id tab_builder::flatten_into(detail::scene& s) const {
     }
 
     // Build the content panel for the active tab
-    const auto& active_tab = tabs_[static_cast<size_t>(active_idx)];
+    const auto &active_tab = tabs_[static_cast<size_t>(active_idx)];
     if (!active_tab.content) {
         auto bar_id = tab_bar.flatten_into(s);
         if (z_order_ != 0) s.set_z_order(bar_id, z_order_);
@@ -94,4 +95,4 @@ node_id tab_builder::flatten_into(detail::scene& s) const {
     }
 }
 
-}  // namespace tapiru
+} // namespace tapiru

@@ -3,18 +3,18 @@
  * @brief Tests for component_base, make_renderer, containers, catch_event.
  */
 
-#include <gtest/gtest.h>
-
 #include "tapiru/core/component.h"
 #include "tapiru/core/console.h"
 #include "tapiru/widgets/builders.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
 // ── Helper ──────────────────────────────────────────────────────────────
 
 class virtual_terminal {
-public:
+  public:
     [[nodiscard]] console make_console() {
         console_config cfg;
         cfg.sink = [this](std::string_view data) { buffer_ += data; };
@@ -22,9 +22,10 @@ public:
         cfg.no_color = true;
         return console(cfg);
     }
-    [[nodiscard]] const std::string& raw() const noexcept { return buffer_; }
+    [[nodiscard]] const std::string &raw() const noexcept { return buffer_; }
     void clear() { buffer_.clear(); }
-private:
+
+  private:
     std::string buffer_;
 };
 
@@ -101,12 +102,12 @@ TEST(ComponentTest, EmptyContainerDoesNotCrash) {
 
 namespace {
 class focusable_component : public component_base {
-public:
+  public:
     explicit focusable_component(std::string label) : label_(std::move(label)) {}
     element render() override { return element(text_builder(label_)); }
     bool focusable() const override { return true; }
-    bool on_event(const input_event& ev) override {
-        if (auto* ke = std::get_if<key_event>(&ev)) {
+    bool on_event(const input_event &ev) override {
+        if (auto *ke = std::get_if<key_event>(&ev)) {
             if (ke->key == special_key::enter) {
                 activated_ = true;
                 return true;
@@ -115,10 +116,11 @@ public:
         return false;
     }
     bool activated_ = false;
-private:
+
+  private:
     std::string label_;
 };
-}  // anonymous namespace
+} // anonymous namespace
 
 TEST(ComponentTest, ContainerFocusCycleTab) {
     auto f1 = std::make_shared<focusable_component>("F1");
@@ -199,8 +201,8 @@ TEST(ComponentTest, StackedContainerShowsSelected) {
 TEST(ComponentTest, CatchEventInterceptsEvent) {
     bool intercepted = false;
     auto inner = make_renderer([]() { return element(text_builder("x")); });
-    auto wrapped = catch_event(inner, [&](const input_event& ev) {
-        if (auto* ke = std::get_if<key_event>(&ev)) {
+    auto wrapped = catch_event(inner, [&](const input_event &ev) {
+        if (auto *ke = std::get_if<key_event>(&ev)) {
             if (ke->key == special_key::escape) {
                 intercepted = true;
                 return true;
@@ -216,7 +218,7 @@ TEST(ComponentTest, CatchEventInterceptsEvent) {
 
 TEST(ComponentTest, CatchEventPassesThrough) {
     auto inner = make_renderer([]() { return element(text_builder("x")); });
-    auto wrapped = catch_event(inner, [](const input_event&) { return false; });
+    auto wrapped = catch_event(inner, [](const input_event &) { return false; });
 
     key_event enter_ev{0, special_key::enter, key_mod::none};
     EXPECT_FALSE(wrapped->on_event(enter_ev));

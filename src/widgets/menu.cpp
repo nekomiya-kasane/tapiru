@@ -4,8 +4,9 @@
  */
 
 #include "tapiru/widgets/menu.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 #include <algorithm>
 #include <cmath>
@@ -14,13 +15,13 @@ namespace tapiru {
 
 // ── menu_tree ────────────────────────────────────────────────────────────
 
-void menu_tree::build_node(node& n, const menu_item_builder& b) {
-    n.label    = b.label_;
+void menu_tree::build_node(node &n, const menu_item_builder &b) {
+    n.label = b.label_;
     n.shortcut = b.shortcut_;
     n.separator = b.separator_;
-    n.disabled  = b.disabled_;
-    n.checked   = b.checked_;
-    n.icon      = b.icon_;
+    n.disabled = b.disabled_;
+    n.checked = b.checked_;
+    n.icon = b.icon_;
 
     if (b.separator_) {
         n.global_index = -1;
@@ -28,14 +29,14 @@ void menu_tree::build_node(node& n, const menu_item_builder& b) {
         n.global_index = next_index_++;
     }
 
-    for (const auto& child : b.children_) {
+    for (const auto &child : b.children_) {
         node cn;
         build_node(cn, child);
         n.children.push_back(std::move(cn));
     }
 }
 
-void menu_tree::add_item(const menu_item_builder& b) {
+void menu_tree::add_item(const menu_item_builder &b) {
     node n;
     build_node(n, b);
     roots_.push_back(std::move(n));
@@ -48,8 +49,8 @@ void menu_tree::add_separator() {
     roots_.push_back(std::move(n));
 }
 
-const std::vector<menu_tree::node>& menu_tree::children_at(const std::vector<int>& path) const {
-    const std::vector<node>* current = &roots_;
+const std::vector<menu_tree::node> &menu_tree::children_at(const std::vector<int> &path) const {
+    const std::vector<node> *current = &roots_;
     for (int idx : path) {
         if (idx < 0 || idx >= static_cast<int>(current->size())) return roots_;
         current = &(*current)[static_cast<size_t>(idx)].children;
@@ -57,18 +58,17 @@ const std::vector<menu_tree::node>& menu_tree::children_at(const std::vector<int
     return *current;
 }
 
-int menu_tree::next_selectable(const std::vector<node>& items, int from, int dir) const {
+int menu_tree::next_selectable(const std::vector<node> &items, int from, int dir) const {
     if (items.empty()) return -1;
     int n = static_cast<int>(items.size());
     int pos = from;
     for (int i = 0; i < n; ++i) {
         pos = (pos + dir + n) % n;
-        if (!items[static_cast<size_t>(pos)].separator &&
-            !items[static_cast<size_t>(pos)].disabled) {
+        if (!items[static_cast<size_t>(pos)].separator && !items[static_cast<size_t>(pos)].disabled) {
             return pos;
         }
     }
-    return from;  // no selectable item found
+    return from; // no selectable item found
 }
 
 // ── menu_state ───────────────────────────────────────────────────────────
@@ -106,49 +106,49 @@ bool menu_state::is_keyboard_mode() const {
     return keyboard_mode_;
 }
 
-const std::vector<menu_tree::node>& menu_state::items_at_depth(const menu_tree& tree, int d) const {
+const std::vector<menu_tree::node> &menu_state::items_at_depth(const menu_tree &tree, int d) const {
     if (d == 0) return tree.roots();
     // Build path to depth d-1
     std::vector<int> sub_path(path_.begin(), path_.begin() + d);
     return tree.children_at(sub_path);
 }
 
-void menu_state::move_up(const menu_tree& tree) {
+void menu_state::move_up(const menu_tree &tree) {
     keyboard_mode_ = true;
-    auto& items = items_at_depth(tree, depth());
+    auto &items = items_at_depth(tree, depth());
     int cur = cursor();
     int next = tree.next_selectable(items, cur, -1);
     path_.back() = next;
 }
 
-void menu_state::move_down(const menu_tree& tree) {
+void menu_state::move_down(const menu_tree &tree) {
     keyboard_mode_ = true;
-    auto& items = items_at_depth(tree, depth());
+    auto &items = items_at_depth(tree, depth());
     int cur = cursor();
     int next = tree.next_selectable(items, cur, 1);
     path_.back() = next;
 }
 
-void menu_state::move_home(const menu_tree& tree) {
+void menu_state::move_home(const menu_tree &tree) {
     keyboard_mode_ = true;
-    auto& items = items_at_depth(tree, depth());
+    auto &items = items_at_depth(tree, depth());
     int next = tree.next_selectable(items, static_cast<int>(items.size()) - 1, 1);
     path_.back() = next;
 }
 
-void menu_state::move_end(const menu_tree& tree) {
+void menu_state::move_end(const menu_tree &tree) {
     keyboard_mode_ = true;
-    auto& items = items_at_depth(tree, depth());
+    auto &items = items_at_depth(tree, depth());
     int next = tree.next_selectable(items, 0, -1);
     path_.back() = next;
 }
 
-void menu_state::open_submenu(const menu_tree& tree) {
+void menu_state::open_submenu(const menu_tree &tree) {
     keyboard_mode_ = true;
-    auto& items = items_at_depth(tree, depth());
+    auto &items = items_at_depth(tree, depth());
     int cur = cursor();
     if (cur < 0 || cur >= static_cast<int>(items.size())) return;
-    const auto& item = items[static_cast<size_t>(cur)];
+    const auto &item = items[static_cast<size_t>(cur)];
     if (!item.has_submenu() || item.disabled) return;
 
     // Find first selectable in submenu
@@ -163,11 +163,11 @@ void menu_state::close_submenu() {
     }
 }
 
-void menu_state::select(const menu_tree& tree) {
-    auto& items = items_at_depth(tree, depth());
+void menu_state::select(const menu_tree &tree) {
+    auto &items = items_at_depth(tree, depth());
     int cur = cursor();
     if (cur < 0 || cur >= static_cast<int>(items.size())) return;
-    const auto& item = items[static_cast<size_t>(cur)];
+    const auto &item = items[static_cast<size_t>(cur)];
 
     if (item.disabled || item.separator) return;
 
@@ -180,16 +180,16 @@ void menu_state::select(const menu_tree& tree) {
     was_selected_ = true;
 }
 
-void menu_state::type_char(char32_t ch, const menu_tree& tree) {
+void menu_state::type_char(char32_t ch, const menu_tree &tree) {
     keyboard_mode_ = true;
-    auto& items = items_at_depth(tree, depth());
+    auto &items = items_at_depth(tree, depth());
     int cur = cursor();
     int n = static_cast<int>(items.size());
 
     // Search from current+1, wrapping around
     for (int i = 1; i <= n; ++i) {
         int idx = (cur + i) % n;
-        const auto& item = items[static_cast<size_t>(idx)];
+        const auto &item = items[static_cast<size_t>(idx)];
         if (item.separator || item.disabled) continue;
         if (!item.label.empty()) {
             char32_t first = static_cast<char32_t>(static_cast<unsigned char>(item.label[0]));
@@ -205,8 +205,7 @@ void menu_state::type_char(char32_t ch, const menu_tree& tree) {
     }
 }
 
-void menu_state::hover(int hover_depth, int item_index, int mouse_x, int mouse_y,
-                       const menu_tree& tree) {
+void menu_state::hover(int hover_depth, int item_index, int mouse_x, int mouse_y, const menu_tree &tree) {
     keyboard_mode_ = false;
     leave_pending_ = false;
 
@@ -220,9 +219,9 @@ void menu_state::hover(int hover_depth, int item_index, int mouse_x, int mouse_y
         path_.push_back(0);
     }
 
-    auto& items = items_at_depth(tree, hover_depth);
+    auto &items = items_at_depth(tree, hover_depth);
     if (item_index < 0 || item_index >= static_cast<int>(items.size())) return;
-    const auto& item = items[static_cast<size_t>(item_index)];
+    const auto &item = items[static_cast<size_t>(item_index)];
     if (item.separator) return;
 
     path_[static_cast<size_t>(hover_depth)] = item_index;
@@ -243,7 +242,7 @@ void menu_state::hover(int hover_depth, int item_index, int mouse_x, int mouse_y
     }
 }
 
-void menu_state::click(int click_depth, int item_index, const menu_tree& tree) {
+void menu_state::click(int click_depth, int item_index, const menu_tree &tree) {
     keyboard_mode_ = false;
     leave_pending_ = false;
 
@@ -255,9 +254,9 @@ void menu_state::click(int click_depth, int item_index, const menu_tree& tree) {
         path_.resize(static_cast<size_t>(click_depth) + 1);
     }
 
-    auto& items = items_at_depth(tree, click_depth);
+    auto &items = items_at_depth(tree, click_depth);
     if (item_index < 0 || item_index >= static_cast<int>(items.size())) return;
-    const auto& item = items[static_cast<size_t>(item_index)];
+    const auto &item = items[static_cast<size_t>(item_index)];
 
     if (item.separator || item.disabled) return;
 
@@ -369,48 +368,46 @@ bool menu_state::is_in_safe_triangle(int mouse_x, int mouse_y) const {
 
 // ── menu_builder ─────────────────────────────────────────────────────────
 
-menu_builder& menu_builder::key(std::string_view k) {
+menu_builder &menu_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
-node_id menu_builder::flatten_into(detail::scene& s) const {
+node_id menu_builder::flatten_into(detail::scene &s) const {
     detail::menu_data md;
 
     // Recursive conversion from menu_item_builder to detail::menu_item
-    std::function<void(const std::vector<menu_item_builder>&, std::vector<detail::menu_item>&)> convert =
-        [&convert](const std::vector<menu_item_builder>& builders, std::vector<detail::menu_item>& out) {
-        for (const auto& b : builders) {
-            detail::menu_item mi;
-            mi.label     = b.label_;
-            mi.shortcut  = b.shortcut_;
-            mi.separator = b.separator_;
-            mi.disabled  = b.disabled_;
-            mi.checked   = b.checked_;
-            mi.icon      = b.icon_;
-            if (!b.children_.empty()) {
-                convert(b.children_, mi.children);
+    std::function<void(const std::vector<menu_item_builder> &, std::vector<detail::menu_item> &)> convert =
+        [&convert](const std::vector<menu_item_builder> &builders, std::vector<detail::menu_item> &out) {
+            for (const auto &b : builders) {
+                detail::menu_item mi;
+                mi.label = b.label_;
+                mi.shortcut = b.shortcut_;
+                mi.separator = b.separator_;
+                mi.disabled = b.disabled_;
+                mi.checked = b.checked_;
+                mi.icon = b.icon_;
+                if (!b.children_.empty()) {
+                    convert(b.children_, mi.children);
+                }
+                out.push_back(std::move(mi));
             }
-            out.push_back(std::move(mi));
-        }
-    };
+        };
     convert(items_, md.items);
 
-    md.cursor        = cursor_;
-    md.border        = border_;
-    md.border_sty    = border_sty_;
+    md.cursor = cursor_;
+    md.border = border_;
+    md.border_sty = border_sty_;
     md.highlight_sty = highlight_sty_;
-    md.shortcut_sty  = shortcut_sty_;
-    md.item_sty      = item_sty_;
-    md.disabled_sty  = disabled_sty_;
+    md.shortcut_sty = shortcut_sty_;
+    md.item_sty = item_sty_;
+    md.disabled_sty = disabled_sty_;
     if (state_) {
         md.open_path = &state_->open_path();
     }
     if (shadow_) {
-        md.shadow = detail::shadow_config{
-            shadow_->offset_x, shadow_->offset_y, shadow_->blur,
-            shadow_->shadow_color, shadow_->opacity
-        };
+        md.shadow = detail::shadow_config{shadow_->offset_x, shadow_->offset_y, shadow_->blur, shadow_->shadow_color,
+                                          shadow_->opacity};
     }
 
     auto pi = s.add_menu(std::move(md));
@@ -419,4 +416,4 @@ node_id menu_builder::flatten_into(detail::scene& s) const {
     return id;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

@@ -8,15 +8,15 @@
  * events internally and produces elements via the underlying builder.
  */
 
+#include "tapiru/core/component.h"
+#include "tapiru/core/style.h"
+#include "tapiru/exports.h"
+
 #include <cstdint>
 #include <functional>
 #include <string>
 #include <string_view>
 #include <vector>
-
-#include "tapiru/core/component.h"
-#include "tapiru/core/style.h"
-#include "tapiru/exports.h"
 
 namespace tapiru {
 
@@ -34,7 +34,7 @@ TAPIRU_API component make_button(button_option opt);
 
 struct checkbox_option {
     std::string label;
-    bool* value = nullptr;
+    bool *value = nullptr;
     style sty;
 };
 
@@ -44,7 +44,7 @@ TAPIRU_API component make_checkbox(checkbox_option opt);
 
 struct radio_group_option {
     std::vector<std::string> options;
-    int* selected = nullptr;
+    int *selected = nullptr;
     style sty;
 };
 
@@ -54,7 +54,7 @@ TAPIRU_API component make_radio_group(radio_group_option opt);
 
 struct selectable_list_option {
     std::vector<std::string> items;
-    int* cursor = nullptr;
+    int *cursor = nullptr;
     uint32_t visible_count = 0;
     style sty;
     style highlight_sty;
@@ -66,11 +66,11 @@ TAPIRU_API component make_selectable_list(selectable_list_option opt);
 // ── text_input ──────────────────────────────────────────────────────────
 
 struct text_input_option {
-    std::string* buffer = nullptr;
+    std::string *buffer = nullptr;
     std::string placeholder;
     uint32_t width = 20;
     style sty;
-    std::function<void(const std::string&)> on_change;
+    std::function<void(const std::string &)> on_change;
 };
 
 TAPIRU_API component make_text_input(text_input_option opt);
@@ -78,7 +78,7 @@ TAPIRU_API component make_text_input(text_input_option opt);
 // ── slider ──────────────────────────────────────────────────────────────
 
 struct slider_option {
-    float* value = nullptr;
+    float *value = nullptr;
     float min_val = 0.0f;
     float max_val = 1.0f;
     float step = 0.01f;
@@ -89,4 +89,4 @@ struct slider_option {
 
 TAPIRU_API component make_slider(slider_option opt);
 
-}  // namespace tapiru
+} // namespace tapiru

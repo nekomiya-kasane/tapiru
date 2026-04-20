@@ -1,10 +1,10 @@
-#include <gtest/gtest.h>
-
 #include "tapiru/testing/test_harness.h"
-#include "tapiru/widgets/builders.h"
-#include "tapiru/widgets/tree_view.h"
-#include "tapiru/widgets/tab.h"
 #include "tapiru/widgets/breadcrumb.h"
+#include "tapiru/widgets/builders.h"
+#include "tapiru/widgets/tab.h"
+#include "tapiru/widgets/tree_view.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 using namespace tapiru::testing;
@@ -76,10 +76,7 @@ TEST(VirtualScreenTest, TreeView) {
     std::unordered_set<std::string> expanded = {"Root"};
     int cursor = 0;
 
-    auto tree = tree_view_builder()
-        .root(std::move(root))
-        .expanded_set(&expanded)
-        .cursor(&cursor);
+    auto tree = tree_view_builder().root(std::move(root)).expanded_set(&expanded).cursor(&cursor);
     vs.render(tree);
     EXPECT_TRUE(vs.contains("Root"));
     EXPECT_TRUE(vs.contains("Child"));
@@ -91,24 +88,25 @@ TEST(AppHarnessTest, MenuBarVisible) {
     app_harness ah(app_harness::config{
         .width = 80,
         .height = 24,
-        .menus = {
-            {"File", {}},
-            {"View", {}},
-            {"Help", {}},
-        },
+        .menus =
+            {
+                {"File", {}},
+                {"View", {}},
+                {"Help", {}},
+            },
     });
-    ah.set_content([](rows_builder& content, int, int vh) {
+    ah.set_content([](rows_builder &content, int, int vh) {
         sized_box_builder sb(text_builder("Content"));
         sb.height(static_cast<uint32_t>(vh));
         content.add(std::move(sb));
     });
-    ah.set_status([](status_bar_builder& sb) {
+    ah.set_status([](status_bar_builder &sb) {
         sb.left("Status Left");
         sb.right("Status Right");
     });
     ah.render();
 
-    auto& scr = ah.screen();
+    auto &scr = ah.screen();
     // Menu bar should be on row 0
     EXPECT_TRUE(scr.contains("File"));
     EXPECT_TRUE(scr.contains("View"));
@@ -128,17 +126,15 @@ TEST(AppHarnessTest, FrameHeight) {
         .width = 80,
         .height = 24,
     });
-    ah.set_content([](rows_builder& content, int, int vh) {
+    ah.set_content([](rows_builder &content, int, int vh) {
         sized_box_builder sb(text_builder("X"));
         sb.height(static_cast<uint32_t>(vh));
         content.add(std::move(sb));
     });
-    ah.set_status([](status_bar_builder& sb) {
-        sb.left("S");
-    });
+    ah.set_status([](status_bar_builder &sb) { sb.left("S"); });
     ah.render();
 
-    auto& scr = ah.screen();
+    auto &scr = ah.screen();
     // menu(1) + viewport_h(21) + status(1) = 23
     if (scr.row_count() != 23u) {
         scr.dump(std::cerr);
@@ -153,7 +149,7 @@ TEST(AppHarnessTest, FrameHeightWithTable) {
         .height = 24,
         .menus = {{"File", {}}, {"View", {}}, {"Help", {}}},
     });
-    ah.set_content([](rows_builder& content, int, int vh) {
+    ah.set_content([](rows_builder &content, int, int vh) {
         // Left: panel with some text
         panel_builder tree_panel(text_builder("Root\n  Child1\n  Child2"));
         tree_panel.title("Tree");
@@ -162,7 +158,7 @@ TEST(AppHarnessTest, FrameHeightWithTable) {
         // Right: table
         table_builder tb;
         tb.add_column("Property", {justify::left, 16, 20});
-        tb.add_column("Value",    {justify::left, 20, 40});
+        tb.add_column("Value", {justify::left, 20, 40});
         tb.border(border_style::rounded);
         tb.add_row({"Name", "Root Entry"});
         tb.add_row({"Type", "Root Storage"});
@@ -184,14 +180,14 @@ TEST(AppHarnessTest, FrameHeightWithTable) {
         sized.height(static_cast<uint32_t>(std::max(vh, 1)));
         content.add(std::move(sized));
     });
-    ah.set_status([](status_bar_builder& sb) {
+    ah.set_status([](status_bar_builder &sb) {
         sb.left("file.cfb");
         sb.center("CFB v4");
         sb.right("Root Storage");
     });
     ah.render();
 
-    auto& scr = ah.screen();
+    auto &scr = ah.screen();
     // menu(1) + viewport_h(21) + status(1) = 23
     if (scr.row_count() != 23u) {
         scr.dump(std::cerr);

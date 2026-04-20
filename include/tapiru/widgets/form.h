@@ -9,14 +9,14 @@
  * with optional error message display.
  */
 
+#include "tapiru/core/component.h"
+#include "tapiru/core/style.h"
+#include "tapiru/exports.h"
+
 #include <functional>
 #include <string>
 #include <string_view>
 #include <vector>
-
-#include "tapiru/core/component.h"
-#include "tapiru/core/style.h"
-#include "tapiru/exports.h"
 
 namespace tapiru {
 
@@ -25,7 +25,7 @@ namespace tapiru {
 struct form_option {
     struct field {
         std::string label;
-        std::string* value = nullptr;
+        std::string *value = nullptr;
         std::function<bool(std::string_view)> validator;
         std::string error_message;
     };
@@ -43,4 +43,4 @@ struct form_option {
 
 TAPIRU_API component make_form(form_option opt);
 
-}  // namespace tapiru
+} // namespace tapiru

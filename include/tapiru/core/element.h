@@ -9,17 +9,19 @@
  * decorator pipe syntax: `elem | border() | bold()`.
  */
 
+#include "tapiru/core/style.h"
+#include "tapiru/exports.h"
+
 #include <concepts>
 #include <functional>
 #include <memory>
 #include <type_traits>
 
-#include "tapiru/core/style.h"
-#include "tapiru/exports.h"
-
 namespace tapiru {
 
-namespace detail { class scene; }
+namespace detail {
+class scene;
+}
 
 using node_id = uint32_t;
 
@@ -28,40 +30,37 @@ using node_id = uint32_t;
 namespace detail {
 
 template <typename B>
-concept flattenable = requires(B b, detail::scene& s) {
+concept flattenable = requires(B b, detail::scene &s) {
     { b.flatten_into(s) } -> std::same_as<node_id>;
 };
 
-}  // namespace detail
+} // namespace detail
 
 // ── element ─────────────────────────────────────────────────────────────
 
 class TAPIRU_API element {
-public:
+  public:
     element() = default;
 
     template <detail::flattenable B>
-        requires (!std::same_as<std::decay_t<B>, element>)
-    element(B&& builder)  // NOLINT(google-explicit-constructor)
+        requires(!std::same_as<std::decay_t<B>, element>)
+    element(B &&builder) // NOLINT(google-explicit-constructor)
         : impl_(std::make_shared<model_<std::decay_t<B>>>(std::forward<B>(builder))) {}
 
     [[nodiscard]] bool empty() const noexcept { return !impl_; }
 
-    node_id flatten_into(detail::scene& s) const;
+    node_id flatten_into(detail::scene &s) const;
 
-private:
+  private:
     struct concept_ {
         virtual ~concept_() = default;
-        virtual node_id flatten(detail::scene& s) const = 0;
+        virtual node_id flatten(detail::scene &s) const = 0;
     };
 
-    template <typename B>
-    struct model_ final : concept_ {
+    template <typename B> struct model_ final : concept_ {
         B builder_;
         explicit model_(B b) : builder_(std::move(b)) {}
-        node_id flatten(detail::scene& s) const override {
-            return builder_.flatten_into(s);
-        }
+        node_id flatten(detail::scene &s) const override { return builder_.flatten_into(s); }
     };
 
     std::shared_ptr<concept_> impl_;
@@ -71,7 +70,7 @@ private:
 
 using decorator = std::function<element(element)>;
 
-TAPIRU_API element operator|(element e, const decorator& d);
-TAPIRU_API element operator|(element e, const style& s);
+TAPIRU_API element operator|(element e, const decorator &d);
+TAPIRU_API element operator|(element e, const style &s);
 
-}  // namespace tapiru
+} // namespace tapiru

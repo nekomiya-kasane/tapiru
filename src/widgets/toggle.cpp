@@ -4,17 +4,18 @@
  */
 
 #include "tapiru/widgets/toggle.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
+#include "tapiru/widgets/builders.h"
 
 namespace tapiru {
 
-toggle_builder& toggle_builder::key(std::string_view k) {
+toggle_builder &toggle_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
-node_id toggle_builder::flatten_into(detail::scene& s) const {
+node_id toggle_builder::flatten_into(detail::scene &s) const {
     bool is_on = value_ ? *value_ : false;
 
     std::string switch_text = is_on ? on_text_ : off_text_;
@@ -41,4 +42,4 @@ node_id toggle_builder::flatten_into(detail::scene& s) const {
     return id;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

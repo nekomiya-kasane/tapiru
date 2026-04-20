@@ -8,11 +8,6 @@
  *   .\build\bin\Release\tapiru_vfx_demo.exe
  */
 
-#include <chrono>
-#include <cmath>
-#include <string>
-#include <thread>
-
 #include "tapiru/core/console.h"
 #include "tapiru/core/gradient.h"
 #include "tapiru/core/live.h"
@@ -22,13 +17,18 @@
 #include "tapiru/widgets/progress.h"
 #include "tapiru/widgets/spinner.h"
 
+#include <chrono>
+#include <cmath>
+#include <string>
+#include <thread>
+
 using namespace tapiru;
 
 // ═══════════════════════════════════════════════════════════════════════
 //  Helper
 // ═══════════════════════════════════════════════════════════════════════
 
-static void section(console& con, const char* title) {
+static void section(console &con, const char *title) {
     con.newline();
     con.print_widget(rule_builder(title).rule_style(style{colors::bright_cyan, {}, attr::bold}), 70);
     con.newline();
@@ -38,7 +38,7 @@ static void section(console& con, const char* title) {
 //  1. Box Shadow
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_shadow(console& con) {
+static void demo_shadow(console &con) {
     section(con, " 1. Box Shadow ");
 
     con.print("[dim]Panel with drop shadow (offset 2,1  blur 1):[/]");
@@ -47,7 +47,7 @@ static void demo_shadow(console& con) {
     panel_builder pb(text_builder("[bold]Hello Shadow![/]\nThis panel casts a soft shadow."));
     pb.title("Shadow Demo");
     pb.border(border_style::rounded);
-    pb.shadow();  // default: offset_x=2, offset_y=1, blur=1
+    pb.shadow(); // default: offset_x=2, offset_y=1, blur=1
     con.print_widget(std::move(pb), 50);
 
     con.newline();
@@ -67,7 +67,7 @@ static void demo_shadow(console& con) {
 //  2. Glow Effect
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_glow(console& con) {
+static void demo_glow(console &con) {
     section(con, " 2. Glow Effect ");
 
     con.print("[dim]Panel with cyan glow (blur 2, opacity 100):[/]");
@@ -98,13 +98,14 @@ static void demo_glow(console& con) {
 //  3. Terminal Shaders (static)
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_shaders_static(console& con) {
+static void demo_shaders_static(console &con) {
     section(con, " 3. Terminal Shaders (static) ");
 
     con.print("[dim]Scanline shader (CRT effect):[/]");
     con.newline();
 
-    panel_builder pb1(text_builder("[bold]Retro Terminal[/]\n[green]> READY[/]\n[green]> RUN PROGRAM[/]\n[green]> ...[/]"));
+    panel_builder pb1(
+        text_builder("[bold]Retro Terminal[/]\n[green]> READY[/]\n[green]> RUN PROGRAM[/]\n[green]> ...[/]"));
     pb1.title("CRT");
     pb1.border(border_style::rounded);
     pb1.border_style_override(style{colors::green, {}});
@@ -117,7 +118,8 @@ static void demo_shaders_static(console& con) {
     con.print("[dim]Vignette shader (darkened edges):[/]");
     con.newline();
 
-    panel_builder pb2(text_builder("[bold white]Cinematic[/]\n\nThe edges fade to darkness,\ndrawing focus to the center."));
+    panel_builder pb2(
+        text_builder("[bold white]Cinematic[/]\n\nThe edges fade to darkness,\ndrawing focus to the center."));
     pb2.title("Vignette");
     pb2.border(border_style::rounded);
     pb2.background_gradient({color::from_rgb(40, 20, 60), color::from_rgb(20, 10, 40)});
@@ -129,7 +131,7 @@ static void demo_shaders_static(console& con) {
 //  4. Widget Keys
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_widget_keys(console& con) {
+static void demo_widget_keys(console &con) {
     section(con, " 4. Widget Keys ");
 
     con.print("[dim]Widgets with identity keys for reconciliation:[/]");
@@ -140,20 +142,26 @@ static void demo_widget_keys(console& con) {
 
     {
         panel_builder pa(text_builder("[bold]Alpha[/]\nkey=\"card-a\""));
-        pa.title("Card A").border(border_style::rounded)
-          .border_style_override(style{colors::red, {}, attr::bold}).key("card-a");
+        pa.title("Card A")
+            .border(border_style::rounded)
+            .border_style_override(style{colors::red, {}, attr::bold})
+            .key("card-a");
         cols.add(std::move(pa), 1);
     }
     {
         panel_builder pb(text_builder("[bold]Beta[/]\nkey=\"card-b\""));
-        pb.title("Card B").border(border_style::rounded)
-          .border_style_override(style{colors::green, {}, attr::bold}).key("card-b");
+        pb.title("Card B")
+            .border(border_style::rounded)
+            .border_style_override(style{colors::green, {}, attr::bold})
+            .key("card-b");
         cols.add(std::move(pb), 1);
     }
     {
         panel_builder pc(text_builder("[bold]Gamma[/]\nkey=\"card-c\""));
-        pc.title("Card C").border(border_style::rounded)
-          .border_style_override(style{colors::blue, {}, attr::bold}).key("card-c");
+        pc.title("Card C")
+            .border(border_style::rounded)
+            .border_style_override(style{colors::blue, {}, attr::bold})
+            .key("card-c");
         cols.add(std::move(pc), 1);
     }
     cols.gap(2);
@@ -171,9 +179,8 @@ static void demo_widget_keys(console& con) {
 
 static panel_builder make_shimmer_panel(int tick) {
     (void)tick;
-    panel_builder pb(text_builder(
-        "[bold cyan]Shimmer[/]\nAnimated highlight\nsweeps diagonally\n\n"
-        "[dim]The shimmer band moves\nacross the panel each frame.[/]"));
+    panel_builder pb(text_builder("[bold cyan]Shimmer[/]\nAnimated highlight\nsweeps diagonally\n\n"
+                                  "[dim]The shimmer band moves\nacross the panel each frame.[/]"));
     pb.title("Shimmer");
     pb.border(border_style::rounded);
     pb.border_style_override(style{colors::bright_cyan, {}, attr::bold});
@@ -184,9 +191,8 @@ static panel_builder make_shimmer_panel(int tick) {
 
 static panel_builder make_pulse_panel(int tick) {
     (void)tick;
-    panel_builder pb(text_builder(
-        "[bold magenta]Glow Pulse[/]\nBorder pulses with\na soft glow\n\n"
-        "[dim]Watch the border edges\npulse rhythmically.[/]"));
+    panel_builder pb(text_builder("[bold magenta]Glow Pulse[/]\nBorder pulses with\na soft glow\n\n"
+                                  "[dim]Watch the border edges\npulse rhythmically.[/]"));
     pb.title("Glow Pulse");
     pb.border(border_style::rounded);
     pb.border_style_override(style{colors::bright_magenta, {}, attr::bold});
@@ -196,7 +202,7 @@ static panel_builder make_pulse_panel(int tick) {
     return pb;
 }
 
-static void demo_live_shaders(console& con) {
+static void demo_live_shaders(console &con) {
     section(con, " 5. Live Animated Shaders ");
 
     if (!terminal::is_tty()) {
@@ -241,21 +247,19 @@ static void demo_live_shaders(console& con) {
 //  6. Combined: Shadow + Gradient + Shader
 // ═══════════════════════════════════════════════════════════════════════
 
-static void demo_combined(console& con) {
+static void demo_combined(console &con) {
     section(con, " 6. Combined Effects ");
 
     con.print("[dim]Shadow + gradient + scanline shader:[/]");
     con.newline();
 
-    panel_builder pb(text_builder(
-        "[bold]Full Stack[/]\n"
-        "\n"
-        "This panel combines:\n"
-        "  [cyan]\xE2\x80\xA2[/] Drop shadow\n"
-        "  [cyan]\xE2\x80\xA2[/] Gradient background\n"
-        "  [cyan]\xE2\x80\xA2[/] Scanline shader\n"
-        "  [cyan]\xE2\x80\xA2[/] Widget key"
-    ));
+    panel_builder pb(text_builder("[bold]Full Stack[/]\n"
+                                  "\n"
+                                  "This panel combines:\n"
+                                  "  [cyan]\xE2\x80\xA2[/] Drop shadow\n"
+                                  "  [cyan]\xE2\x80\xA2[/] Gradient background\n"
+                                  "  [cyan]\xE2\x80\xA2[/] Scanline shader\n"
+                                  "  [cyan]\xE2\x80\xA2[/] Widget key"));
     pb.title("Everything");
     pb.border(border_style::heavy);
     pb.border_style_override(style{colors::bright_yellow, {}, attr::bold});
@@ -274,11 +278,10 @@ int main() {
     console con;
 
     con.newline();
-    con.print_widget(
-        rule_builder(" tapiru VFX Demo — Phase 6-7 Features ")
-            .rule_style(style{colors::bright_yellow, {}, attr::bold})
-            .character(U'\x2550'),  // ═
-        70);
+    con.print_widget(rule_builder(" tapiru VFX Demo — Phase 6-7 Features ")
+                         .rule_style(style{colors::bright_yellow, {}, attr::bold})
+                         .character(U'\x2550'), // ═
+                     70);
 
     demo_shadow(con);
     demo_glow(con);
@@ -288,11 +291,10 @@ int main() {
     demo_live_shaders(con);
 
     con.newline();
-    con.print_widget(
-        rule_builder(" VFX Demo Complete! ")
-            .rule_style(style{colors::bright_green, {}, attr::bold})
-            .character(U'\x2550'),
-        70);
+    con.print_widget(rule_builder(" VFX Demo Complete! ")
+                         .rule_style(style{colors::bright_green, {}, attr::bold})
+                         .character(U'\x2550'),
+                     70);
     con.newline();
 
     return 0;

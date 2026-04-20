@@ -34,15 +34,15 @@
  *   con.set_highlighter(chain);
  */
 
+#include "tapiru/core/style.h"
+#include "tapiru/exports.h"
+#include "tapiru/text/markup.h"
+
 #include <cstddef>
 #include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
-
-#include "tapiru/core/style.h"
-#include "tapiru/exports.h"
-#include "tapiru/text/markup.h"
 
 namespace tapiru {
 
@@ -54,10 +54,10 @@ namespace tapiru {
  * Spans are non-overlapping and sorted by offset after merging.
  */
 struct highlight_span {
-    size_t      offset = 0;
-    size_t      length = 0;
-    style       sty{};
-    std::string link;   ///< Optional OSC 8 hyperlink URL (empty = no link)
+    size_t offset = 0;
+    size_t length = 0;
+    style sty{};
+    std::string link; ///< Optional OSC 8 hyperlink URL (empty = no link)
 
     [[nodiscard]] constexpr size_t end() const noexcept { return offset + length; }
 };
@@ -70,8 +70,8 @@ struct highlight_span {
  */
 struct linked_fragment {
     std::string text;
-    style       sty;
-    std::string link;   ///< OSC 8 hyperlink URL (empty = no link)
+    style sty;
+    std::string link; ///< OSC 8 hyperlink URL (empty = no link)
 };
 
 // ── Highlighter base class ──────────────────────────────────────────────
@@ -83,7 +83,7 @@ struct linked_fragment {
  * styled spans for detected patterns.
  */
 class TAPIRU_API highlighter {
-public:
+  public:
     virtual ~highlighter() = default;
 
     /**
@@ -95,8 +95,7 @@ public:
      * @param text  plain text to scan (no markup)
      * @return vector of highlight_span, not necessarily sorted
      */
-    [[nodiscard]] virtual std::vector<highlight_span>
-    highlight(std::string_view text) const = 0;
+    [[nodiscard]] virtual std::vector<highlight_span> highlight(std::string_view text) const = 0;
 };
 
 // ── Regex highlighter ───────────────────────────────────────────────────
@@ -106,8 +105,8 @@ public:
  */
 struct highlight_rule {
     std::string pattern;
-    style       sty;
-    int         group = 0;  ///< Capture group to highlight (0 = whole match)
+    style sty;
+    int group = 0; ///< Capture group to highlight (0 = whole match)
 };
 
 /**
@@ -117,7 +116,7 @@ struct highlight_rule {
  * Rules are evaluated in order; first match at each position wins.
  */
 class TAPIRU_API regex_highlighter final : public highlighter {
-public:
+  public:
     regex_highlighter() = default;
 
     /**
@@ -135,12 +134,11 @@ public:
      */
     void add_word(std::string_view word, style sty);
 
-    [[nodiscard]] const std::vector<highlight_rule>& rules() const noexcept { return rules_; }
+    [[nodiscard]] const std::vector<highlight_rule> &rules() const noexcept { return rules_; }
 
-    [[nodiscard]] std::vector<highlight_span>
-    highlight(std::string_view text) const override;
+    [[nodiscard]] std::vector<highlight_span> highlight(std::string_view text) const override;
 
-private:
+  private:
     std::vector<highlight_rule> rules_;
 };
 
@@ -156,32 +154,32 @@ private:
  * Use repr_highlighter::instance() for a shared default instance.
  */
 class TAPIRU_API repr_highlighter final : public highlighter {
-public:
+  public:
     /**
      * @brief Style theme for repr_highlighter.
      *
      * All fields have sensible defaults. Override any field to customize.
      */
     struct theme {
-        style number     = {colors::cyan,          {}, attr::none};
-        style number_hex = {colors::bright_cyan,   {}, attr::none};
-        style string     = {colors::green,         {}, attr::none};
-        style url        = {colors::bright_blue,   {}, attr::underline};
-        style path       = {colors::bright_green,  {}, attr::italic};
-        style uuid       = {colors::bright_magenta,{}, attr::none};
-        style ipv4       = {colors::bright_yellow, {}, attr::none};
-        style ipv6       = {colors::bright_yellow, {}, attr::none};
-        style boolean    = {colors::bright_cyan,   {}, attr::italic};
-        style null       = {colors::bright_cyan,   {}, attr::italic | attr::dim};
-        style env_var    = {colors::yellow,         {}, attr::none};
-        style email      = {colors::bright_blue,   {}, attr::underline};
-        style iso_date   = {colors::bright_magenta,{}, attr::none};
-        style keyword_todo  = {colors::black, colors::yellow,  attr::bold};
-        style keyword_fixme = {colors::black, colors::red,     attr::bold};
-        style keyword_note  = {colors::black, colors::cyan,    attr::bold};
-        style keyword_hack  = {colors::black, colors::magenta, attr::bold};
-        style keyword_bug   = {colors::white, colors::red,     attr::bold};
-        style keyword_xxx   = {colors::black, colors::yellow,  attr::bold};
+        style number = {colors::cyan, {}, attr::none};
+        style number_hex = {colors::bright_cyan, {}, attr::none};
+        style string = {colors::green, {}, attr::none};
+        style url = {colors::bright_blue, {}, attr::underline};
+        style path = {colors::bright_green, {}, attr::italic};
+        style uuid = {colors::bright_magenta, {}, attr::none};
+        style ipv4 = {colors::bright_yellow, {}, attr::none};
+        style ipv6 = {colors::bright_yellow, {}, attr::none};
+        style boolean = {colors::bright_cyan, {}, attr::italic};
+        style null = {colors::bright_cyan, {}, attr::italic | attr::dim};
+        style env_var = {colors::yellow, {}, attr::none};
+        style email = {colors::bright_blue, {}, attr::underline};
+        style iso_date = {colors::bright_magenta, {}, attr::none};
+        style keyword_todo = {colors::black, colors::yellow, attr::bold};
+        style keyword_fixme = {colors::black, colors::red, attr::bold};
+        style keyword_note = {colors::black, colors::cyan, attr::bold};
+        style keyword_hack = {colors::black, colors::magenta, attr::bold};
+        style keyword_bug = {colors::white, colors::red, attr::bold};
+        style keyword_xxx = {colors::black, colors::yellow, attr::bold};
     };
 
     /** @brief Construct with default theme. */
@@ -191,18 +189,17 @@ public:
     explicit repr_highlighter(theme t);
 
     /** @brief Access the current theme. */
-    [[nodiscard]] const theme& get_theme() const noexcept { return theme_; }
+    [[nodiscard]] const theme &get_theme() const noexcept { return theme_; }
 
     /** @brief Modify the theme. */
     void set_theme(theme t) noexcept { theme_ = t; }
 
     /** @brief Get a shared default instance (thread-safe after init). */
-    [[nodiscard]] static const repr_highlighter& instance();
+    [[nodiscard]] static const repr_highlighter &instance();
 
-    [[nodiscard]] std::vector<highlight_span>
-    highlight(std::string_view text) const override;
+    [[nodiscard]] std::vector<highlight_span> highlight(std::string_view text) const override;
 
-private:
+  private:
     theme theme_;
 };
 
@@ -215,24 +212,23 @@ private:
  * have priority: if two spans overlap, the first one wins.
  */
 class TAPIRU_API highlight_chain final : public highlighter {
-public:
+  public:
     highlight_chain() = default;
 
     /**
      * @brief Add a highlighter to the chain (by reference — caller owns lifetime).
      */
-    void add(const highlighter& hl);
+    void add(const highlighter &hl);
 
     /**
      * @brief Add a highlighter to the chain (by shared_ptr — chain co-owns).
      */
     void add(std::shared_ptr<highlighter> hl);
 
-    [[nodiscard]] std::vector<highlight_span>
-    highlight(std::string_view text) const override;
+    [[nodiscard]] std::vector<highlight_span> highlight(std::string_view text) const override;
 
-private:
-    std::vector<const highlighter*>          refs_;
+  private:
+    std::vector<const highlighter *> refs_;
     std::vector<std::shared_ptr<highlighter>> owned_;
 };
 
@@ -244,8 +240,7 @@ private:
  * Input spans need not be sorted. Output is sorted by offset,
  * non-overlapping, and gaps are preserved (unstyled).
  */
-[[nodiscard]] TAPIRU_API std::vector<highlight_span>
-merge_spans(std::vector<highlight_span> spans, size_t text_length);
+[[nodiscard]] TAPIRU_API std::vector<highlight_span> merge_spans(std::vector<highlight_span> spans, size_t text_length);
 
 /**
  * @brief Apply highlight spans to produce styled text fragments.
@@ -258,8 +253,8 @@ merge_spans(std::vector<highlight_span> spans, size_t text_length);
  * @param spans  merged, non-overlapping spans (from merge_spans)
  * @return vector of text_fragment ready for console emission
  */
-[[nodiscard]] TAPIRU_API std::vector<text_fragment>
-apply_highlights(std::string_view text, const std::vector<highlight_span>& spans);
+[[nodiscard]] TAPIRU_API std::vector<text_fragment> apply_highlights(std::string_view text,
+                                                                     const std::vector<highlight_span> &spans);
 
 /**
  * @brief Apply highlight spans to produce linked text fragments.
@@ -267,8 +262,8 @@ apply_highlights(std::string_view text, const std::vector<highlight_span>& spans
  * Like apply_highlights(), but preserves link URLs from spans
  * for OSC 8 hyperlink emission.
  */
-[[nodiscard]] TAPIRU_API std::vector<linked_fragment>
-apply_highlights_linked(std::string_view text, const std::vector<highlight_span>& spans);
+[[nodiscard]] TAPIRU_API std::vector<linked_fragment> apply_highlights_linked(std::string_view text,
+                                                                              const std::vector<highlight_span> &spans);
 
 /**
  * @brief Convenience: highlight text and produce fragments in one call.
@@ -277,15 +272,14 @@ apply_highlights_linked(std::string_view text, const std::vector<highlight_span>
  * @param hl    highlighter to use
  * @return styled text fragments
  */
-[[nodiscard]] TAPIRU_API std::vector<text_fragment>
-highlight_text(std::string_view text, const highlighter& hl);
+[[nodiscard]] TAPIRU_API std::vector<text_fragment> highlight_text(std::string_view text, const highlighter &hl);
 
 /**
  * @brief Convenience: highlight text and produce linked fragments in one call.
  *
  * Like highlight_text(), but preserves link URLs for OSC 8 hyperlinks.
  */
-[[nodiscard]] TAPIRU_API std::vector<linked_fragment>
-highlight_text_linked(std::string_view text, const highlighter& hl);
+[[nodiscard]] TAPIRU_API std::vector<linked_fragment> highlight_text_linked(std::string_view text,
+                                                                            const highlighter &hl);
 
-}  // namespace tapiru
+} // namespace tapiru

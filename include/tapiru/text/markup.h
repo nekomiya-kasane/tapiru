@@ -18,12 +18,12 @@
  *   RGB:          #RRGGBB (fg), on_#RRGGBB (bg)
  */
 
+#include "tapiru/core/style.h"
+#include "tapiru/exports.h"
+
 #include <string>
 #include <string_view>
 #include <vector>
-
-#include "tapiru/core/style.h"
-#include "tapiru/exports.h"
 
 namespace tapiru {
 
@@ -32,7 +32,7 @@ namespace tapiru {
  */
 struct text_fragment {
     std::string text;
-    style       sty;
+    style sty;
 };
 
 /**
@@ -48,4 +48,4 @@ struct text_fragment {
  */
 [[nodiscard]] TAPIRU_API std::string strip_markup(std::string_view markup);
 
-}  // namespace tapiru
+} // namespace tapiru

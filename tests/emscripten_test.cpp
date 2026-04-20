@@ -10,10 +10,10 @@
  * behavior of the same API surface.
  */
 
-#include <gtest/gtest.h>
-
-#include "tapiru/core/terminal.h"
 #include "tapiru/core/raw_input.h"
+#include "tapiru/core/terminal.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
@@ -24,7 +24,7 @@ TEST(EmscriptenTest, TerminalSizeReturnsReasonable) {
     // Must return positive dimensions (at least the fallback 80x24)
     EXPECT_GE(sz.width, 1u);
     EXPECT_GE(sz.height, 1u);
-    EXPECT_LE(sz.width, 1000u);   // sanity upper bound
+    EXPECT_LE(sz.width, 1000u); // sanity upper bound
     EXPECT_LE(sz.height, 500u);
 }
 
@@ -55,7 +55,7 @@ TEST(EmscriptenTest, OutputFunctionsAvailable) {
     EXPECT_LE(static_cast<int>(depth), 3);
 
     bool vt = terminal::enable_vt_processing();
-    (void)vt;  // may be true or false depending on platform
+    (void)vt; // may be true or false depending on platform
 
-    terminal::enable_utf8();  // must not crash
+    terminal::enable_utf8(); // must not crash
 }

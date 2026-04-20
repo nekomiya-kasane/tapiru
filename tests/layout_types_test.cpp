@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #include "tapiru/layout/types.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 

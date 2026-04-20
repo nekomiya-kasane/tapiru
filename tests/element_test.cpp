@@ -3,19 +3,19 @@
  * @brief Tests for element type-erasure and decorator pipe composition.
  */
 
-#include <gtest/gtest.h>
-
+#include "tapiru/core/console.h"
 #include "tapiru/core/decorator.h"
 #include "tapiru/core/element.h"
-#include "tapiru/core/console.h"
 #include "tapiru/widgets/builders.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
 // ── VirtualTerminal helper ──────────────────────────────────────────────
 
 class virtual_terminal {
-public:
+  public:
     [[nodiscard]] console make_console(bool color = false) {
         console_config cfg;
         cfg.sink = [this](std::string_view data) { buffer_ += data; };
@@ -24,13 +24,14 @@ public:
         cfg.no_color = !color;
         return console(cfg);
     }
-    [[nodiscard]] const std::string& raw() const noexcept { return buffer_; }
+    [[nodiscard]] const std::string &raw() const noexcept { return buffer_; }
     void clear() { buffer_.clear(); }
-private:
+
+  private:
     std::string buffer_;
 };
 
-static std::string render(auto&& builder, uint32_t width = 40) {
+static std::string render(auto &&builder, uint32_t width = 40) {
     virtual_terminal vt;
     auto con = vt.make_console(false);
     con.print_widget(std::forward<decltype(builder)>(builder), width);
@@ -87,10 +88,7 @@ TEST(ElementTest, DecoratorPaddingAddsSpace) {
 }
 
 TEST(ElementTest, DecoratorChaining) {
-    element e = text_builder("chain")
-        | border()
-        | padding(uint8_t{1})
-        | bold();
+    element e = text_builder("chain") | border() | padding(uint8_t{1}) | bold();
     EXPECT_FALSE(e.empty());
     auto out = render(e, 40);
     EXPECT_TRUE(out.find("chain") != std::string::npos);

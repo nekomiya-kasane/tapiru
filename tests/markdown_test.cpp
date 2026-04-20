@@ -1,10 +1,9 @@
-#include <gtest/gtest.h>
-
-#include <mutex>
-#include <string>
-
 #include "tapiru/core/console.h"
 #include "tapiru/text/markdown.h"
+
+#include <gtest/gtest.h>
+#include <mutex>
+#include <string>
 
 using namespace tapiru;
 
@@ -111,7 +110,7 @@ TEST(MarkdownInlineTest, Mixed) {
 // ── markdown_builder rendering ──────────────────────────────────────────
 
 class capture_sink {
-public:
+  public:
     void operator()(std::string_view data) {
         std::lock_guard lk(mu_);
         buffer_ += data;
@@ -120,7 +119,8 @@ public:
         std::lock_guard lk(mu_);
         return buffer_;
     }
-private:
+
+  private:
     mutable std::mutex mu_;
     std::string buffer_;
 };
@@ -248,7 +248,7 @@ TEST(MarkdownParserTest, GfmTable) {
     auto blocks = parse_markdown("| A | B |\n|---|---|\n| 1 | 2 |\n| 3 | 4 |");
     ASSERT_EQ(blocks.size(), 1u);
     EXPECT_EQ(blocks[0].type, md_block_type::table);
-    ASSERT_EQ(blocks[0].table_rows.size(), 3u);  // header + 2 data rows
+    ASSERT_EQ(blocks[0].table_rows.size(), 3u); // header + 2 data rows
     EXPECT_EQ(blocks[0].table_rows[0][0], "A");
     EXPECT_EQ(blocks[0].table_rows[0][1], "B");
     EXPECT_EQ(blocks[0].table_rows[1][0], "1");

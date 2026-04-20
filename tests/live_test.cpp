@@ -1,21 +1,20 @@
-#include <gtest/gtest.h>
-
-#include <atomic>
-#include <chrono>
-#include <mutex>
-#include <string>
-#include <thread>
-
 #include "tapiru/core/console.h"
 #include "tapiru/core/live.h"
 #include "tapiru/widgets/builders.h"
+
+#include <atomic>
+#include <chrono>
+#include <gtest/gtest.h>
+#include <mutex>
+#include <string>
+#include <thread>
 
 using namespace tapiru;
 
 // ── Thread-safe capture sink ────────────────────────────────────────────
 
 class capture_sink {
-public:
+  public:
     void operator()(std::string_view data) {
         std::lock_guard lk(mu_);
         buffer_ += data;
@@ -34,7 +33,8 @@ public:
         buffer_.clear();
         write_count_ = 0;
     }
-private:
+
+  private:
     mutable std::mutex mu_;
     std::string buffer_;
     int write_count_ = 0;
@@ -97,7 +97,7 @@ TEST(LiveTest, StopIsIdempotent) {
     lv.set(text_builder("Test"));
     std::this_thread::sleep_for(std::chrono::milliseconds(80));
     lv.stop();
-    lv.stop();  // second stop should be safe
+    lv.stop(); // second stop should be safe
     EXPECT_FALSE(lv.running());
 }
 

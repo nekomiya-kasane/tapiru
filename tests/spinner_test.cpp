@@ -1,11 +1,10 @@
-#include <gtest/gtest.h>
+#include "tapiru/core/console.h"
+#include "tapiru/widgets/spinner.h"
 
+#include <gtest/gtest.h>
 #include <memory>
 #include <mutex>
 #include <string>
-
-#include "tapiru/core/console.h"
-#include "tapiru/widgets/spinner.h"
 
 using namespace tapiru;
 
@@ -35,12 +34,12 @@ TEST(SpinnerStateTest, Done) {
 // ── spinner_frames ──────────────────────────────────────────────────────
 
 TEST(SpinnerFramesTest, Dots) {
-    auto& f = spinner_frames::dots();
+    auto &f = spinner_frames::dots();
     EXPECT_EQ(f.size(), 10u);
 }
 
 TEST(SpinnerFramesTest, Line) {
-    auto& f = spinner_frames::line();
+    auto &f = spinner_frames::line();
     EXPECT_EQ(f.size(), 4u);
     EXPECT_EQ(f[0], "-");
     EXPECT_EQ(f[1], "\\");
@@ -49,14 +48,14 @@ TEST(SpinnerFramesTest, Line) {
 }
 
 TEST(SpinnerFramesTest, Arc) {
-    auto& f = spinner_frames::arc();
+    auto &f = spinner_frames::arc();
     EXPECT_EQ(f.size(), 4u);
 }
 
 // ── spinner_builder rendering tests ─────────────────────────────────────
 
 class capture_sink {
-public:
+  public:
     void operator()(std::string_view data) {
         std::lock_guard lk(mu_);
         buffer_ += data;
@@ -69,7 +68,8 @@ public:
         std::lock_guard lk(mu_);
         buffer_.clear();
     }
-private:
+
+  private:
     mutable std::mutex mu_;
     std::string buffer_;
 };
@@ -83,11 +83,7 @@ TEST(SpinnerBuilderTest, RenderWithMessage) {
     console con(cfg);
 
     auto st = std::make_shared<spinner_state>();
-    con.print_widget(
-        spinner_builder(st)
-            .message("Loading...")
-            .frames({"-", "\\", "|", "/"}),
-        40);
+    con.print_widget(spinner_builder(st).message("Loading...").frames({"-", "\\", "|", "/"}), 40);
 
     auto out = sink->snapshot();
     EXPECT_TRUE(out.find("Loading...") != std::string::npos);
@@ -104,11 +100,7 @@ TEST(SpinnerBuilderTest, RenderDone) {
     auto st = std::make_shared<spinner_state>();
     st->set_done();
 
-    con.print_widget(
-        spinner_builder(st)
-            .message("Done!")
-            .done_text("OK"),
-        40);
+    con.print_widget(spinner_builder(st).message("Done!").done_text("OK"), 40);
 
     auto out = sink->snapshot();
     EXPECT_TRUE(out.find("OK") != std::string::npos);

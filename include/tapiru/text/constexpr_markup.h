@@ -18,11 +18,11 @@
  *   static_assert(m.fragments[0].sty.attrs == tapiru::attr::bold);
  */
 
+#include "tapiru/core/style.h"
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
-
-#include "tapiru/core/style.h"
 
 namespace tapiru {
 
@@ -30,7 +30,7 @@ namespace tapiru {
 
 namespace detail {
 
-constexpr bool sv_eq(const char* a, size_t alen, const char* b, size_t blen) {
+constexpr bool sv_eq(const char *a, size_t alen, const char *b, size_t blen) {
     if (alen != blen) return false;
     for (size_t i = 0; i < alen; ++i) {
         if (a[i] != b[i]) return false;
@@ -45,22 +45,19 @@ constexpr uint8_t hex_digit(char c) {
     return 0xFF;
 }
 
-constexpr bool try_parse_hex_color_ct(const char* s, size_t len, color& out) {
+constexpr bool try_parse_hex_color_ct(const char *s, size_t len, color &out) {
     if (len != 7 || s[0] != '#') return false;
     uint8_t r1 = hex_digit(s[1]), r2 = hex_digit(s[2]);
     uint8_t g1 = hex_digit(s[3]), g2 = hex_digit(s[4]);
     uint8_t b1 = hex_digit(s[5]), b2 = hex_digit(s[6]);
-    if (r1 == 0xFF || r2 == 0xFF || g1 == 0xFF || g2 == 0xFF || b1 == 0xFF || b2 == 0xFF)
-        return false;
-    out = color::from_rgb(
-        static_cast<uint8_t>(r1 * 16 + r2),
-        static_cast<uint8_t>(g1 * 16 + g2),
-        static_cast<uint8_t>(b1 * 16 + b2));
+    if (r1 == 0xFF || r2 == 0xFF || g1 == 0xFF || g2 == 0xFF || b1 == 0xFF || b2 == 0xFF) return false;
+    out = color::from_rgb(static_cast<uint8_t>(r1 * 16 + r2), static_cast<uint8_t>(g1 * 16 + g2),
+                          static_cast<uint8_t>(b1 * 16 + b2));
     return true;
 }
 
 // Constexpr decimal uint8_t parser: parses digits starting at pos, returns value and advances pos.
-constexpr uint8_t ct_parse_uint8(const char* s, size_t len, size_t& pos) {
+constexpr uint8_t ct_parse_uint8(const char *s, size_t len, size_t &pos) {
     uint16_t val = 0;
     while (pos < len && s[pos] >= '0' && s[pos] <= '9') {
         val = val * 10 + static_cast<uint16_t>(s[pos] - '0');
@@ -70,14 +67,15 @@ constexpr uint8_t ct_parse_uint8(const char* s, size_t len, size_t& pos) {
 }
 
 // Try parse rgb(R,G,B) or on_rgb(R,G,B) at compile time
-constexpr bool try_parse_rgb_func_ct(const char* tag, size_t len, color& out, bool is_bg) {
+constexpr bool try_parse_rgb_func_ct(const char *tag, size_t len, color &out, bool is_bg) {
     // Expected: "rgb(R,G,B)" or "on_rgb(R,G,B)"
-    size_t prefix = is_bg ? 7 : 4;  // "on_rgb(" vs "rgb("
-    if (len < prefix + 5) return false;  // minimum "rgb(0,0,0)" = 10 chars
+    size_t prefix = is_bg ? 7 : 4;      // "on_rgb(" vs "rgb("
+    if (len < prefix + 5) return false; // minimum "rgb(0,0,0)" = 10 chars
     // Check prefix
     if (is_bg) {
-        if (tag[0] != 'o' || tag[1] != 'n' || tag[2] != '_' ||
-            tag[3] != 'r' || tag[4] != 'g' || tag[5] != 'b' || tag[6] != '(') return false;
+        if (tag[0] != 'o' || tag[1] != 'n' || tag[2] != '_' || tag[3] != 'r' || tag[4] != 'g' || tag[5] != 'b' ||
+            tag[6] != '(')
+            return false;
     } else {
         if (tag[0] != 'r' || tag[1] != 'g' || tag[2] != 'b' || tag[3] != '(') return false;
     }
@@ -85,9 +83,11 @@ constexpr bool try_parse_rgb_func_ct(const char* tag, size_t len, color& out, bo
     if (tag[len - 1] != ')') return false;
     size_t pos = prefix;
     uint8_t r = ct_parse_uint8(tag, len - 1, pos);
-    if (pos >= len - 1 || tag[pos] != ',') return false; ++pos;
+    if (pos >= len - 1 || tag[pos] != ',') return false;
+    ++pos;
     uint8_t g = ct_parse_uint8(tag, len - 1, pos);
-    if (pos >= len - 1 || tag[pos] != ',') return false; ++pos;
+    if (pos >= len - 1 || tag[pos] != ',') return false;
+    ++pos;
     uint8_t b = ct_parse_uint8(tag, len - 1, pos);
     if (pos != len - 1) return false;
     out = color::from_rgb(r, g, b);
@@ -95,10 +95,10 @@ constexpr bool try_parse_rgb_func_ct(const char* tag, size_t len, color& out, bo
 }
 
 // Try parse color256(N) or on_color256(N) at compile time
-constexpr bool try_parse_color256_ct(const char* tag, size_t len, color& out, bool is_bg) {
+constexpr bool try_parse_color256_ct(const char *tag, size_t len, color &out, bool is_bg) {
     // Expected: "color256(N)" or "on_color256(N)"
-    size_t prefix = is_bg ? 12 : 9;  // "on_color256(" vs "color256("
-    if (len < prefix + 2) return false;  // minimum "color256(0)" = 11 chars
+    size_t prefix = is_bg ? 12 : 9;     // "on_color256(" vs "color256("
+    if (len < prefix + 2) return false; // minimum "color256(0)" = 11 chars
     if (is_bg) {
         if (!sv_eq(tag, 12, "on_color256(", 12)) return false;
     } else {
@@ -112,91 +112,94 @@ constexpr bool try_parse_color256_ct(const char* tag, size_t len, color& out, bo
     return true;
 }
 
-#define TAPIRU_CT_TAG(name, action) \
-    if (sv_eq(tag, len, name, sizeof(name) - 1)) { action; return true; }
+#define TAPIRU_CT_TAG(name, action)                                                                                    \
+    if (sv_eq(tag, len, name, sizeof(name) - 1)) {                                                                     \
+        action;                                                                                                        \
+        return true;                                                                                                   \
+    }
 
-constexpr bool apply_tag_ct(const char* tag, size_t len, style& s) {
+constexpr bool apply_tag_ct(const char *tag, size_t len, style &s) {
     // Attributes
-    TAPIRU_CT_TAG("bold",             s.attrs |= attr::bold)
-    TAPIRU_CT_TAG("dim",              s.attrs |= attr::dim)
-    TAPIRU_CT_TAG("italic",           s.attrs |= attr::italic)
-    TAPIRU_CT_TAG("underline",        s.attrs |= attr::underline)
-    TAPIRU_CT_TAG("blink",            s.attrs |= attr::blink)
-    TAPIRU_CT_TAG("reverse",          s.attrs |= attr::reverse)
-    TAPIRU_CT_TAG("hidden",           s.attrs |= attr::hidden)
-    TAPIRU_CT_TAG("strike",           s.attrs |= attr::strike)
+    TAPIRU_CT_TAG("bold", s.attrs |= attr::bold)
+    TAPIRU_CT_TAG("dim", s.attrs |= attr::dim)
+    TAPIRU_CT_TAG("italic", s.attrs |= attr::italic)
+    TAPIRU_CT_TAG("underline", s.attrs |= attr::underline)
+    TAPIRU_CT_TAG("blink", s.attrs |= attr::blink)
+    TAPIRU_CT_TAG("reverse", s.attrs |= attr::reverse)
+    TAPIRU_CT_TAG("hidden", s.attrs |= attr::hidden)
+    TAPIRU_CT_TAG("strike", s.attrs |= attr::strike)
     TAPIRU_CT_TAG("double_underline", s.attrs |= attr::double_underline)
-    TAPIRU_CT_TAG("overline",         s.attrs |= attr::overline)
-    TAPIRU_CT_TAG("superscript",      s.attrs |= attr::superscript)
-    TAPIRU_CT_TAG("subscript",        s.attrs |= attr::subscript)
+    TAPIRU_CT_TAG("overline", s.attrs |= attr::overline)
+    TAPIRU_CT_TAG("superscript", s.attrs |= attr::superscript)
+    TAPIRU_CT_TAG("subscript", s.attrs |= attr::subscript)
 
     // Negation tags
-    TAPIRU_CT_TAG("not_bold",      s.attrs = s.attrs & ~attr::bold)
-    TAPIRU_CT_TAG("not_dim",       s.attrs = s.attrs & ~attr::dim)
-    TAPIRU_CT_TAG("not_italic",    s.attrs = s.attrs & ~attr::italic)
+    TAPIRU_CT_TAG("not_bold", s.attrs = s.attrs & ~attr::bold)
+    TAPIRU_CT_TAG("not_dim", s.attrs = s.attrs & ~attr::dim)
+    TAPIRU_CT_TAG("not_italic", s.attrs = s.attrs & ~attr::italic)
     TAPIRU_CT_TAG("not_underline", s.attrs = s.attrs & ~attr::underline)
-    TAPIRU_CT_TAG("not_blink",     s.attrs = s.attrs & ~attr::blink)
-    TAPIRU_CT_TAG("not_reverse",   s.attrs = s.attrs & ~attr::reverse)
-    TAPIRU_CT_TAG("not_hidden",    s.attrs = s.attrs & ~attr::hidden)
-    TAPIRU_CT_TAG("not_strike",    s.attrs = s.attrs & ~attr::strike)
-    TAPIRU_CT_TAG("not_overline",  s.attrs = s.attrs & ~attr::overline)
+    TAPIRU_CT_TAG("not_blink", s.attrs = s.attrs & ~attr::blink)
+    TAPIRU_CT_TAG("not_reverse", s.attrs = s.attrs & ~attr::reverse)
+    TAPIRU_CT_TAG("not_hidden", s.attrs = s.attrs & ~attr::hidden)
+    TAPIRU_CT_TAG("not_strike", s.attrs = s.attrs & ~attr::strike)
+    TAPIRU_CT_TAG("not_overline", s.attrs = s.attrs & ~attr::overline)
 
     // Color reset
-    TAPIRU_CT_TAG("default",    s.fg = color::default_color())
+    TAPIRU_CT_TAG("default", s.fg = color::default_color())
     TAPIRU_CT_TAG("on_default", s.bg = color::default_color())
 
     // Semantic aliases
-    TAPIRU_CT_TAG("error",       (s.attrs |= attr::bold, s.fg = colors::red))
-    TAPIRU_CT_TAG("warning",     (s.attrs |= attr::bold, s.fg = colors::yellow))
-    TAPIRU_CT_TAG("success",     (s.attrs |= attr::bold, s.fg = colors::green))
-    TAPIRU_CT_TAG("info",        (s.attrs |= attr::bold, s.fg = colors::cyan))
-    TAPIRU_CT_TAG("debug",       s.attrs |= attr::dim)
-    TAPIRU_CT_TAG("muted",       s.attrs |= attr::dim)
-    TAPIRU_CT_TAG("highlight",   (s.attrs |= attr::bold, s.fg = colors::black, s.bg = colors::yellow))
+    TAPIRU_CT_TAG("error", (s.attrs |= attr::bold, s.fg = colors::red))
+    TAPIRU_CT_TAG("warning", (s.attrs |= attr::bold, s.fg = colors::yellow))
+    TAPIRU_CT_TAG("success", (s.attrs |= attr::bold, s.fg = colors::green))
+    TAPIRU_CT_TAG("info", (s.attrs |= attr::bold, s.fg = colors::cyan))
+    TAPIRU_CT_TAG("debug", s.attrs |= attr::dim)
+    TAPIRU_CT_TAG("muted", s.attrs |= attr::dim)
+    TAPIRU_CT_TAG("highlight", (s.attrs |= attr::bold, s.fg = colors::black, s.bg = colors::yellow))
     TAPIRU_CT_TAG("code_inline", (s.attrs |= attr::bold, s.fg = colors::cyan, s.bg = color::from_rgb(0x1e, 0x1e, 0x2e)))
-    TAPIRU_CT_TAG("url",         (s.attrs |= attr::underline, s.fg = colors::bright_blue))
-    TAPIRU_CT_TAG("path",        (s.attrs |= attr::italic, s.fg = colors::bright_green))
-    TAPIRU_CT_TAG("key",         (s.attrs |= attr::bold, s.fg = colors::white, s.bg = color::from_rgb(0x3a, 0x3a, 0x4a)))
-    TAPIRU_CT_TAG("badge.red",    (s.attrs |= attr::bold, s.fg = colors::white, s.bg = colors::red))
-    TAPIRU_CT_TAG("badge.green",  (s.attrs |= attr::bold, s.fg = colors::white, s.bg = colors::green))
-    TAPIRU_CT_TAG("badge.blue",   (s.attrs |= attr::bold, s.fg = colors::white, s.bg = colors::blue))
+    TAPIRU_CT_TAG("url", (s.attrs |= attr::underline, s.fg = colors::bright_blue))
+    TAPIRU_CT_TAG("path", (s.attrs |= attr::italic, s.fg = colors::bright_green))
+    TAPIRU_CT_TAG("key", (s.attrs |= attr::bold, s.fg = colors::white, s.bg = color::from_rgb(0x3a, 0x3a, 0x4a)))
+    TAPIRU_CT_TAG("badge.red", (s.attrs |= attr::bold, s.fg = colors::white, s.bg = colors::red))
+    TAPIRU_CT_TAG("badge.green", (s.attrs |= attr::bold, s.fg = colors::white, s.bg = colors::green))
+    TAPIRU_CT_TAG("badge.blue", (s.attrs |= attr::bold, s.fg = colors::white, s.bg = colors::blue))
     TAPIRU_CT_TAG("badge.yellow", (s.attrs |= attr::bold, s.fg = colors::black, s.bg = colors::yellow))
 
     // Foreground colors
-    TAPIRU_CT_TAG("black",          s.fg = colors::black)
-    TAPIRU_CT_TAG("red",            s.fg = colors::red)
-    TAPIRU_CT_TAG("green",          s.fg = colors::green)
-    TAPIRU_CT_TAG("yellow",         s.fg = colors::yellow)
-    TAPIRU_CT_TAG("blue",           s.fg = colors::blue)
-    TAPIRU_CT_TAG("magenta",        s.fg = colors::magenta)
-    TAPIRU_CT_TAG("cyan",           s.fg = colors::cyan)
-    TAPIRU_CT_TAG("white",          s.fg = colors::white)
-    TAPIRU_CT_TAG("bright_black",   s.fg = colors::bright_black)
-    TAPIRU_CT_TAG("bright_red",     s.fg = colors::bright_red)
-    TAPIRU_CT_TAG("bright_green",   s.fg = colors::bright_green)
-    TAPIRU_CT_TAG("bright_yellow",  s.fg = colors::bright_yellow)
-    TAPIRU_CT_TAG("bright_blue",    s.fg = colors::bright_blue)
+    TAPIRU_CT_TAG("black", s.fg = colors::black)
+    TAPIRU_CT_TAG("red", s.fg = colors::red)
+    TAPIRU_CT_TAG("green", s.fg = colors::green)
+    TAPIRU_CT_TAG("yellow", s.fg = colors::yellow)
+    TAPIRU_CT_TAG("blue", s.fg = colors::blue)
+    TAPIRU_CT_TAG("magenta", s.fg = colors::magenta)
+    TAPIRU_CT_TAG("cyan", s.fg = colors::cyan)
+    TAPIRU_CT_TAG("white", s.fg = colors::white)
+    TAPIRU_CT_TAG("bright_black", s.fg = colors::bright_black)
+    TAPIRU_CT_TAG("bright_red", s.fg = colors::bright_red)
+    TAPIRU_CT_TAG("bright_green", s.fg = colors::bright_green)
+    TAPIRU_CT_TAG("bright_yellow", s.fg = colors::bright_yellow)
+    TAPIRU_CT_TAG("bright_blue", s.fg = colors::bright_blue)
     TAPIRU_CT_TAG("bright_magenta", s.fg = colors::bright_magenta)
-    TAPIRU_CT_TAG("bright_cyan",    s.fg = colors::bright_cyan)
-    TAPIRU_CT_TAG("bright_white",   s.fg = colors::bright_white)
+    TAPIRU_CT_TAG("bright_cyan", s.fg = colors::bright_cyan)
+    TAPIRU_CT_TAG("bright_white", s.fg = colors::bright_white)
 
     // Background colors
-    TAPIRU_CT_TAG("on_black",          s.bg = colors::black)
-    TAPIRU_CT_TAG("on_red",            s.bg = colors::red)
-    TAPIRU_CT_TAG("on_green",          s.bg = colors::green)
-    TAPIRU_CT_TAG("on_yellow",         s.bg = colors::yellow)
-    TAPIRU_CT_TAG("on_blue",           s.bg = colors::blue)
-    TAPIRU_CT_TAG("on_magenta",        s.bg = colors::magenta)
-    TAPIRU_CT_TAG("on_cyan",           s.bg = colors::cyan)
-    TAPIRU_CT_TAG("on_white",          s.bg = colors::white)
-    TAPIRU_CT_TAG("on_bright_black",   s.bg = colors::bright_black)
-    TAPIRU_CT_TAG("on_bright_red",     s.bg = colors::bright_red)
-    TAPIRU_CT_TAG("on_bright_green",   s.bg = colors::bright_green)
-    TAPIRU_CT_TAG("on_bright_yellow",  s.bg = colors::bright_yellow)
-    TAPIRU_CT_TAG("on_bright_blue",    s.bg = colors::bright_blue)
+    TAPIRU_CT_TAG("on_black", s.bg = colors::black)
+    TAPIRU_CT_TAG("on_red", s.bg = colors::red)
+    TAPIRU_CT_TAG("on_green", s.bg = colors::green)
+    TAPIRU_CT_TAG("on_yellow", s.bg = colors::yellow)
+    TAPIRU_CT_TAG("on_blue", s.bg = colors::blue)
+    TAPIRU_CT_TAG("on_magenta", s.bg = colors::magenta)
+    TAPIRU_CT_TAG("on_cyan", s.bg = colors::cyan)
+    TAPIRU_CT_TAG("on_white", s.bg = colors::white)
+    TAPIRU_CT_TAG("on_bright_black", s.bg = colors::bright_black)
+    TAPIRU_CT_TAG("on_bright_red", s.bg = colors::bright_red)
+    TAPIRU_CT_TAG("on_bright_green", s.bg = colors::bright_green)
+    TAPIRU_CT_TAG("on_bright_yellow", s.bg = colors::bright_yellow)
+    TAPIRU_CT_TAG("on_bright_blue", s.bg = colors::bright_blue)
     TAPIRU_CT_TAG("on_bright_magenta", s.bg = colors::bright_magenta)
-    TAPIRU_CT_TAG("on_bright_cyan",    s.bg = colors::bright_cyan)
-    TAPIRU_CT_TAG("on_bright_white",   s.bg = colors::bright_white)
+    TAPIRU_CT_TAG("on_bright_cyan", s.bg = colors::bright_cyan)
+    TAPIRU_CT_TAG("on_bright_white", s.bg = colors::bright_white)
 
     // RGB hex: #RRGGBB (fg)
     if (len == 7 && tag[0] == '#') {
@@ -226,8 +229,8 @@ constexpr bool apply_tag_ct(const char* tag, size_t len, style& s) {
     }
 
     // on_rgb(R,G,B) (bg)
-    if (len >= 13 && tag[0] == 'o' && tag[1] == 'n' && tag[2] == '_' &&
-        tag[3] == 'r' && tag[4] == 'g' && tag[5] == 'b' && tag[6] == '(') {
+    if (len >= 13 && tag[0] == 'o' && tag[1] == 'n' && tag[2] == '_' && tag[3] == 'r' && tag[4] == 'g' &&
+        tag[5] == 'b' && tag[6] == '(') {
         color c;
         if (try_parse_rgb_func_ct(tag, len, c, true)) {
             s.bg = c;
@@ -258,7 +261,7 @@ constexpr bool apply_tag_ct(const char* tag, size_t len, style& s) {
 
 #undef TAPIRU_CT_TAG
 
-constexpr void apply_compound_tag_ct(const char* tag, size_t len, style& s) {
+constexpr void apply_compound_tag_ct(const char *tag, size_t len, style &s) {
     size_t pos = 0;
     while (pos < len) {
         while (pos < len && tag[pos] == ' ') ++pos;
@@ -270,7 +273,7 @@ constexpr void apply_compound_tag_ct(const char* tag, size_t len, style& s) {
     }
 }
 
-}  // namespace detail
+} // namespace detail
 
 // ── Public API: markup_style ────────────────────────────────────────────
 
@@ -280,8 +283,7 @@ constexpr void apply_compound_tag_ct(const char* tag, size_t len, style& s) {
  * @param tag  space-separated tag string, e.g. "bold red on_blue"
  * @return the resolved style
  */
-template <size_t N>
-consteval style markup_style(const char (&tag)[N]) {
+template <size_t N> consteval style markup_style(const char (&tag)[N]) {
     style s{};
     detail::apply_compound_tag_ct(tag, N - 1, s);
     return s;
@@ -295,28 +297,26 @@ consteval style markup_style(const char (&tag)[N]) {
 struct ct_fragment {
     size_t offset = 0;
     size_t length = 0;
-    style  sty{};
+    style sty{};
 };
 
 /**
  * @brief Result of compile-time markup parsing.
  * @tparam MaxFragments maximum number of fragments supported
  */
-template <size_t MaxFragments = 16>
-struct static_markup {
+template <size_t MaxFragments = 16> struct static_markup {
     std::array<ct_fragment, MaxFragments> fragments{};
     size_t count = 0;
 };
 
 namespace detail {
 
-template <size_t N, size_t MaxFragments>
-consteval static_markup<MaxFragments> ct_parse_impl(const char (&markup)[N]) {
+template <size_t N, size_t MaxFragments> consteval static_markup<MaxFragments> ct_parse_impl(const char (&markup)[N]) {
     static_markup<MaxFragments> result{};
     constexpr size_t len = N - 1;
 
     style style_stack[32]{};
-    size_t stack_depth = 1;  // style_stack[0] = default
+    size_t stack_depth = 1; // style_stack[0] = default
 
     size_t text_start = 0;
     bool in_text = false;
@@ -336,7 +336,10 @@ consteval static_markup<MaxFragments> ct_parse_impl(const char (&markup)[N]) {
         if (markup[i] == '[') {
             // Escaped [[
             if (i + 1 < len && markup[i + 1] == '[') {
-                if (!in_text) { text_start = i; in_text = true; }
+                if (!in_text) {
+                    text_start = i;
+                    in_text = true;
+                }
                 // We include the first [ as literal text, skip the second
                 // But since we can't modify the string, we flush up to i,
                 // then record i..i+1 as a single [ character
@@ -352,7 +355,10 @@ consteval static_markup<MaxFragments> ct_parse_impl(const char (&markup)[N]) {
             while (close < len && markup[close] != ']') ++close;
             if (close >= len) {
                 // No closing ] — treat as literal
-                if (!in_text) { text_start = i; in_text = true; }
+                if (!in_text) {
+                    text_start = i;
+                    in_text = true;
+                }
                 ++i;
                 continue;
             }
@@ -375,15 +381,17 @@ consteval static_markup<MaxFragments> ct_parse_impl(const char (&markup)[N]) {
                 // [tag] — push
                 if (stack_depth < 32) {
                     style_stack[stack_depth] = style_stack[stack_depth - 1];
-                    apply_compound_tag_ct(markup + tag_start, tag_len,
-                                          style_stack[stack_depth]);
+                    apply_compound_tag_ct(markup + tag_start, tag_len, style_stack[stack_depth]);
                     stack_depth++;
                 }
             }
 
             i = close + 1;
         } else {
-            if (!in_text) { text_start = i; in_text = true; }
+            if (!in_text) {
+                text_start = i;
+                in_text = true;
+            }
             ++i;
         }
     }
@@ -392,7 +400,7 @@ consteval static_markup<MaxFragments> ct_parse_impl(const char (&markup)[N]) {
     return result;
 }
 
-}  // namespace detail
+} // namespace detail
 
 /**
  * @brief Parse a markup string literal at compile time.
@@ -414,34 +422,34 @@ consteval static_markup<MaxFragments> ct_parse_markup(const char (&markup)[N]) {
  * @brief Kind of block-level operation.
  */
 enum class block_kind : uint8_t {
-    none = 0,       ///< Plain inline text (existing behavior)
-    box_open,       ///< Open a bordered box
-    box_close,      ///< Close a bordered box
-    rule,           ///< Horizontal rule
-    indent_open,    ///< Open indented block
-    indent_close,   ///< Close indented block
-    align_open,     ///< Open alignment block (center/right)
-    align_close,    ///< Close alignment block
-    quote_open,     ///< Open blockquote
-    quote_close,    ///< Close blockquote
-    code_open,      ///< Open code block
-    code_close,     ///< Close code block
-    heading,        ///< Heading (h1/h2/h3) — style push
-    heading_close,  ///< Close heading — style pop
-    list_open,      ///< Open list (ul/ol)
-    list_close,     ///< Close list
-    list_item,      ///< List item bullet/number
-    pad_open,       ///< Open padded block
-    pad_close,      ///< Close padded block
-    progress_bar,   ///< Inline progress bar
-    fraction_bar,   ///< Fraction bar (N/M)
-    line_break,     ///< Explicit line break
-    spacing,        ///< N spaces
-    emoji,          ///< Emoji (name stored as offset+len, resolved at runtime)
-    link_open,      ///< OSC 8 hyperlink open
-    link_close,     ///< OSC 8 hyperlink close
-    columns_open,   ///< Open columns
-    columns_close,  ///< Close columns
+    none = 0,      ///< Plain inline text (existing behavior)
+    box_open,      ///< Open a bordered box
+    box_close,     ///< Close a bordered box
+    rule,          ///< Horizontal rule
+    indent_open,   ///< Open indented block
+    indent_close,  ///< Close indented block
+    align_open,    ///< Open alignment block (center/right)
+    align_close,   ///< Close alignment block
+    quote_open,    ///< Open blockquote
+    quote_close,   ///< Close blockquote
+    code_open,     ///< Open code block
+    code_close,    ///< Close code block
+    heading,       ///< Heading (h1/h2/h3) — style push
+    heading_close, ///< Close heading — style pop
+    list_open,     ///< Open list (ul/ol)
+    list_close,    ///< Close list
+    list_item,     ///< List item bullet/number
+    pad_open,      ///< Open padded block
+    pad_close,     ///< Close padded block
+    progress_bar,  ///< Inline progress bar
+    fraction_bar,  ///< Fraction bar (N/M)
+    line_break,    ///< Explicit line break
+    spacing,       ///< N spaces
+    emoji,         ///< Emoji (name stored as offset+len, resolved at runtime)
+    link_open,     ///< OSC 8 hyperlink open
+    link_close,    ///< OSC 8 hyperlink close
+    columns_open,  ///< Open columns
+    columns_close, ///< Close columns
 };
 
 /**
@@ -452,19 +460,19 @@ enum class block_kind : uint8_t {
  */
 struct ct_block_params {
     block_kind kind = block_kind::none;
-    uint8_t border = 2;         ///< border_style as uint8_t (default: rounded=2)
-    uint8_t level = 0;          ///< heading level (1-3), indent spaces, pad amount
-    uint8_t numerator = 0;      ///< progress percent or bar numerator
-    uint8_t denominator = 0;    ///< bar denominator
-    uint8_t align = 0;          ///< justify as uint8_t (0=left, 1=center, 2=right)
-    bool ordered = false;       ///< list ordered?
-    uint16_t title_offset = 0;  ///< offset into source for rule/box title
-    uint16_t title_length = 0;  ///< length of title
-    uint16_t url_offset = 0;    ///< offset into source for link URL
-    uint16_t url_length = 0;    ///< length of URL
-    uint16_t name_offset = 0;   ///< offset into source for emoji name
-    uint16_t name_length = 0;   ///< length of emoji name
-    style content_sty{};        ///< style for heading/code content
+    uint8_t border = 2;        ///< border_style as uint8_t (default: rounded=2)
+    uint8_t level = 0;         ///< heading level (1-3), indent spaces, pad amount
+    uint8_t numerator = 0;     ///< progress percent or bar numerator
+    uint8_t denominator = 0;   ///< bar denominator
+    uint8_t align = 0;         ///< justify as uint8_t (0=left, 1=center, 2=right)
+    bool ordered = false;      ///< list ordered?
+    uint16_t title_offset = 0; ///< offset into source for rule/box title
+    uint16_t title_length = 0; ///< length of title
+    uint16_t url_offset = 0;   ///< offset into source for link URL
+    uint16_t url_length = 0;   ///< length of URL
+    uint16_t name_offset = 0;  ///< offset into source for emoji name
+    uint16_t name_length = 0;  ///< length of emoji name
+    style content_sty{};       ///< style for heading/code content
 };
 
 /**
@@ -475,22 +483,21 @@ struct ct_block_params {
 struct ct_rich_fragment {
     size_t offset = 0;
     size_t length = 0;
-    style  sty{};
+    style sty{};
     ct_block_params block{};
 };
 
 /**
  * @brief Result of compile-time rich markup parsing.
  */
-template <size_t MaxFragments = 64>
-struct static_rich_markup {
+template <size_t MaxFragments = 64> struct static_rich_markup {
     std::array<ct_rich_fragment, MaxFragments> fragments{};
     size_t count = 0;
 };
 
 namespace detail {
 
-constexpr bool sv_starts_with(const char* s, size_t slen, const char* prefix, size_t plen) {
+constexpr bool sv_starts_with(const char *s, size_t slen, const char *prefix, size_t plen) {
     if (slen < plen) return false;
     for (size_t i = 0; i < plen; ++i)
         if (s[i] != prefix[i]) return false;
@@ -498,9 +505,8 @@ constexpr bool sv_starts_with(const char* s, size_t slen, const char* prefix, si
 }
 
 // Try to recognize a block tag. Returns true if recognized.
-constexpr bool try_block_tag_ct(const char* tag, size_t len,
-                                const char* markup, size_t tag_abs_offset,
-                                ct_rich_fragment& frag) {
+constexpr bool try_block_tag_ct(const char *tag, size_t len, const char *markup, size_t tag_abs_offset,
+                                ct_rich_fragment &frag) {
     // [br]
     if (sv_eq(tag, len, "br", 2)) {
         frag.block.kind = block_kind::line_break;
@@ -532,22 +538,22 @@ constexpr bool try_block_tag_ct(const char* tag, size_t len,
     // [box], [box.heavy], [box.double], [box.ascii], [box title="T"]
     if (sv_eq(tag, len, "box", 3)) {
         frag.block.kind = block_kind::box_open;
-        frag.block.border = 2;  // rounded
+        frag.block.border = 2; // rounded
         return true;
     }
     if (sv_eq(tag, len, "box.heavy", 9)) {
         frag.block.kind = block_kind::box_open;
-        frag.block.border = 3;  // heavy
+        frag.block.border = 3; // heavy
         return true;
     }
     if (sv_eq(tag, len, "box.double", 10)) {
         frag.block.kind = block_kind::box_open;
-        frag.block.border = 4;  // double_
+        frag.block.border = 4; // double_
         return true;
     }
     if (sv_eq(tag, len, "box.ascii", 9)) {
         frag.block.kind = block_kind::box_open;
-        frag.block.border = 1;  // ascii
+        frag.block.border = 1; // ascii
         return true;
     }
     // [box title="T"] — find title="..." inside tag
@@ -679,29 +685,20 @@ constexpr bool try_block_tag_ct(const char* tag, size_t len,
 }
 
 // Map closing tag name to block_kind
-constexpr block_kind closing_block_kind(const char* tag, size_t len) {
+constexpr block_kind closing_block_kind(const char *tag, size_t len) {
     // tag starts after '/', e.g. "box", "indent", etc.
-    if (sv_eq(tag, len, "box", 3) || sv_starts_with(tag, len, "box.", 4) ||
-        sv_starts_with(tag, len, "box ", 4))
+    if (sv_eq(tag, len, "box", 3) || sv_starts_with(tag, len, "box.", 4) || sv_starts_with(tag, len, "box ", 4))
         return block_kind::box_close;
-    if (sv_eq(tag, len, "indent", 6) || sv_starts_with(tag, len, "indent=", 7))
-        return block_kind::indent_close;
-    if (sv_eq(tag, len, "center", 6) || sv_eq(tag, len, "right", 5))
-        return block_kind::align_close;
-    if (sv_eq(tag, len, "quote", 5))
-        return block_kind::quote_close;
-    if (sv_eq(tag, len, "code", 4))
-        return block_kind::code_close;
+    if (sv_eq(tag, len, "indent", 6) || sv_starts_with(tag, len, "indent=", 7)) return block_kind::indent_close;
+    if (sv_eq(tag, len, "center", 6) || sv_eq(tag, len, "right", 5)) return block_kind::align_close;
+    if (sv_eq(tag, len, "quote", 5)) return block_kind::quote_close;
+    if (sv_eq(tag, len, "code", 4)) return block_kind::code_close;
     if (sv_eq(tag, len, "h1", 2) || sv_eq(tag, len, "h2", 2) || sv_eq(tag, len, "h3", 2))
         return block_kind::heading_close;
-    if (sv_eq(tag, len, "ul", 2) || sv_eq(tag, len, "ol", 2))
-        return block_kind::list_close;
-    if (sv_eq(tag, len, "columns", 7))
-        return block_kind::columns_close;
-    if (sv_starts_with(tag, len, "pad=", 4) || sv_eq(tag, len, "pad", 3))
-        return block_kind::pad_close;
-    if (sv_eq(tag, len, "link", 4) || sv_starts_with(tag, len, "link=", 5))
-        return block_kind::link_close;
+    if (sv_eq(tag, len, "ul", 2) || sv_eq(tag, len, "ol", 2)) return block_kind::list_close;
+    if (sv_eq(tag, len, "columns", 7)) return block_kind::columns_close;
+    if (sv_starts_with(tag, len, "pad=", 4) || sv_eq(tag, len, "pad", 3)) return block_kind::pad_close;
+    if (sv_eq(tag, len, "link", 4) || sv_starts_with(tag, len, "link=", 5)) return block_kind::link_close;
     return block_kind::none;
 }
 
@@ -731,7 +728,10 @@ consteval static_rich_markup<MaxFragments> ct_parse_rich_impl(const char (&marku
     while (i < len) {
         if (markup[i] == '[') {
             if (i + 1 < len && markup[i + 1] == '[') {
-                if (!in_text) { text_start = i; in_text = true; }
+                if (!in_text) {
+                    text_start = i;
+                    in_text = true;
+                }
                 i += 2;
                 continue;
             }
@@ -739,7 +739,10 @@ consteval static_rich_markup<MaxFragments> ct_parse_rich_impl(const char (&marku
             size_t close = i + 1;
             while (close < len && markup[close] != ']') ++close;
             if (close >= len) {
-                if (!in_text) { text_start = i; in_text = true; }
+                if (!in_text) {
+                    text_start = i;
+                    in_text = true;
+                }
                 ++i;
                 continue;
             }
@@ -755,7 +758,7 @@ consteval static_rich_markup<MaxFragments> ct_parse_rich_impl(const char (&marku
                 style_stack[0] = style{};
             } else if (tag_len > 0 && markup[tag_start] == '/') {
                 // [/tag] — closing tag
-                const char* close_name = markup + tag_start + 1;
+                const char *close_name = markup + tag_start + 1;
                 size_t close_name_len = tag_len - 1;
 
                 block_kind ck = closing_block_kind(close_name, close_name_len);
@@ -769,8 +772,7 @@ consteval static_rich_markup<MaxFragments> ct_parse_rich_impl(const char (&marku
                 // [tag] — opening tag
                 // Try block tag first
                 ct_rich_fragment block_frag{};
-                if (try_block_tag_ct(markup + tag_start, tag_len,
-                                     markup, tag_start, block_frag)) {
+                if (try_block_tag_ct(markup + tag_start, tag_len, markup, tag_start, block_frag)) {
                     if (result.count < MaxFragments) {
                         result.fragments[result.count] = block_frag;
                         result.count++;
@@ -786,8 +788,7 @@ consteval static_rich_markup<MaxFragments> ct_parse_rich_impl(const char (&marku
                     // Inline style tag
                     if (stack_depth < 32) {
                         style_stack[stack_depth] = style_stack[stack_depth - 1];
-                        apply_compound_tag_ct(markup + tag_start, tag_len,
-                                              style_stack[stack_depth]);
+                        apply_compound_tag_ct(markup + tag_start, tag_len, style_stack[stack_depth]);
                         stack_depth++;
                     }
                 }
@@ -795,7 +796,10 @@ consteval static_rich_markup<MaxFragments> ct_parse_rich_impl(const char (&marku
 
             i = close + 1;
         } else {
-            if (!in_text) { text_start = i; in_text = true; }
+            if (!in_text) {
+                text_start = i;
+                in_text = true;
+            }
             ++i;
         }
     }
@@ -804,7 +808,7 @@ consteval static_rich_markup<MaxFragments> ct_parse_rich_impl(const char (&marku
     return result;
 }
 
-}  // namespace detail
+} // namespace detail
 
 /**
  * @brief Parse a rich markup string literal at compile time.
@@ -818,4 +822,4 @@ consteval static_rich_markup<MaxFragments> compile_markup(const char (&markup)[N
     return detail::ct_parse_rich_impl<N, MaxFragments>(markup);
 }
 
-}  // namespace tapiru
+} // namespace tapiru

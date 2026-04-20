@@ -11,4 +11,4 @@ namespace tapiru {
 
 using tapioca::cell;
 
-}  // namespace tapiru
+} // namespace tapiru

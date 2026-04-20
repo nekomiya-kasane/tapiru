@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #include "tapiru/core/canvas.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
@@ -51,7 +51,7 @@ TEST(CanvasTest, DefaultCellsAreSpaces) {
     canvas cv(3, 2);
     for (uint32_t y = 0; y < 2; ++y) {
         for (uint32_t x = 0; x < 3; ++x) {
-            auto& c = cv.get(x, y);
+            auto &c = cv.get(x, y);
             EXPECT_EQ(c.codepoint, U' ');
             EXPECT_EQ(c.sid, default_style_id);
         }
@@ -95,7 +95,7 @@ TEST(CanvasTest, DiffCallbackReportsCorrectCells) {
     cv.set(2, 1, target);
 
     size_t count = 0;
-    cv.diff([&](uint32_t x, uint32_t y, const cell& c) {
+    cv.diff([&](uint32_t x, uint32_t y, const cell &c) {
         EXPECT_EQ(x, 2u);
         EXPECT_EQ(y, 1u);
         EXPECT_EQ(c, target);

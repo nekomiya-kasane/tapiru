@@ -7,6 +7,7 @@
  */
 
 #include "tapiru/widgets/interactive.h"
+
 #include "detail/scene.h"
 #include "detail/widget_types.h"
 
@@ -17,7 +18,7 @@ namespace tapiru {
 
 // ── button_builder ─────────────────────────────────────────────────────
 
-node_id button_builder::flatten_into(detail::scene& s) const {
+node_id button_builder::flatten_into(detail::scene &s) const {
     std::string markup;
     if (focused_) {
         markup = "[bold reverse] " + label_ + " [/]";
@@ -33,7 +34,7 @@ node_id button_builder::flatten_into(detail::scene& s) const {
 
 // ── checkbox_builder ───────────────────────────────────────────────────
 
-node_id checkbox_builder::flatten_into(detail::scene& s) const {
+node_id checkbox_builder::flatten_into(detail::scene &s) const {
     bool checked = value_ ? *value_ : false;
     std::string markup;
     if (focused_) {
@@ -50,7 +51,7 @@ node_id checkbox_builder::flatten_into(detail::scene& s) const {
 
 // ── radio_group_builder ────────────────────────────────────────────────
 
-node_id radio_group_builder::flatten_into(detail::scene& s) const {
+node_id radio_group_builder::flatten_into(detail::scene &s) const {
     int sel = selected_ ? *selected_ : -1;
     // Build a multi-line text with radio buttons
     std::string markup;
@@ -76,7 +77,7 @@ node_id radio_group_builder::flatten_into(detail::scene& s) const {
 
 // ── selectable_list_builder ────────────────────────────────────────────
 
-node_id selectable_list_builder::flatten_into(detail::scene& s) const {
+node_id selectable_list_builder::flatten_into(detail::scene &s) const {
     int cur = cursor_ ? *cursor_ : 0;
     uint32_t total = static_cast<uint32_t>(items_.size());
     uint32_t vis = (visible_ > 0 && visible_ < total) ? visible_ : total;
@@ -106,7 +107,7 @@ node_id selectable_list_builder::flatten_into(detail::scene& s) const {
 
 // ── text_input_builder ─────────────────────────────────────────────────
 
-node_id text_input_builder::flatten_into(detail::scene& s) const {
+node_id text_input_builder::flatten_into(detail::scene &s) const {
     std::string content = buffer_ ? *buffer_ : "";
     std::string display;
 
@@ -141,7 +142,7 @@ node_id text_input_builder::flatten_into(detail::scene& s) const {
 
 // ── slider_builder ─────────────────────────────────────────────────────
 
-node_id slider_builder::flatten_into(detail::scene& s) const {
+node_id slider_builder::flatten_into(detail::scene &s) const {
     float val = value_ ? *value_ : min_;
     float range = max_ - min_;
     float ratio = (range > 0.0f) ? (val - min_) / range : 0.0f;
@@ -150,7 +151,7 @@ node_id slider_builder::flatten_into(detail::scene& s) const {
 
     uint32_t bar_w = width_;
     if (show_pct_) {
-        bar_w = width_ > 5 ? width_ - 5 : 1;  // reserve space for " XXX%"
+        bar_w = width_ > 5 ? width_ - 5 : 1; // reserve space for " XXX%"
     }
 
     uint32_t filled = static_cast<uint32_t>(ratio * static_cast<float>(bar_w) + 0.5f);
@@ -210,4 +211,4 @@ node_id slider_builder::flatten_into(detail::scene& s) const {
     return tb.flatten_into(s);
 }
 
-}  // namespace tapiru
+} // namespace tapiru

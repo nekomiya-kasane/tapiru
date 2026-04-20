@@ -3,20 +3,20 @@
  * @brief Tests for the MF2 bytecode compiler AST types and compilation unit.
  */
 
-#include <gtest/gtest.h>
-
 #include "lemonade/i18n/mf2_compiler.h"
+
+#include <gtest/gtest.h>
 
 using namespace lemonade::i18n;
 
 // ── mf2_expr_kind enum ──────────────────────────────────────────────────
 
 TEST(Mf2CompilerTest, ExprKindValues) {
-    EXPECT_EQ(static_cast<uint8_t>(mf2_expr_kind::literal),           0u);
-    EXPECT_EQ(static_cast<uint8_t>(mf2_expr_kind::variable),          1u);
-    EXPECT_EQ(static_cast<uint8_t>(mf2_expr_kind::function_call),     2u);
-    EXPECT_EQ(static_cast<uint8_t>(mf2_expr_kind::markup_open),       3u);
-    EXPECT_EQ(static_cast<uint8_t>(mf2_expr_kind::markup_close),      4u);
+    EXPECT_EQ(static_cast<uint8_t>(mf2_expr_kind::literal), 0u);
+    EXPECT_EQ(static_cast<uint8_t>(mf2_expr_kind::variable), 1u);
+    EXPECT_EQ(static_cast<uint8_t>(mf2_expr_kind::function_call), 2u);
+    EXPECT_EQ(static_cast<uint8_t>(mf2_expr_kind::markup_open), 3u);
+    EXPECT_EQ(static_cast<uint8_t>(mf2_expr_kind::markup_close), 4u);
     EXPECT_EQ(static_cast<uint8_t>(mf2_expr_kind::markup_standalone), 5u);
 }
 

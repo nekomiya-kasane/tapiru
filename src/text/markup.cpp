@@ -16,21 +16,23 @@ namespace {
 // ── Tag → style mapping ─────────────────────────────────────────────────
 
 struct tag_entry {
-    const char* name;
+    const char *name;
     enum class kind : uint8_t { fg, bg, attr } type;
     union {
-        color   col;
-        attr    at;
+        color col;
+        attr at;
     };
 };
 
-constexpr color make_fg(uint8_t idx) { return color::from_index_16(idx); }
+constexpr color make_fg(uint8_t idx) {
+    return color::from_index_16(idx);
+}
 
 // Tag lookup table (sorted for potential binary search, but linear is fine for ~40 entries)
-bool try_parse_hex_color(std::string_view s, color& out) {
+bool try_parse_hex_color(std::string_view s, color &out) {
     if (s.size() != 7 || s[0] != '#') return false;
     uint8_t r, g, b;
-    auto parse_byte = [](const char* p, uint8_t& v) -> bool {
+    auto parse_byte = [](const char *p, uint8_t &v) -> bool {
         auto [ptr, ec] = std::from_chars(p, p + 2, v, 16);
         return ec == std::errc{};
     };
@@ -41,7 +43,7 @@ bool try_parse_hex_color(std::string_view s, color& out) {
     return true;
 }
 
-bool try_parse_rgb_func(std::string_view tag, color& out, bool is_bg) {
+bool try_parse_rgb_func(std::string_view tag, color &out, bool is_bg) {
     // "rgb(R,G,B)" or "on_rgb(R,G,B)"
     auto prefix = is_bg ? std::string_view("on_rgb(") : std::string_view("rgb(");
     if (!tag.starts_with(prefix) || tag.back() != ')') return false;
@@ -62,7 +64,7 @@ bool try_parse_rgb_func(std::string_view tag, color& out, bool is_bg) {
     return true;
 }
 
-bool try_parse_color256(std::string_view tag, color& out, bool is_bg) {
+bool try_parse_color256(std::string_view tag, color &out, bool is_bg) {
     auto prefix = is_bg ? std::string_view("on_color256(") : std::string_view("color256(");
     if (!tag.starts_with(prefix) || tag.back() != ')') return false;
     auto inner = tag.substr(prefix.size(), tag.size() - prefix.size() - 1);
@@ -73,88 +75,318 @@ bool try_parse_color256(std::string_view tag, color& out, bool is_bg) {
     return true;
 }
 
-bool apply_tag(std::string_view tag, style& s) {
+bool apply_tag(std::string_view tag, style &s) {
     // Attributes
-    if (tag == "bold")             { s.attrs |= attr::bold;             return true; }
-    if (tag == "dim")              { s.attrs |= attr::dim;              return true; }
-    if (tag == "italic")           { s.attrs |= attr::italic;           return true; }
-    if (tag == "underline")        { s.attrs |= attr::underline;        return true; }
-    if (tag == "blink")            { s.attrs |= attr::blink;            return true; }
-    if (tag == "reverse")          { s.attrs |= attr::reverse;          return true; }
-    if (tag == "hidden")           { s.attrs |= attr::hidden;           return true; }
-    if (tag == "strike")           { s.attrs |= attr::strike;           return true; }
-    if (tag == "double_underline") { s.attrs |= attr::double_underline; return true; }
-    if (tag == "overline")         { s.attrs |= attr::overline;         return true; }
-    if (tag == "superscript")      { s.attrs |= attr::superscript;      return true; }
-    if (tag == "subscript")        { s.attrs |= attr::subscript;        return true; }
+    if (tag == "bold") {
+        s.attrs |= attr::bold;
+        return true;
+    }
+    if (tag == "dim") {
+        s.attrs |= attr::dim;
+        return true;
+    }
+    if (tag == "italic") {
+        s.attrs |= attr::italic;
+        return true;
+    }
+    if (tag == "underline") {
+        s.attrs |= attr::underline;
+        return true;
+    }
+    if (tag == "blink") {
+        s.attrs |= attr::blink;
+        return true;
+    }
+    if (tag == "reverse") {
+        s.attrs |= attr::reverse;
+        return true;
+    }
+    if (tag == "hidden") {
+        s.attrs |= attr::hidden;
+        return true;
+    }
+    if (tag == "strike") {
+        s.attrs |= attr::strike;
+        return true;
+    }
+    if (tag == "double_underline") {
+        s.attrs |= attr::double_underline;
+        return true;
+    }
+    if (tag == "overline") {
+        s.attrs |= attr::overline;
+        return true;
+    }
+    if (tag == "superscript") {
+        s.attrs |= attr::superscript;
+        return true;
+    }
+    if (tag == "subscript") {
+        s.attrs |= attr::subscript;
+        return true;
+    }
 
     // Negation tags
-    if (tag == "not_bold")      { s.attrs = s.attrs & ~attr::bold;      return true; }
-    if (tag == "not_dim")       { s.attrs = s.attrs & ~attr::dim;       return true; }
-    if (tag == "not_italic")    { s.attrs = s.attrs & ~attr::italic;    return true; }
-    if (tag == "not_underline") { s.attrs = s.attrs & ~attr::underline; return true; }
-    if (tag == "not_blink")     { s.attrs = s.attrs & ~attr::blink;     return true; }
-    if (tag == "not_reverse")   { s.attrs = s.attrs & ~attr::reverse;   return true; }
-    if (tag == "not_hidden")    { s.attrs = s.attrs & ~attr::hidden;    return true; }
-    if (tag == "not_strike")    { s.attrs = s.attrs & ~attr::strike;    return true; }
-    if (tag == "not_overline")  { s.attrs = s.attrs & ~attr::overline;  return true; }
+    if (tag == "not_bold") {
+        s.attrs = s.attrs & ~attr::bold;
+        return true;
+    }
+    if (tag == "not_dim") {
+        s.attrs = s.attrs & ~attr::dim;
+        return true;
+    }
+    if (tag == "not_italic") {
+        s.attrs = s.attrs & ~attr::italic;
+        return true;
+    }
+    if (tag == "not_underline") {
+        s.attrs = s.attrs & ~attr::underline;
+        return true;
+    }
+    if (tag == "not_blink") {
+        s.attrs = s.attrs & ~attr::blink;
+        return true;
+    }
+    if (tag == "not_reverse") {
+        s.attrs = s.attrs & ~attr::reverse;
+        return true;
+    }
+    if (tag == "not_hidden") {
+        s.attrs = s.attrs & ~attr::hidden;
+        return true;
+    }
+    if (tag == "not_strike") {
+        s.attrs = s.attrs & ~attr::strike;
+        return true;
+    }
+    if (tag == "not_overline") {
+        s.attrs = s.attrs & ~attr::overline;
+        return true;
+    }
 
     // Color reset
-    if (tag == "default")    { s.fg = color::default_color(); return true; }
-    if (tag == "on_default") { s.bg = color::default_color(); return true; }
+    if (tag == "default") {
+        s.fg = color::default_color();
+        return true;
+    }
+    if (tag == "on_default") {
+        s.bg = color::default_color();
+        return true;
+    }
 
     // Semantic aliases
-    if (tag == "error")        { s.attrs |= attr::bold; s.fg = colors::red;    return true; }
-    if (tag == "warning")      { s.attrs |= attr::bold; s.fg = colors::yellow; return true; }
-    if (tag == "success")      { s.attrs |= attr::bold; s.fg = colors::green;  return true; }
-    if (tag == "info")         { s.attrs |= attr::bold; s.fg = colors::cyan;   return true; }
-    if (tag == "debug")        { s.attrs |= attr::dim; return true; }
-    if (tag == "muted")        { s.attrs |= attr::dim; return true; }
-    if (tag == "highlight")    { s.attrs |= attr::bold; s.fg = colors::black; s.bg = colors::yellow; return true; }
-    if (tag == "code_inline")  { s.attrs |= attr::bold; s.fg = colors::cyan; s.bg = color::from_rgb(0x1e, 0x1e, 0x2e); return true; }
-    if (tag == "url")          { s.attrs |= attr::underline; s.fg = colors::bright_blue; return true; }
-    if (tag == "path")         { s.attrs |= attr::italic; s.fg = colors::bright_green; return true; }
-    if (tag == "key")          { s.attrs |= attr::bold; s.fg = colors::white; s.bg = color::from_rgb(0x3a, 0x3a, 0x4a); return true; }
-    if (tag == "badge.red")    { s.attrs |= attr::bold; s.fg = colors::white; s.bg = colors::red;    return true; }
-    if (tag == "badge.green")  { s.attrs |= attr::bold; s.fg = colors::white; s.bg = colors::green;  return true; }
-    if (tag == "badge.blue")   { s.attrs |= attr::bold; s.fg = colors::white; s.bg = colors::blue;   return true; }
-    if (tag == "badge.yellow") { s.attrs |= attr::bold; s.fg = colors::black; s.bg = colors::yellow; return true; }
+    if (tag == "error") {
+        s.attrs |= attr::bold;
+        s.fg = colors::red;
+        return true;
+    }
+    if (tag == "warning") {
+        s.attrs |= attr::bold;
+        s.fg = colors::yellow;
+        return true;
+    }
+    if (tag == "success") {
+        s.attrs |= attr::bold;
+        s.fg = colors::green;
+        return true;
+    }
+    if (tag == "info") {
+        s.attrs |= attr::bold;
+        s.fg = colors::cyan;
+        return true;
+    }
+    if (tag == "debug") {
+        s.attrs |= attr::dim;
+        return true;
+    }
+    if (tag == "muted") {
+        s.attrs |= attr::dim;
+        return true;
+    }
+    if (tag == "highlight") {
+        s.attrs |= attr::bold;
+        s.fg = colors::black;
+        s.bg = colors::yellow;
+        return true;
+    }
+    if (tag == "code_inline") {
+        s.attrs |= attr::bold;
+        s.fg = colors::cyan;
+        s.bg = color::from_rgb(0x1e, 0x1e, 0x2e);
+        return true;
+    }
+    if (tag == "url") {
+        s.attrs |= attr::underline;
+        s.fg = colors::bright_blue;
+        return true;
+    }
+    if (tag == "path") {
+        s.attrs |= attr::italic;
+        s.fg = colors::bright_green;
+        return true;
+    }
+    if (tag == "key") {
+        s.attrs |= attr::bold;
+        s.fg = colors::white;
+        s.bg = color::from_rgb(0x3a, 0x3a, 0x4a);
+        return true;
+    }
+    if (tag == "badge.red") {
+        s.attrs |= attr::bold;
+        s.fg = colors::white;
+        s.bg = colors::red;
+        return true;
+    }
+    if (tag == "badge.green") {
+        s.attrs |= attr::bold;
+        s.fg = colors::white;
+        s.bg = colors::green;
+        return true;
+    }
+    if (tag == "badge.blue") {
+        s.attrs |= attr::bold;
+        s.fg = colors::white;
+        s.bg = colors::blue;
+        return true;
+    }
+    if (tag == "badge.yellow") {
+        s.attrs |= attr::bold;
+        s.fg = colors::black;
+        s.bg = colors::yellow;
+        return true;
+    }
 
     // Foreground colors
-    if (tag == "black")          { s.fg = colors::black;          return true; }
-    if (tag == "red")            { s.fg = colors::red;            return true; }
-    if (tag == "green")          { s.fg = colors::green;          return true; }
-    if (tag == "yellow")         { s.fg = colors::yellow;         return true; }
-    if (tag == "blue")           { s.fg = colors::blue;           return true; }
-    if (tag == "magenta")        { s.fg = colors::magenta;        return true; }
-    if (tag == "cyan")           { s.fg = colors::cyan;           return true; }
-    if (tag == "white")          { s.fg = colors::white;          return true; }
-    if (tag == "bright_black")   { s.fg = colors::bright_black;   return true; }
-    if (tag == "bright_red")     { s.fg = colors::bright_red;     return true; }
-    if (tag == "bright_green")   { s.fg = colors::bright_green;   return true; }
-    if (tag == "bright_yellow")  { s.fg = colors::bright_yellow;  return true; }
-    if (tag == "bright_blue")    { s.fg = colors::bright_blue;    return true; }
-    if (tag == "bright_magenta") { s.fg = colors::bright_magenta; return true; }
-    if (tag == "bright_cyan")    { s.fg = colors::bright_cyan;    return true; }
-    if (tag == "bright_white")   { s.fg = colors::bright_white;   return true; }
+    if (tag == "black") {
+        s.fg = colors::black;
+        return true;
+    }
+    if (tag == "red") {
+        s.fg = colors::red;
+        return true;
+    }
+    if (tag == "green") {
+        s.fg = colors::green;
+        return true;
+    }
+    if (tag == "yellow") {
+        s.fg = colors::yellow;
+        return true;
+    }
+    if (tag == "blue") {
+        s.fg = colors::blue;
+        return true;
+    }
+    if (tag == "magenta") {
+        s.fg = colors::magenta;
+        return true;
+    }
+    if (tag == "cyan") {
+        s.fg = colors::cyan;
+        return true;
+    }
+    if (tag == "white") {
+        s.fg = colors::white;
+        return true;
+    }
+    if (tag == "bright_black") {
+        s.fg = colors::bright_black;
+        return true;
+    }
+    if (tag == "bright_red") {
+        s.fg = colors::bright_red;
+        return true;
+    }
+    if (tag == "bright_green") {
+        s.fg = colors::bright_green;
+        return true;
+    }
+    if (tag == "bright_yellow") {
+        s.fg = colors::bright_yellow;
+        return true;
+    }
+    if (tag == "bright_blue") {
+        s.fg = colors::bright_blue;
+        return true;
+    }
+    if (tag == "bright_magenta") {
+        s.fg = colors::bright_magenta;
+        return true;
+    }
+    if (tag == "bright_cyan") {
+        s.fg = colors::bright_cyan;
+        return true;
+    }
+    if (tag == "bright_white") {
+        s.fg = colors::bright_white;
+        return true;
+    }
 
     // Background colors (on_ prefix)
-    if (tag == "on_black")          { s.bg = colors::black;          return true; }
-    if (tag == "on_red")            { s.bg = colors::red;            return true; }
-    if (tag == "on_green")          { s.bg = colors::green;          return true; }
-    if (tag == "on_yellow")         { s.bg = colors::yellow;         return true; }
-    if (tag == "on_blue")           { s.bg = colors::blue;           return true; }
-    if (tag == "on_magenta")        { s.bg = colors::magenta;        return true; }
-    if (tag == "on_cyan")           { s.bg = colors::cyan;           return true; }
-    if (tag == "on_white")          { s.bg = colors::white;          return true; }
-    if (tag == "on_bright_black")   { s.bg = colors::bright_black;   return true; }
-    if (tag == "on_bright_red")     { s.bg = colors::bright_red;     return true; }
-    if (tag == "on_bright_green")   { s.bg = colors::bright_green;   return true; }
-    if (tag == "on_bright_yellow")  { s.bg = colors::bright_yellow;  return true; }
-    if (tag == "on_bright_blue")    { s.bg = colors::bright_blue;    return true; }
-    if (tag == "on_bright_magenta") { s.bg = colors::bright_magenta; return true; }
-    if (tag == "on_bright_cyan")    { s.bg = colors::bright_cyan;    return true; }
-    if (tag == "on_bright_white")   { s.bg = colors::bright_white;   return true; }
+    if (tag == "on_black") {
+        s.bg = colors::black;
+        return true;
+    }
+    if (tag == "on_red") {
+        s.bg = colors::red;
+        return true;
+    }
+    if (tag == "on_green") {
+        s.bg = colors::green;
+        return true;
+    }
+    if (tag == "on_yellow") {
+        s.bg = colors::yellow;
+        return true;
+    }
+    if (tag == "on_blue") {
+        s.bg = colors::blue;
+        return true;
+    }
+    if (tag == "on_magenta") {
+        s.bg = colors::magenta;
+        return true;
+    }
+    if (tag == "on_cyan") {
+        s.bg = colors::cyan;
+        return true;
+    }
+    if (tag == "on_white") {
+        s.bg = colors::white;
+        return true;
+    }
+    if (tag == "on_bright_black") {
+        s.bg = colors::bright_black;
+        return true;
+    }
+    if (tag == "on_bright_red") {
+        s.bg = colors::bright_red;
+        return true;
+    }
+    if (tag == "on_bright_green") {
+        s.bg = colors::bright_green;
+        return true;
+    }
+    if (tag == "on_bright_yellow") {
+        s.bg = colors::bright_yellow;
+        return true;
+    }
+    if (tag == "on_bright_blue") {
+        s.bg = colors::bright_blue;
+        return true;
+    }
+    if (tag == "on_bright_magenta") {
+        s.bg = colors::bright_magenta;
+        return true;
+    }
+    if (tag == "on_bright_cyan") {
+        s.bg = colors::bright_cyan;
+        return true;
+    }
+    if (tag == "on_bright_white") {
+        s.bg = colors::bright_white;
+        return true;
+    }
 
     // RGB hex: #RRGGBB (fg)
     if (tag.size() == 7 && tag[0] == '#') {
@@ -177,27 +409,39 @@ bool apply_tag(std::string_view tag, style& s) {
     // rgb(R,G,B) / on_rgb(R,G,B)
     if (tag.starts_with("rgb(")) {
         color c;
-        if (try_parse_rgb_func(tag, c, false)) { s.fg = c; return true; }
+        if (try_parse_rgb_func(tag, c, false)) {
+            s.fg = c;
+            return true;
+        }
     }
     if (tag.starts_with("on_rgb(")) {
         color c;
-        if (try_parse_rgb_func(tag, c, true)) { s.bg = c; return true; }
+        if (try_parse_rgb_func(tag, c, true)) {
+            s.bg = c;
+            return true;
+        }
     }
 
     // color256(N) / on_color256(N)
     if (tag.starts_with("color256(")) {
         color c;
-        if (try_parse_color256(tag, c, false)) { s.fg = c; return true; }
+        if (try_parse_color256(tag, c, false)) {
+            s.fg = c;
+            return true;
+        }
     }
     if (tag.starts_with("on_color256(")) {
         color c;
-        if (try_parse_color256(tag, c, true)) { s.bg = c; return true; }
+        if (try_parse_color256(tag, c, true)) {
+            s.bg = c;
+            return true;
+        }
     }
 
-    return false;  // unknown tag
+    return false; // unknown tag
 }
 
-void apply_compound_tag(std::string_view tag_content, style& s) {
+void apply_compound_tag(std::string_view tag_content, style &s) {
     // Split by spaces and apply each sub-tag
     size_t pos = 0;
     while (pos < tag_content.size()) {
@@ -217,14 +461,14 @@ void apply_compound_tag(std::string_view tag_content, style& s) {
     }
 }
 
-}  // anonymous namespace
+} // anonymous namespace
 
 // ── parse_markup ────────────────────────────────────────────────────────
 
 std::vector<text_fragment> parse_markup(std::string_view markup) {
     std::vector<text_fragment> result;
     std::vector<style> style_stack;
-    style_stack.push_back(style{});  // default style
+    style_stack.push_back(style{}); // default style
 
     std::string current_text;
     size_t i = 0;
@@ -319,4 +563,4 @@ std::string strip_markup(std::string_view markup) {
     return result;
 }
 
-}  // namespace tapiru
+} // namespace tapiru

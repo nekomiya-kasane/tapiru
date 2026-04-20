@@ -6,9 +6,9 @@
  * matches than naive Euclidean RGB distance for color downgrade.
  */
 
-#include <gtest/gtest.h>
-
 #include "tapiru/core/style.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
@@ -80,7 +80,7 @@ TEST(OklchDowngradeTest, BlackTo16) {
     auto c = color::from_rgb(0, 0, 0);
     auto d = c.downgrade(1);
     EXPECT_EQ(d.kind, color_kind::indexed_16);
-    EXPECT_EQ(d.r, 0u);  // ANSI black
+    EXPECT_EQ(d.r, 0u); // ANSI black
 }
 
 TEST(OklchDowngradeTest, WhiteTo256) {
@@ -159,7 +159,7 @@ TEST(OklchDowngradeTest, DoubleDowngradeIdemPotent) {
 
 TEST(OklchDowngradeTest, Idx16NoDowngrade) {
     auto c = color::from_index_16(5);
-    auto d = c.downgrade(3);  // target higher than current
+    auto d = c.downgrade(3); // target higher than current
     EXPECT_EQ(d, c);
 }
 

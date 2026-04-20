@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
-
 #include "tapiru/core/style.h"
 #include "tapiru/core/style_table.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 

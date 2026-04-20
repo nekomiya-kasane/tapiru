@@ -3,8 +3,9 @@
  * @brief Tests for tween, easing functions, and animated<T>.
  */
 
-#include <gtest/gtest.h>
 #include "tapiru/core/animation.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
@@ -19,13 +20,13 @@ TEST(EasingTest, LinearIdentity) {
 TEST(EasingTest, EaseInStartsSlowEndsAtOne) {
     EXPECT_FLOAT_EQ(easing::ease_in(0.0f), 0.0f);
     EXPECT_FLOAT_EQ(easing::ease_in(1.0f), 1.0f);
-    EXPECT_LT(easing::ease_in(0.5f), 0.5f);  // slower than linear at midpoint
+    EXPECT_LT(easing::ease_in(0.5f), 0.5f); // slower than linear at midpoint
 }
 
 TEST(EasingTest, EaseOutStartsFastEndsAtOne) {
     EXPECT_FLOAT_EQ(easing::ease_out(0.0f), 0.0f);
     EXPECT_FLOAT_EQ(easing::ease_out(1.0f), 1.0f);
-    EXPECT_GT(easing::ease_out(0.5f), 0.5f);  // faster than linear at midpoint
+    EXPECT_GT(easing::ease_out(0.5f), 0.5f); // faster than linear at midpoint
 }
 
 TEST(EasingTest, EaseInOutEndpoints) {

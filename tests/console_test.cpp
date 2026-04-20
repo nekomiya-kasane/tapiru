@@ -1,19 +1,17 @@
-#include <gtest/gtest.h>
-
 #include "tapiru/core/console.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
 // ── VirtualTerminal: test mock that captures ANSI output ────────────────
 
 class virtual_terminal {
-public:
+  public:
     /** @brief Create a console that writes to this virtual terminal. */
     [[nodiscard]] console make_console(bool color = true) {
         console_config cfg;
-        cfg.sink = [this](std::string_view data) {
-            buffer_ += data;
-        };
+        cfg.sink = [this](std::string_view data) { buffer_ += data; };
         cfg.depth = color ? color_depth::true_color : color_depth::none;
         cfg.force_color = color;
         cfg.no_color = !color;
@@ -21,7 +19,7 @@ public:
     }
 
     /** @brief Get the raw captured output (including ANSI sequences). */
-    [[nodiscard]] const std::string& raw() const noexcept { return buffer_; }
+    [[nodiscard]] const std::string &raw() const noexcept { return buffer_; }
 
     /** @brief Strip ANSI escape sequences from the captured output. */
     [[nodiscard]] std::string plain() const {
@@ -33,7 +31,7 @@ public:
                 // Skip until 'm' or end
                 i += 2;
                 while (i < buffer_.size() && buffer_[i] != 'm') ++i;
-                if (i < buffer_.size()) ++i;  // skip 'm'
+                if (i < buffer_.size()) ++i; // skip 'm'
             } else {
                 result += buffer_[i];
                 ++i;
@@ -43,14 +41,12 @@ public:
     }
 
     /** @brief Check if the raw output contains a specific ANSI sequence. */
-    [[nodiscard]] bool contains_ansi(std::string_view seq) const {
-        return buffer_.find(seq) != std::string::npos;
-    }
+    [[nodiscard]] bool contains_ansi(std::string_view seq) const { return buffer_.find(seq) != std::string::npos; }
 
     /** @brief Clear the buffer. */
     void clear() { buffer_.clear(); }
 
-private:
+  private:
     std::string buffer_;
 };
 
@@ -113,9 +109,9 @@ TEST(ConsoleTest, CompoundStyleEmitsAnsi) {
     auto con = vt.make_console(true);
     con.print("[bold red on_blue]Alert[/]");
 
-    EXPECT_TRUE(vt.contains_ansi("1"));   // bold
-    EXPECT_TRUE(vt.contains_ansi("31"));  // red fg
-    EXPECT_TRUE(vt.contains_ansi("44"));  // blue bg
+    EXPECT_TRUE(vt.contains_ansi("1"));  // bold
+    EXPECT_TRUE(vt.contains_ansi("31")); // red fg
+    EXPECT_TRUE(vt.contains_ansi("44")); // blue bg
     EXPECT_EQ(vt.plain(), "Alert\n");
 }
 

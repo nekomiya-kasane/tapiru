@@ -24,22 +24,14 @@
  */
 
 #ifdef _WIN32
-#  define WIN32_LEAN_AND_MEAN
-#  define NOMINMAX
-#  include <Windows.h>
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
 #else
-#  include <termios.h>
-#  include <unistd.h>
-#  include <sys/select.h>
+#include <sys/select.h>
+#include <termios.h>
+#include <unistd.h>
 #endif
-
-#include <chrono>
-#include <cmath>
-#include <cstdio>
-#include <cstdint>
-#include <string>
-#include <thread>
-#include <vector>
 
 #include "tapiru/core/console.h"
 #include "tapiru/core/gradient.h"
@@ -54,6 +46,14 @@
 #include "tapiru/widgets/progress.h"
 #include "tapiru/widgets/status_bar.h"
 
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <cstdio>
+#include <string>
+#include <thread>
+#include <vector>
+
 using namespace tapiru;
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -61,8 +61,17 @@ using namespace tapiru;
 // ═══════════════════════════════════════════════════════════════════════
 
 enum class input_ev : uint8_t {
-    none, up, down, left, right, enter, tab, shift_tab, quit, space,
-    mouse_click  // mouse left-click (coordinates stored separately)
+    none,
+    up,
+    down,
+    left,
+    right,
+    enter,
+    tab,
+    shift_tab,
+    quit,
+    space,
+    mouse_click // mouse left-click (coordinates stored separately)
 };
 
 static int g_mouse_x = 0;
@@ -71,13 +80,12 @@ static int g_mouse_y = 0;
 #ifdef _WIN32
 
 static HANDLE g_stdin = INVALID_HANDLE_VALUE;
-static DWORD  g_old_mode = 0;
+static DWORD g_old_mode = 0;
 
 static void enable_raw_input() {
     g_stdin = GetStdHandle(STD_INPUT_HANDLE);
     GetConsoleMode(g_stdin, &g_old_mode);
-    SetConsoleMode(g_stdin, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT
-                   | ENABLE_MOUSE_INPUT | ENABLE_PROCESSED_INPUT);
+    SetConsoleMode(g_stdin, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT | ENABLE_PROCESSED_INPUT);
 }
 
 static void restore_input() {
@@ -85,28 +93,26 @@ static void restore_input() {
 }
 
 static input_ev poll_input(int timeout_ms) {
-    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0)
-        return input_ev::none;
+    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0) return input_ev::none;
     INPUT_RECORD rec;
     DWORD count = 0;
-    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0)
-        return input_ev::none;
+    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0) return input_ev::none;
     if (rec.EventType == KEY_EVENT && rec.Event.KeyEvent.bKeyDown) {
         auto vk = rec.Event.KeyEvent.wVirtualKeyCode;
         auto ch = rec.Event.KeyEvent.uChar.UnicodeChar;
         bool shift = (rec.Event.KeyEvent.dwControlKeyState & SHIFT_PRESSED) != 0;
-        if (vk == VK_UP)     return input_ev::up;
-        if (vk == VK_DOWN)   return input_ev::down;
-        if (vk == VK_LEFT)   return input_ev::left;
-        if (vk == VK_RIGHT)  return input_ev::right;
+        if (vk == VK_UP) return input_ev::up;
+        if (vk == VK_DOWN) return input_ev::down;
+        if (vk == VK_LEFT) return input_ev::left;
+        if (vk == VK_RIGHT) return input_ev::right;
         if (vk == VK_RETURN) return input_ev::enter;
-        if (vk == VK_TAB)    return shift ? input_ev::shift_tab : input_ev::tab;
+        if (vk == VK_TAB) return shift ? input_ev::shift_tab : input_ev::tab;
         if (vk == VK_ESCAPE) return input_ev::quit;
         if (ch == L'q' || ch == L'Q') return input_ev::quit;
-        if (ch == L' ')      return input_ev::space;
+        if (ch == L' ') return input_ev::space;
     }
     if (rec.EventType == MOUSE_EVENT) {
-        auto& me = rec.Event.MouseEvent;
+        auto &me = rec.Event.MouseEvent;
         if (me.dwEventFlags == 0 && (me.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED)) {
             g_mouse_x = me.dwMousePosition.X;
             g_mouse_y = me.dwMousePosition.Y;
@@ -140,8 +146,7 @@ static input_ev poll_input(int timeout_ms) {
     struct timeval tv;
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
-    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0)
-        return input_ev::none;
+    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0) return input_ev::none;
     char buf[16];
     int n = read(STDIN_FILENO, buf, sizeof(buf));
     if (n <= 0) return input_ev::none;
@@ -167,43 +172,41 @@ static input_ev poll_input(int timeout_ms) {
 // ═══════════════════════════════════════════════════════════════════════
 
 static constexpr int NUM_PAGES = 6;
-static const char* page_names[NUM_PAGES] = {
-    "Menu", "StatusBar", "Rows", "Table", "Dashboard", "tqdm"
-};
+static const char *page_names[NUM_PAGES] = {"Menu", "StatusBar", "Rows", "Table", "Dashboard", "tqdm"};
 
 struct app_state {
     bool quit = false;
-    int  page = 0;
-    int  cursor = 0;
-    int  tick = 0;
+    int page = 0;
+    int cursor = 0;
+    int tick = 0;
 
     // Page 0: Menu & Popup
-    int  menu_cursor = 0;
+    int menu_cursor = 0;
     bool show_popup = false;
-    int  popup_item = -1;  // which menu item triggered the popup
+    int popup_item = -1; // which menu item triggered the popup
 
     // Page 1: Status Bar
-    int  sb_style = 0;  // 0=editor, 1=build, 2=error, 3=minimal
+    int sb_style = 0; // 0=editor, 1=build, 2=error, 3=minimal
 
     // Page 2: Rows & Spacer
-    int  row_gap = 0;
-    int  spacer_mode = 0;  // 0=left-right, 1=centered, 2=three-section
+    int row_gap = 0;
+    int spacer_mode = 0; // 0=left-right, 1=centered, 2=three-section
 
     // Page 3: Table Visuals
-    int  table_effect = 0;  // 0=none, 1=shadow, 2=glow, 3=custom shadow
+    int table_effect = 0; // 0=none, 1=shadow, 2=glow, 3=custom shadow
 
     // Page 4: Dashboard (composite)
-    int  dash_cursor = 0;
+    int dash_cursor = 0;
 
     // Page 5: tqdm
     bool tqdm_running = false;
-    int  tqdm_progress = 0;
-    int  tqdm_total = 50;
+    int tqdm_progress = 0;
+    int tqdm_total = 50;
 
     // Mouse tracking (shown on all pages)
-    int  last_click_x = -1;
-    int  last_click_y = -1;
-    int  click_count = 0;
+    int last_click_x = -1;
+    int last_click_y = -1;
+    int click_count = 0;
 };
 
 // Menu separator indices (items at these positions are separators, not selectable)
@@ -231,7 +234,7 @@ static int menu_cursor_prev(int cur) {
 //  Page views — each builds a widget tree
 // ═══════════════════════════════════════════════════════════════════════
 
-static auto build_tab_bar(const app_state& st) {
+static auto build_tab_bar(const app_state &st) {
     std::string tabs = "  ";
     for (int i = 0; i < NUM_PAGES; ++i) {
         if (i == st.page)
@@ -243,16 +246,14 @@ static auto build_tab_bar(const app_state& st) {
     return text_builder(tabs);
 }
 
-static auto build_footer(const app_state& st) {
-    std::string footer =
-        "  [dim]Tab[/] page  [dim]\xe2\x86\x91\xe2\x86\x93[/] navigate  "
-        "[dim]Enter[/] select  [dim]\xe2\x86\x90\xe2\x86\x92[/] adjust  "
-        "[dim]Mouse[/] click tabs  [dim]q[/] quit";
+static auto build_footer(const app_state &st) {
+    std::string footer = "  [dim]Tab[/] page  [dim]\xe2\x86\x91\xe2\x86\x93[/] navigate  "
+                         "[dim]Enter[/] select  [dim]\xe2\x86\x90\xe2\x86\x92[/] adjust  "
+                         "[dim]Mouse[/] click tabs  [dim]q[/] quit";
     if (st.click_count > 0) {
         char buf[64];
-        std::snprintf(buf, sizeof(buf),
-            "\n  [dim]Last click:[/] (%d, %d)  [dim]Total clicks:[/] %d",
-            st.last_click_x, st.last_click_y, st.click_count);
+        std::snprintf(buf, sizeof(buf), "\n  [dim]Last click:[/] (%d, %d)  [dim]Total clicks:[/] %d", st.last_click_x,
+                      st.last_click_y, st.click_count);
         footer += buf;
     }
     return text_builder(footer);
@@ -261,10 +262,10 @@ static auto build_footer(const app_state& st) {
 // ── Page 0: Menu & Popup ────────────────────────────────────────────────
 
 class menu_page_view {
-public:
-    explicit menu_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit menu_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -277,39 +278,38 @@ public:
         // Left: menu
         {
             auto mb = menu_builder()
-                .add_item("New Project",    "Ctrl+N")
-                .add_item("Open Project",   "Ctrl+O")
-                .add_item("Save All",       "Ctrl+Shift+S")
-                .add_separator()
-                .add_item("Settings",       "Ctrl+,")
-                .add_item("Extensions",     "Ctrl+Shift+X")
-                .add_separator()
-                .add_item("Exit",           "Ctrl+Q")
-                .cursor(&st_.menu_cursor)
-                .border(border_style::rounded)
-                .highlight_style(style{colors::bright_white, colors::blue, attr::bold})
-                .shortcut_style(style{colors::bright_black})
-                .shadow()
-                .key("main-menu");
+                          .add_item("New Project", "Ctrl+N")
+                          .add_item("Open Project", "Ctrl+O")
+                          .add_item("Save All", "Ctrl+Shift+S")
+                          .add_separator()
+                          .add_item("Settings", "Ctrl+,")
+                          .add_item("Extensions", "Ctrl+Shift+X")
+                          .add_separator()
+                          .add_item("Exit", "Ctrl+Q")
+                          .cursor(&st_.menu_cursor)
+                          .border(border_style::rounded)
+                          .highlight_style(style{colors::bright_white, colors::blue, attr::bold})
+                          .shortcut_style(style{colors::bright_black})
+                          .shadow()
+                          .key("main-menu");
             body.add(std::move(mb));
         }
 
         // Right: description panel
         {
-            const char* descriptions[] = {
+            const char *descriptions[] = {
                 "[bold]New Project[/]\nCreate a new project from template.",
                 "[bold]Open Project[/]\nBrowse and open an existing project.",
                 "[bold]Save All[/]\nSave all modified files to disk.",
-                "",  // separator
+                "", // separator
                 "[bold]Settings[/]\nConfigure editor preferences.",
                 "[bold]Extensions[/]\nManage installed extensions.",
-                "",  // separator
+                "", // separator
                 "[bold]Exit[/]\nClose the application.",
             };
 
             int desc_idx = st_.menu_cursor;
-            const char* desc_text = (desc_idx >= 0 && desc_idx < 8)
-                ? descriptions[desc_idx] : "";
+            const char *desc_text = (desc_idx >= 0 && desc_idx < 8) ? descriptions[desc_idx] : "";
 
             auto info_text = text_builder(desc_text);
             panel_builder info(std::move(info_text));
@@ -328,15 +328,14 @@ public:
 
         // Popup overlay (if active)
         if (st_.show_popup && st_.popup_item >= 0) {
-            const char* item_names[] = {
-                "New Project", "Open Project", "Save All", "",
-                "Settings", "Extensions", "", "Exit"
-            };
-            const char* name = (st_.popup_item < 8) ? item_names[st_.popup_item] : "?";
+            const char *item_names[] = {"New Project", "Open Project", "Save All", "",
+                                        "Settings",    "Extensions",   "",         "Exit"};
+            const char *name = (st_.popup_item < 8) ? item_names[st_.popup_item] : "?";
 
-            std::string popup_text = std::string("[bold]") + name + "[/]\n\n"
-                "This action would be executed.\n\n"
-                "[dim]Press Enter or Esc to dismiss.[/]";
+            std::string popup_text = std::string("[bold]") + name +
+                                     "[/]\n\n"
+                                     "This action would be executed.\n\n"
+                                     "[dim]Press Enter or Esc to dismiss.[/]";
 
             page.add(text_builder(""));
 
@@ -353,17 +352,18 @@ public:
         page.key("menu-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ── Page 1: Status Bars ─────────────────────────────────────────────────
 
 class statusbar_page_view {
-public:
-    explicit statusbar_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit statusbar_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -371,12 +371,11 @@ public:
         page.add(text_builder("  [dim]Use Up/Down to cycle styles[/]"));
         page.add(text_builder(""));
 
-        const char* style_names[] = {"Editor", "Build", "Error", "Minimal"};
+        const char *style_names[] = {"Editor", "Build", "Error", "Minimal"};
         for (int i = 0; i < 4; ++i) {
             bool sel = (st_.sb_style == i);
-            std::string label = sel
-                ? std::string("[bold bright_white on_blue] \xe2\x96\xb6 ") + style_names[i] + " [/]"
-                : std::string("  [dim]  ") + style_names[i] + "[/]";
+            std::string label = sel ? std::string("[bold bright_white on_blue] \xe2\x96\xb6 ") + style_names[i] + " [/]"
+                                    : std::string("  [dim]  ") + style_names[i] + "[/]";
             page.add(text_builder(label));
         }
 
@@ -387,46 +386,45 @@ public:
         switch (st_.sb_style) {
         case 0:
             page.add(status_bar_builder()
-                .left("[bold] NORMAL [/]")
-                .center("[bold]main.cpp[/] [dim](modified)[/]")
-                .right("[dim]Ln 142, Col 28[/]")
-                .style_override(style{colors::bright_white, color::from_rgb(30, 30, 80)}));
+                         .left("[bold] NORMAL [/]")
+                         .center("[bold]main.cpp[/] [dim](modified)[/]")
+                         .right("[dim]Ln 142, Col 28[/]")
+                         .style_override(style{colors::bright_white, color::from_rgb(30, 30, 80)}));
             break;
         case 1:
             page.add(status_bar_builder()
-                .left("[bold] BUILD [/]")
-                .center("[bold]Release x64[/]")
-                .right("[bold green]0 errors, 2 warnings[/]")
-                .style_override(style{colors::bright_white, color::from_rgb(20, 60, 20)}));
+                         .left("[bold] BUILD [/]")
+                         .center("[bold]Release x64[/]")
+                         .right("[bold green]0 errors, 2 warnings[/]")
+                         .style_override(style{colors::bright_white, color::from_rgb(20, 60, 20)}));
             break;
         case 2:
             page.add(status_bar_builder()
-                .left("[bold] ERROR [/]")
-                .center("ECONNREFUSED 127.0.0.1:5432")
-                .right("[bold]Retry?[/]")
-                .style_override(style{colors::bright_white, color::from_rgb(120, 20, 20)}));
+                         .left("[bold] ERROR [/]")
+                         .center("ECONNREFUSED 127.0.0.1:5432")
+                         .right("[bold]Retry?[/]")
+                         .style_override(style{colors::bright_white, color::from_rgb(120, 20, 20)}));
             break;
         case 3:
-            page.add(status_bar_builder()
-                .left("tapiru v0.1.0")
-                .right("Ready"));
+            page.add(status_bar_builder().left("tapiru v0.1.0").right("Ready"));
             break;
         }
 
         page.key("sb-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ── Page 2: Rows & Spacer ───────────────────────────────────────────────
 
 class rows_page_view {
-public:
-    explicit rows_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit rows_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -435,17 +433,16 @@ public:
         // Controls
         {
             char buf[80];
-            std::snprintf(buf, sizeof(buf),
-                "  [dim]Gap:[/] [bold cyan]%d[/] [dim](Left/Right to adjust)[/]", st_.row_gap);
+            std::snprintf(buf, sizeof(buf), "  [dim]Gap:[/] [bold cyan]%d[/] [dim](Left/Right to adjust)[/]",
+                          st_.row_gap);
             page.add(text_builder(buf));
         }
 
-        const char* mode_names[] = {"Push Apart", "Centered", "Three-Section"};
+        const char *mode_names[] = {"Push Apart", "Centered", "Three-Section"};
         for (int i = 0; i < 3; ++i) {
             bool sel = (st_.spacer_mode == i);
-            std::string label = sel
-                ? std::string("[bold bright_white on_blue] \xe2\x96\xb6 ") + mode_names[i] + " [/]"
-                : std::string("  [dim]  ") + mode_names[i] + "[/]";
+            std::string label = sel ? std::string("[bold bright_white on_blue] \xe2\x96\xb6 ") + mode_names[i] + " [/]"
+                                    : std::string("  [dim]  ") + mode_names[i] + "[/]";
             page.add(text_builder(label));
         }
 
@@ -456,17 +453,17 @@ public:
         {
             columns_builder preview;
             switch (st_.spacer_mode) {
-            case 0:  // Push apart
+            case 0: // Push apart
                 preview.add(text_builder("[bold green]LEFT[/]"));
                 preview.add(spacer_builder(), 1);
                 preview.add(text_builder("[bold red]RIGHT[/]"));
                 break;
-            case 1:  // Centered
+            case 1: // Centered
                 preview.add(spacer_builder(), 1);
                 preview.add(text_builder("[bold bright_yellow]CENTERED CONTENT[/]"));
                 preview.add(spacer_builder(), 1);
                 break;
-            case 2:  // Three-section
+            case 2: // Three-section
                 preview.add(text_builder("[bold] MODE [/]"));
                 preview.add(spacer_builder(), 1);
                 preview.add(text_builder("[bold cyan]file.cpp[/]"));
@@ -500,17 +497,18 @@ public:
         page.key("rows-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ── Page 3: Table Visuals ───────────────────────────────────────────────
 
 class table_page_view {
-public:
-    explicit table_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit table_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -518,12 +516,12 @@ public:
         page.add(text_builder("  [dim]Use Up/Down to select, Enter to apply[/]"));
         page.add(text_builder(""));
 
-        const char* effect_names[] = {"No Effect", "Drop Shadow", "Green Glow", "Red Shadow (custom)"};
+        const char *effect_names[] = {"No Effect", "Drop Shadow", "Green Glow", "Red Shadow (custom)"};
         for (int i = 0; i < 4; ++i) {
             bool sel = (st_.table_effect == i);
-            std::string label = sel
-                ? std::string("[bold bright_white on_blue] \xe2\x96\xb6 ") + effect_names[i] + " [/]"
-                : std::string("  [dim]  ") + effect_names[i] + "[/]";
+            std::string label =
+                sel ? std::string("[bold bright_white on_blue] \xe2\x96\xb6 ") + effect_names[i] + " [/]"
+                    : std::string("  [dim]  ") + effect_names[i] + "[/]";
             page.add(text_builder(label));
         }
 
@@ -539,18 +537,25 @@ public:
             tb.header_style(style{colors::bright_cyan, {}, attr::bold});
             tb.key("demo-table");
 
-            tb.add_row({"menu_builder",       "[green]Done[/]", "Native"});
-            tb.add_row({"popup_builder",      "[green]Done[/]", "Composite"});
+            tb.add_row({"menu_builder", "[green]Done[/]", "Native"});
+            tb.add_row({"popup_builder", "[green]Done[/]", "Composite"});
             tb.add_row({"status_bar_builder", "[green]Done[/]", "Composite"});
-            tb.add_row({"rows_builder",       "[green]Done[/]", "Layout"});
-            tb.add_row({"spacer_builder",     "[green]Done[/]", "Layout"});
-            tb.add_row({"tqdm",               "[green]Done[/]", "Iterator"});
+            tb.add_row({"rows_builder", "[green]Done[/]", "Layout"});
+            tb.add_row({"spacer_builder", "[green]Done[/]", "Layout"});
+            tb.add_row({"tqdm", "[green]Done[/]", "Iterator"});
 
             switch (st_.table_effect) {
-            case 1: tb.shadow(); break;
-            case 2: tb.glow(color::from_rgb(0, 200, 0)); break;
-            case 3: tb.shadow(3, 2, 2, color::from_rgb(180, 0, 0), 100); break;
-            default: break;
+            case 1:
+                tb.shadow();
+                break;
+            case 2:
+                tb.glow(color::from_rgb(0, 200, 0));
+                break;
+            case 3:
+                tb.shadow(3, 2, 2, color::from_rgb(180, 0, 0), 100);
+                break;
+            default:
+                break;
             }
 
             page.add(std::move(tb));
@@ -559,17 +564,18 @@ public:
         page.key("table-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ── Page 4: Dashboard ───────────────────────────────────────────────────
 
 class dashboard_page_view {
-public:
-    explicit dashboard_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit dashboard_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -581,18 +587,16 @@ public:
 
         // Sidebar
         {
-            body.add(
-                menu_builder()
-                    .add_item("Overview")
-                    .add_item("Tasks")
-                    .add_item("Metrics")
-                    .add_separator()
-                    .add_item("Settings")
-                    .cursor(&st_.dash_cursor)
-                    .highlight_style(style{colors::bright_white, colors::blue, attr::bold})
-                    .border(border_style::rounded)
-                    .key("dash-menu")
-            );
+            body.add(menu_builder()
+                         .add_item("Overview")
+                         .add_item("Tasks")
+                         .add_item("Metrics")
+                         .add_separator()
+                         .add_item("Settings")
+                         .cursor(&st_.dash_cursor)
+                         .highlight_style(style{colors::bright_white, colors::blue, attr::bold})
+                         .border(border_style::rounded)
+                         .key("dash-menu"));
         }
 
         // Content area depends on dash_cursor
@@ -601,23 +605,22 @@ public:
             content.gap(0);
 
             switch (st_.dash_cursor) {
-            case 0: {  // Overview
+            case 0: { // Overview
                 content.add(text_builder("[bold]System Overview[/]"));
                 content.add(rule_builder());
 
-                auto t1 = std::make_shared<progress_task>("CPU",  100);
-                auto t2 = std::make_shared<progress_task>("Mem",  100);
+                auto t1 = std::make_shared<progress_task>("CPU", 100);
+                auto t2 = std::make_shared<progress_task>("Mem", 100);
                 auto t3 = std::make_shared<progress_task>("Disk", 100);
                 int cpu_val = 50 + static_cast<int>(30.0 * std::sin(st_.tick * 0.15));
                 t1->advance(cpu_val);
                 t2->advance(62);
                 t3->advance(34);
-                content.add(progress_builder()
-                    .add_task(t1).add_task(t2).add_task(t3)
-                    .bar_width(20).key("sys-progress"));
+                content.add(
+                    progress_builder().add_task(t1).add_task(t2).add_task(t3).bar_width(20).key("sys-progress"));
                 break;
             }
-            case 1: {  // Tasks
+            case 1: { // Tasks
                 content.add(text_builder("[bold]Task List[/]"));
                 content.add(rule_builder());
                 table_builder tb;
@@ -626,26 +629,24 @@ public:
                 tb.border(border_style::none);
                 tb.header_style(style{colors::bright_cyan, {}, attr::bold});
                 tb.add_row({"Widget expansion", "[green]\xe2\x9c\x93[/]"});
-                tb.add_row({"tqdm iterator",    "[green]\xe2\x9c\x93[/]"});
+                tb.add_row({"tqdm iterator", "[green]\xe2\x9c\x93[/]"});
                 tb.add_row({"Interactive demo", "[yellow]...[/]"});
-                tb.add_row({"Documentation",    "[dim]\xe2\x97\x8b[/]"});
+                tb.add_row({"Documentation", "[dim]\xe2\x97\x8b[/]"});
                 tb.key("task-table");
                 content.add(std::move(tb));
                 break;
             }
-            case 2: {  // Metrics
+            case 2: { // Metrics
                 content.add(text_builder("[bold]Metrics[/]"));
                 content.add(rule_builder());
                 std::vector<float> data;
                 for (int i = 0; i < 40; ++i)
-                    data.push_back(static_cast<float>(
-                        std::sin((i + st_.tick) * 0.2) * 30 + 50));
-                content.add(line_chart_builder(data, 30, 4)
-                    .style_override(style{colors::bright_green})
-                    .key("metric-chart"));
+                    data.push_back(static_cast<float>(std::sin((i + st_.tick) * 0.2) * 30 + 50));
+                content.add(
+                    line_chart_builder(data, 30, 4).style_override(style{colors::bright_green}).key("metric-chart"));
                 break;
             }
-            default: {  // Settings
+            default: { // Settings
                 content.add(text_builder("[bold]Settings[/]"));
                 content.add(rule_builder());
                 content.add(text_builder("  Theme:    [cyan]Dark[/]"));
@@ -671,25 +672,26 @@ public:
         char tick_buf[32];
         std::snprintf(tick_buf, sizeof(tick_buf), "Frame %d", st_.tick);
         page.add(status_bar_builder()
-            .left("[bold] ONLINE [/]")
-            .center(tick_buf)
-            .right("[green]All systems nominal[/]")
-            .style_override(style{colors::bright_white, color::from_rgb(30, 30, 60)}));
+                     .left("[bold] ONLINE [/]")
+                     .center(tick_buf)
+                     .right("[green]All systems nominal[/]")
+                     .style_override(style{colors::bright_white, color::from_rgb(30, 30, 60)}));
 
         page.key("dash-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ── Page 5: tqdm Demo ───────────────────────────────────────────────────
 
 class tqdm_page_view {
-public:
-    explicit tqdm_page_view(const app_state& st) : st_(st) {}
+  public:
+    explicit tqdm_page_view(const app_state &st) : st_(st) {}
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder page;
         page.gap(0);
 
@@ -709,9 +711,8 @@ public:
         if (st_.tqdm_running) {
             char buf[80];
             double pct = static_cast<double>(st_.tqdm_progress) / st_.tqdm_total * 100.0;
-            std::snprintf(buf, sizeof(buf),
-                "  [bold yellow]Running:[/] %d/%d [bold](%.0f%%)[/]",
-                st_.tqdm_progress, st_.tqdm_total, pct);
+            std::snprintf(buf, sizeof(buf), "  [bold yellow]Running:[/] %d/%d [bold](%.0f%%)[/]", st_.tqdm_progress,
+                          st_.tqdm_total, pct);
             page.add(text_builder(buf));
 
             // Visual progress bar
@@ -731,8 +732,9 @@ public:
         page.key("tqdm-page");
         return page.flatten_into(s);
     }
-private:
-    const app_state& st_;
+
+  private:
+    const app_state &st_;
 };
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -740,10 +742,10 @@ private:
 // ═══════════════════════════════════════════════════════════════════════
 
 class app_view {
-public:
-    explicit app_view(const app_state& st) : st_(st) {}  // copies the state
+  public:
+    explicit app_view(const app_state &st) : st_(st) {} // copies the state
 
-    node_id flatten_into(detail::scene& s) const {
+    node_id flatten_into(detail::scene &s) const {
         rows_builder root;
         root.gap(0);
 
@@ -756,12 +758,36 @@ public:
 
         // Page content
         switch (st_.page) {
-        case 0: { auto v = menu_page_view(st_);      root.add(std::move(v)); break; }
-        case 1: { auto v = statusbar_page_view(st_);  root.add(std::move(v)); break; }
-        case 2: { auto v = rows_page_view(st_);       root.add(std::move(v)); break; }
-        case 3: { auto v = table_page_view(st_);      root.add(std::move(v)); break; }
-        case 4: { auto v = dashboard_page_view(st_);   root.add(std::move(v)); break; }
-        case 5: { auto v = tqdm_page_view(st_);        root.add(std::move(v)); break; }
+        case 0: {
+            auto v = menu_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 1: {
+            auto v = statusbar_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 2: {
+            auto v = rows_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 3: {
+            auto v = table_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 4: {
+            auto v = dashboard_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
+        case 5: {
+            auto v = tqdm_page_view(st_);
+            root.add(std::move(v));
+            break;
+        }
         }
 
         // Footer
@@ -772,31 +798,39 @@ public:
         root.key("app-root");
         return root.flatten_into(s);
     }
-private:
-    app_state st_;  // COPY — render thread gets its own snapshot
+
+  private:
+    app_state st_; // COPY — render thread gets its own snapshot
 };
 
 // ═══════════════════════════════════════════════════════════════════════
 //  Input handling
 // ═══════════════════════════════════════════════════════════════════════
 
-static int max_cursor(const app_state& st) {
+static int max_cursor(const app_state &st) {
     switch (st.page) {
-    case 0: return 7;   // menu items
-    case 1: return 3;   // status bar styles
-    case 2: return 2;   // spacer modes
-    case 3: return 3;   // table effects
-    case 4: return 4;   // dashboard sidebar (including separator)
-    case 5: return 0;
-    default: return 0;
+    case 0:
+        return 7; // menu items
+    case 1:
+        return 3; // status bar styles
+    case 2:
+        return 2; // spacer modes
+    case 3:
+        return 3; // table effects
+    case 4:
+        return 4; // dashboard sidebar (including separator)
+    case 5:
+        return 0;
+    default:
+        return 0;
     }
 }
 
-static void handle_input(app_state& st, input_ev ev) {
+static void handle_input(app_state &st, input_ev ev) {
     // Popup dismissal takes priority
     if (st.show_popup && (ev == input_ev::enter || ev == input_ev::quit || ev == input_ev::space)) {
         st.show_popup = false;
-        if (ev == input_ev::quit) return;  // don't also quit
+        if (ev == input_ev::quit) return; // don't also quit
         return;
     }
 
@@ -812,14 +846,22 @@ static void handle_input(app_state& st, input_ev ev) {
         st.show_popup = false;
         break;
     case input_ev::up:
-        if (st.page == 0) { st.menu_cursor = menu_cursor_prev(st.menu_cursor); }
-        else if (st.page == 4) { if (st.dash_cursor > 0) --st.dash_cursor; }
-        else { if (st.cursor > 0) --st.cursor; }
+        if (st.page == 0) {
+            st.menu_cursor = menu_cursor_prev(st.menu_cursor);
+        } else if (st.page == 4) {
+            if (st.dash_cursor > 0) --st.dash_cursor;
+        } else {
+            if (st.cursor > 0) --st.cursor;
+        }
         break;
     case input_ev::down:
-        if (st.page == 0) { st.menu_cursor = menu_cursor_next(st.menu_cursor); }
-        else if (st.page == 4) { if (st.dash_cursor < 4) ++st.dash_cursor; }
-        else { if (st.cursor < max_cursor(st)) ++st.cursor; }
+        if (st.page == 0) {
+            st.menu_cursor = menu_cursor_next(st.menu_cursor);
+        } else if (st.page == 4) {
+            if (st.dash_cursor < 4) ++st.dash_cursor;
+        } else {
+            if (st.cursor < max_cursor(st)) ++st.cursor;
+        }
         break;
     case input_ev::enter:
     case input_ev::space:
@@ -838,12 +880,18 @@ static void handle_input(app_state& st, input_ev ev) {
         }
         break;
     case input_ev::left:
-        if (st.page == 1) { st.sb_style = st.cursor; }
-        else if (st.page == 2) { if (st.row_gap > 0) --st.row_gap; }
+        if (st.page == 1) {
+            st.sb_style = st.cursor;
+        } else if (st.page == 2) {
+            if (st.row_gap > 0) --st.row_gap;
+        }
         break;
     case input_ev::right:
-        if (st.page == 1) { st.sb_style = st.cursor; }
-        else if (st.page == 2) { if (st.row_gap < 3) ++st.row_gap; }
+        if (st.page == 1) {
+            st.sb_style = st.cursor;
+        } else if (st.page == 2) {
+            if (st.row_gap < 3) ++st.row_gap;
+        }
         break;
     case input_ev::mouse_click:
         st.last_click_x = g_mouse_x;
@@ -931,9 +979,9 @@ int main() {
         // Animated pages always re-render
         bool anim = (st.page == 4 && st.tick % 10 == 0);
         if (changed || anim) {
-            con.write("\x1b[H");  // cursor home
+            con.write("\x1b[H"); // cursor home
             con.print_widget(app_view(st), width);
-            con.write("\x1b[J");  // clear to end of screen
+            con.write("\x1b[J"); // clear to end of screen
         }
     }
 
@@ -954,7 +1002,7 @@ int main() {
     std::printf("\n");
 
     std::vector<std::string> files = {"main.cpp", "utils.h", "render.cpp", "scene.h", "input.cpp"};
-    for ([[maybe_unused]] auto& f : tapiru::tqdm(files, "Compiling").unit("files").bar_width(25)) {
+    for ([[maybe_unused]] auto &f : tapiru::tqdm(files, "Compiling").unit("files").bar_width(25)) {
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
 

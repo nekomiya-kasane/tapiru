@@ -1,15 +1,14 @@
-#include <gtest/gtest.h>
-
-#include <mutex>
-#include <string>
-
 #include "tapiru/core/console.h"
 #include "tapiru/core/logging.h"
+
+#include <gtest/gtest.h>
+#include <mutex>
+#include <string>
 
 using namespace tapiru;
 
 class capture_sink {
-public:
+  public:
     void operator()(std::string_view data) {
         std::lock_guard lk(mu_);
         buffer_ += data;
@@ -22,7 +21,8 @@ public:
         std::lock_guard lk(mu_);
         buffer_.clear();
     }
-private:
+
+  private:
     mutable std::mutex mu_;
     std::string buffer_;
 };
@@ -32,8 +32,8 @@ private:
 TEST(LoggingTest, LevelNames) {
     EXPECT_EQ(log_level_name(log_level::trace), "TRACE");
     EXPECT_EQ(log_level_name(log_level::debug), "DEBUG");
-    EXPECT_EQ(log_level_name(log_level::info),  "INFO");
-    EXPECT_EQ(log_level_name(log_level::warn),  "WARN");
+    EXPECT_EQ(log_level_name(log_level::info), "INFO");
+    EXPECT_EQ(log_level_name(log_level::warn), "WARN");
     EXPECT_EQ(log_level_name(log_level::error), "ERROR");
     EXPECT_EQ(log_level_name(log_level::fatal), "FATAL");
 }
@@ -200,8 +200,7 @@ TEST(LoggingTest, StructuredFields) {
 
     log_handler logger(con);
     logger.show_timestamp(false);
-    logger.log_structured(log_level::info, "Request handled",
-                          {{"status", "200"}, {"duration", "42ms"}});
+    logger.log_structured(log_level::info, "Request handled", {{"status", "200"}, {"duration", "42ms"}});
 
     auto out = sink->snapshot();
     EXPECT_TRUE(out.find("Request handled") != std::string::npos);
@@ -322,7 +321,7 @@ TEST(LoggingTest, ModulePrefixInOutput) {
 // ── log_panel_builder ──────────────────────────────────────────────────
 
 class virtual_terminal_log {
-public:
+  public:
     [[nodiscard]] console make_console(bool color = false, uint32_t width = 80) {
         console_config cfg;
         cfg.sink = [this](std::string_view data) { buffer_ += data; };
@@ -331,9 +330,10 @@ public:
         cfg.no_color = !color;
         return console(cfg);
     }
-    [[nodiscard]] const std::string& raw() const noexcept { return buffer_; }
+    [[nodiscard]] const std::string &raw() const noexcept { return buffer_; }
     void clear() { buffer_.clear(); }
-private:
+
+  private:
     std::string buffer_;
 };
 
@@ -395,7 +395,7 @@ TEST(LogPanelTest, VisibleLinesLimit) {
     }
 
     con.print_widget(panel, 80);
-    auto& out = vt.raw();
+    auto &out = vt.raw();
     // Auto-scroll: should show last 2 lines
     EXPECT_TRUE(out.find("line9") != std::string::npos);
     EXPECT_TRUE(out.find("line8") != std::string::npos);

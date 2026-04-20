@@ -3,16 +3,17 @@
  * @brief Tests for interactive widget builders.
  */
 
-#include <gtest/gtest.h>
-#include "tapiru/widgets/interactive.h"
 #include "tapiru/core/console.h"
+#include "tapiru/widgets/interactive.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
 // ── VirtualTerminal helper ──────────────────────────────────────────────
 
 class virtual_terminal {
-public:
+  public:
     [[nodiscard]] console make_console(bool color = false, uint32_t width = 40) {
         console_config cfg;
         cfg.sink = [this](std::string_view data) { buffer_ += data; };
@@ -21,14 +22,15 @@ public:
         cfg.no_color = !color;
         return console(cfg);
     }
-    [[nodiscard]] const std::string& raw() const noexcept { return buffer_; }
+    [[nodiscard]] const std::string &raw() const noexcept { return buffer_; }
     void clear() { buffer_.clear(); }
-private:
+
+  private:
     std::string buffer_;
 };
 
 // Helper: render widget to string via virtual_terminal
-static std::string render(auto&& builder, uint32_t width = 40) {
+static std::string render(auto &&builder, uint32_t width = 40) {
     virtual_terminal vt;
     auto con = vt.make_console(false, width);
     con.print_widget(std::forward<decltype(builder)>(builder), width);

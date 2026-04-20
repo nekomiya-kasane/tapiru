@@ -8,33 +8,31 @@
  *   .\build\bin\Release\spearmint_dashboard.exe
  */
 
+#include "tapiru/core/console.h"
+#include "tapiru/core/decorator.h"
+#include "tapiru/core/element.h"
+#include "tapiru/core/style.h"
+#include "tapiru/text/emoji.h"
+#include "tapiru/widgets/builders.h"
+#include "tapiru/widgets/canvas_widget.h"
+#include "tapiru/widgets/chart.h"
+#include "tapiru/widgets/gauge.h"
+#include "tapiru/widgets/progress.h"
+#include "tapiru/widgets/status_bar.h"
+
 #include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <string>
 #include <vector>
 
-#include "tapiru/core/console.h"
-#include "tapiru/core/style.h"
-#include "tapiru/core/element.h"
-#include "tapiru/core/decorator.h"
-#include "tapiru/text/emoji.h"
-
-#include "tapiru/widgets/builders.h"
-#include "tapiru/widgets/chart.h"
-#include "tapiru/widgets/gauge.h"
-#include "tapiru/widgets/progress.h"
-#include "tapiru/widgets/status_bar.h"
-#include "tapiru/widgets/canvas_widget.h"
-
 using namespace tapiru;
 
 static constexpr int W = 78;
 
-static void section(console& con, const char* title) {
+static void section(console &con, const char *title) {
     con.newline();
-    con.print_widget(rule_builder(title)
-        .rule_style(style{colors::bright_cyan, {}, attr::bold}), W);
+    con.print_widget(rule_builder(title).rule_style(style{colors::bright_cyan, {}, attr::bold}), W);
     con.newline();
 }
 
@@ -42,16 +40,17 @@ static void section(console& con, const char* title) {
 //  Header
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_header(console& con) {
+static void show_header(console &con) {
     con.newline();
-    con.print_widget(
-        rule_builder(" spearmint — Feature & Performance Dashboard ")
-            .rule_style(style{colors::bright_yellow, {}, attr::bold})
-            .character(U'\x2550'), W);
+    con.print_widget(rule_builder(" spearmint — Feature & Performance Dashboard ")
+                         .rule_style(style{colors::bright_yellow, {}, attr::bold})
+                         .character(U'\x2550'),
+                     W);
     con.newline();
 
     rows_builder info;
-    info.add(text_builder("[bold bright_white]spearmint[/] [dim]v0.1[/]  —  Semantic Tokenization & Syntax Highlighting Engine"));
+    info.add(text_builder(
+        "[bold bright_white]spearmint[/] [dim]v0.1[/]  —  Semantic Tokenization & Syntax Highlighting Engine"));
     info.add(text_builder("[dim]Lexer registry, token streams, style themes, multi-format exporters[/]"));
     info.add(text_builder("[dim]25 language lexers, 4 export formats, regex-based tokenization[/]"));
     info.gap(0);
@@ -67,68 +66,68 @@ static void show_header(console& con) {
 //  Supported Languages
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_languages(console& con) {
+static void show_languages(console &con) {
     section(con, " Supported Languages (25) ");
 
     columns_builder cols;
 
     {
         table_builder tb;
-        tb.add_column("Language",  {justify::left, 14, 18});
-        tb.add_column("Status",    {justify::center, 8, 12});
+        tb.add_column("Language", {justify::left, 14, 18});
+        tb.add_column("Status", {justify::center, 8, 12});
         tb.border(border_style::rounded);
         tb.header_style(style{colors::bright_cyan, {}, attr::bold});
 
         auto ok = "[green]Ready[/]";
-        tb.add_row({"C++",          ok});
-        tb.add_row({"Python",       ok});
-        tb.add_row({"JavaScript",   ok});
-        tb.add_row({"TypeScript",   ok});
-        tb.add_row({"Java",         ok});
-        tb.add_row({"C#",           ok});
-        tb.add_row({"Rust",         ok});
-        tb.add_row({"Go",           ok});
-        tb.add_row({"Swift",        ok});
+        tb.add_row({"C++", ok});
+        tb.add_row({"Python", ok});
+        tb.add_row({"JavaScript", ok});
+        tb.add_row({"TypeScript", ok});
+        tb.add_row({"Java", ok});
+        tb.add_row({"C#", ok});
+        tb.add_row({"Rust", ok});
+        tb.add_row({"Go", ok});
+        tb.add_row({"Swift", ok});
 
         cols.add(std::move(tb), 1);
     }
 
     {
         table_builder tb;
-        tb.add_column("Language",  {justify::left, 14, 18});
-        tb.add_column("Status",    {justify::center, 8, 12});
+        tb.add_column("Language", {justify::left, 14, 18});
+        tb.add_column("Status", {justify::center, 8, 12});
         tb.border(border_style::rounded);
         tb.header_style(style{colors::bright_cyan, {}, attr::bold});
 
         auto ok = "[green]Ready[/]";
-        tb.add_row({"Ruby",         ok});
-        tb.add_row({"Kotlin",       ok});
-        tb.add_row({"Lua",          ok});
-        tb.add_row({"PHP",          ok});
-        tb.add_row({"SQL",          ok});
-        tb.add_row({"Bash",         ok});
-        tb.add_row({"HTML",         ok});
-        tb.add_row({"CSS",          ok});
-        tb.add_row({"JSON",         ok});
+        tb.add_row({"Ruby", ok});
+        tb.add_row({"Kotlin", ok});
+        tb.add_row({"Lua", ok});
+        tb.add_row({"PHP", ok});
+        tb.add_row({"SQL", ok});
+        tb.add_row({"Bash", ok});
+        tb.add_row({"HTML", ok});
+        tb.add_row({"CSS", ok});
+        tb.add_row({"JSON", ok});
 
         cols.add(std::move(tb), 1);
     }
 
     {
         table_builder tb;
-        tb.add_column("Language",  {justify::left, 14, 18});
-        tb.add_column("Status",    {justify::center, 8, 12});
+        tb.add_column("Language", {justify::left, 14, 18});
+        tb.add_column("Status", {justify::center, 8, 12});
         tb.border(border_style::rounded);
         tb.header_style(style{colors::bright_cyan, {}, attr::bold});
 
         auto ok = "[green]Ready[/]";
-        tb.add_row({"XML",          ok});
-        tb.add_row({"YAML",         ok});
-        tb.add_row({"TOML",         ok});
-        tb.add_row({"INI",          ok});
-        tb.add_row({"Markdown",     ok});
-        tb.add_row({"Makefile",     ok});
-        tb.add_row({"Dockerfile",   ok});
+        tb.add_row({"XML", ok});
+        tb.add_row({"YAML", ok});
+        tb.add_row({"TOML", ok});
+        tb.add_row({"INI", ok});
+        tb.add_row({"Markdown", ok});
+        tb.add_row({"Makefile", ok});
+        tb.add_row({"Dockerfile", ok});
 
         cols.add(std::move(tb), 1);
     }
@@ -141,7 +140,7 @@ static void show_languages(console& con) {
 //  Architecture
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_architecture(console& con) {
+static void show_architecture(console &con) {
     section(con, " Architecture ");
 
     columns_builder cols;
@@ -201,37 +200,37 @@ static void show_architecture(console& con) {
 //  Feature Matrix
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_features(console& con) {
+static void show_features(console &con) {
     section(con, " Feature Matrix ");
 
     table_builder tb;
-    tb.add_column("Category",    {justify::left,   14, 18});
-    tb.add_column("Feature",     {justify::left,   30, 38});
-    tb.add_column("Status",      {justify::center,  8, 12});
+    tb.add_column("Category", {justify::left, 14, 18});
+    tb.add_column("Feature", {justify::left, 30, 38});
+    tb.add_column("Status", {justify::center, 8, 12});
     tb.border(border_style::rounded);
     tb.header_style(style{colors::bright_cyan, {}, attr::bold});
     tb.shadow();
 
     auto ok = "[green]Ready[/]";
 
-    tb.add_row({"Core",         "Token type classification",         ok});
-    tb.add_row({"Core",         "Token stream generation",           ok});
-    tb.add_row({"Core",         "Source range tracking",             ok});
-    tb.add_row({"Lexer",        "Regex-based tokenization",          ok});
-    tb.add_row({"Lexer",        "25 built-in language lexers",       ok});
-    tb.add_row({"Lexer",        "Lexer registry (by name/ext)",      ok});
-    tb.add_row({"Lexer",        "Custom lexer support",              ok});
-    tb.add_row({"Style",        "Named style themes",                ok});
-    tb.add_row({"Style",        "Built-in themes (monokai, etc.)",   ok});
-    tb.add_row({"Style",        "Custom style definitions",          ok});
-    tb.add_row({"Export",       "ANSI terminal output",              ok});
-    tb.add_row({"Export",       "HTML with CSS classes",              ok});
-    tb.add_row({"Export",       "SVG vector output",                 ok});
-    tb.add_row({"Export",       "LaTeX formatted output",            ok});
-    tb.add_row({"Filter",       "Token type filtering",              ok});
-    tb.add_row({"Filter",       "Built-in filter predicates",        ok});
-    tb.add_row({"Utility",      "constexpr_map (compile-time)",      ok});
-    tb.add_row({"Utility",      "String utilities",                  ok});
+    tb.add_row({"Core", "Token type classification", ok});
+    tb.add_row({"Core", "Token stream generation", ok});
+    tb.add_row({"Core", "Source range tracking", ok});
+    tb.add_row({"Lexer", "Regex-based tokenization", ok});
+    tb.add_row({"Lexer", "25 built-in language lexers", ok});
+    tb.add_row({"Lexer", "Lexer registry (by name/ext)", ok});
+    tb.add_row({"Lexer", "Custom lexer support", ok});
+    tb.add_row({"Style", "Named style themes", ok});
+    tb.add_row({"Style", "Built-in themes (monokai, etc.)", ok});
+    tb.add_row({"Style", "Custom style definitions", ok});
+    tb.add_row({"Export", "ANSI terminal output", ok});
+    tb.add_row({"Export", "HTML with CSS classes", ok});
+    tb.add_row({"Export", "SVG vector output", ok});
+    tb.add_row({"Export", "LaTeX formatted output", ok});
+    tb.add_row({"Filter", "Token type filtering", ok});
+    tb.add_row({"Filter", "Built-in filter predicates", ok});
+    tb.add_row({"Utility", "constexpr_map (compile-time)", ok});
+    tb.add_row({"Utility", "String utilities", ok});
 
     con.print_widget(tb, W);
 }
@@ -240,36 +239,34 @@ static void show_features(console& con) {
 //  Performance Metrics (simulated)
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_performance(console& con) {
+static void show_performance(console &con) {
     section(con, " Performance Metrics ");
 
     con.print("[dim]Simulated benchmarks based on typical tokenization workloads:[/]");
     con.newline();
 
-    struct perf_entry { const char* name; double us; const char* unit; };
+    struct perf_entry {
+        const char *name;
+        double us;
+        const char *unit;
+    };
     perf_entry entries[] = {
-        {"Lex C++ (100 lines)",         120.0,  "us"},
-        {"Lex Python (100 lines)",       95.0,  "us"},
-        {"Lex JSON (100 lines)",         45.0,  "us"},
-        {"Lex JavaScript (100 lines)",  105.0,  "us"},
-        {"Lex Markdown (100 lines)",     55.0,  "us"},
-        {"Export ANSI (500 tokens)",      80.0,  "us"},
-        {"Export HTML (500 tokens)",      65.0,  "us"},
-        {"Export SVG (500 tokens)",      110.0,  "us"},
-        {"Export LaTeX (500 tokens)",     90.0,  "us"},
-        {"Style lookup (by name)",        0.8,  "us"},
-        {"Lexer registry lookup",         0.5,  "us"},
-        {"Token stream iterate",          2.0,  "us/100tok"},
+        {"Lex C++ (100 lines)", 120.0, "us"},      {"Lex Python (100 lines)", 95.0, "us"},
+        {"Lex JSON (100 lines)", 45.0, "us"},      {"Lex JavaScript (100 lines)", 105.0, "us"},
+        {"Lex Markdown (100 lines)", 55.0, "us"},  {"Export ANSI (500 tokens)", 80.0, "us"},
+        {"Export HTML (500 tokens)", 65.0, "us"},  {"Export SVG (500 tokens)", 110.0, "us"},
+        {"Export LaTeX (500 tokens)", 90.0, "us"}, {"Style lookup (by name)", 0.8, "us"},
+        {"Lexer registry lookup", 0.5, "us"},      {"Token stream iterate", 2.0, "us/100tok"},
     };
 
     table_builder tb;
-    tb.add_column("Operation",       {justify::left,   28, 34});
-    tb.add_column("Latency",         {justify::right,  10, 14});
-    tb.add_column("Throughput",      {justify::right,  16, 20});
+    tb.add_column("Operation", {justify::left, 28, 34});
+    tb.add_column("Latency", {justify::right, 10, 14});
+    tb.add_column("Throughput", {justify::right, 16, 20});
     tb.border(border_style::rounded);
     tb.header_style(style{colors::bright_yellow, {}, attr::bold});
 
-    for (auto& e : entries) {
+    for (auto &e : entries) {
         char lat[32], thr[32];
         std::snprintf(lat, sizeof(lat), "%.1f %s", e.us, e.unit);
         if (e.us > 10.0) {
@@ -290,28 +287,26 @@ static void show_performance(console& con) {
     con.newline();
     con.print("[dim]Lexer latency by language (us for 100 lines, lower = better):[/]");
     std::vector<float> lex_times = {120, 95, 45, 105, 55};
-    con.print_widget(
-        bar_chart_builder(lex_times, 6)
-            .labels({"C++", "Python", "JSON", "JS", "MD"})
-            .style_override(style{colors::bright_magenta}),
-        W);
+    con.print_widget(bar_chart_builder(lex_times, 6)
+                         .labels({"C++", "Python", "JSON", "JS", "MD"})
+                         .style_override(style{colors::bright_magenta}),
+                     W);
 
     // Bar chart: exporter latency
     con.newline();
     con.print("[dim]Exporter latency (us for 500 tokens, lower = better):[/]");
     std::vector<float> exp_times = {80, 65, 110, 90};
-    con.print_widget(
-        bar_chart_builder(exp_times, 6)
-            .labels({"ANSI", "HTML", "SVG", "LaTeX"})
-            .style_override(style{colors::bright_cyan}),
-        W);
+    con.print_widget(bar_chart_builder(exp_times, 6)
+                         .labels({"ANSI", "HTML", "SVG", "LaTeX"})
+                         .style_override(style{colors::bright_cyan}),
+                     W);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 //  Token Type Showcase
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_token_types(console& con) {
+static void show_token_types(console &con) {
     section(con, " Token Type Classification ");
 
     con.print("[dim]spearmint classifies source code into semantic token types:[/]");
@@ -361,25 +356,25 @@ static void show_token_types(console& con) {
 //  Export Format Comparison
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_export_comparison(console& con) {
+static void show_export_comparison(console &con) {
     section(con, " Export Format Comparison ");
 
     table_builder tb;
-    tb.add_column("Property",        {justify::left,   18, 24});
-    tb.add_column("ANSI",            {justify::center, 10, 14});
-    tb.add_column("HTML",            {justify::center, 10, 14});
-    tb.add_column("SVG",             {justify::center, 10, 14});
-    tb.add_column("LaTeX",           {justify::center, 10, 14});
+    tb.add_column("Property", {justify::left, 18, 24});
+    tb.add_column("ANSI", {justify::center, 10, 14});
+    tb.add_column("HTML", {justify::center, 10, 14});
+    tb.add_column("SVG", {justify::center, 10, 14});
+    tb.add_column("LaTeX", {justify::center, 10, 14});
     tb.border(border_style::rounded);
     tb.header_style(style{colors::bright_yellow, {}, attr::bold});
 
-    tb.add_row({"Terminal output",   "[green]Yes[/]",  "[dim]No[/]",   "[dim]No[/]",   "[dim]No[/]"});
-    tb.add_row({"Web embedding",     "[dim]No[/]",     "[green]Yes[/]","[green]Yes[/]", "[dim]No[/]"});
-    tb.add_row({"Print/PDF",         "[dim]No[/]",     "[dim]No[/]",   "[green]Yes[/]", "[green]Yes[/]"});
-    tb.add_row({"Scalable",          "[dim]No[/]",     "[dim]No[/]",   "[green]Yes[/]", "[green]Yes[/]"});
-    tb.add_row({"Copy-pasteable",    "[green]Yes[/]",  "[green]Yes[/]","[dim]No[/]",    "[dim]No[/]"});
-    tb.add_row({"File size",         "[green]Small[/]","[yellow]Med[/]","[yellow]Med[/]","[yellow]Med[/]"});
-    tb.add_row({"Speed",             "[green]Fast[/]", "[green]Fast[/]","[yellow]Med[/]","[yellow]Med[/]"});
+    tb.add_row({"Terminal output", "[green]Yes[/]", "[dim]No[/]", "[dim]No[/]", "[dim]No[/]"});
+    tb.add_row({"Web embedding", "[dim]No[/]", "[green]Yes[/]", "[green]Yes[/]", "[dim]No[/]"});
+    tb.add_row({"Print/PDF", "[dim]No[/]", "[dim]No[/]", "[green]Yes[/]", "[green]Yes[/]"});
+    tb.add_row({"Scalable", "[dim]No[/]", "[dim]No[/]", "[green]Yes[/]", "[green]Yes[/]"});
+    tb.add_row({"Copy-pasteable", "[green]Yes[/]", "[green]Yes[/]", "[dim]No[/]", "[dim]No[/]"});
+    tb.add_row({"File size", "[green]Small[/]", "[yellow]Med[/]", "[yellow]Med[/]", "[yellow]Med[/]"});
+    tb.add_row({"Speed", "[green]Fast[/]", "[green]Fast[/]", "[yellow]Med[/]", "[yellow]Med[/]"});
 
     con.print_widget(tb, W);
 }
@@ -388,7 +383,7 @@ static void show_export_comparison(console& con) {
 //  Test Coverage
 // ═══════════════════════════════════════════════════════════════════════
 
-static void show_test_coverage(console& con) {
+static void show_test_coverage(console &con) {
     section(con, " Test Coverage ");
 
     columns_builder cols;
@@ -415,22 +410,22 @@ static void show_test_coverage(console& con) {
 
     {
         table_builder tb;
-        tb.add_column("Test File",      {justify::left,   22, 28});
-        tb.add_column("Tests",          {justify::right,   6, 10});
+        tb.add_column("Test File", {justify::left, 22, 28});
+        tb.add_column("Tests", {justify::right, 6, 10});
         tb.border(border_style::rounded);
         tb.header_style(style{colors::bright_cyan, {}, attr::bold});
 
-        tb.add_row({"test_token",         "12"});
-        tb.add_row({"test_token_stream",  "15"});
-        tb.add_row({"test_style",         "15"});
-        tb.add_row({"test_lexer",         "18"});
-        tb.add_row({"test_regex_lexer",   "22"});
-        tb.add_row({"test_python_lexer",  "15"});
-        tb.add_row({"test_cpp_lexer",     "15"});
-        tb.add_row({"test_json_lexer",    "15"});
-        tb.add_row({"test_exporters",     "36"});
-        tb.add_row({"test_filters",       "18"});
-        tb.add_row({"[bold]Total[/]",     "[bold]181[/]"});
+        tb.add_row({"test_token", "12"});
+        tb.add_row({"test_token_stream", "15"});
+        tb.add_row({"test_style", "15"});
+        tb.add_row({"test_lexer", "18"});
+        tb.add_row({"test_regex_lexer", "22"});
+        tb.add_row({"test_python_lexer", "15"});
+        tb.add_row({"test_cpp_lexer", "15"});
+        tb.add_row({"test_json_lexer", "15"});
+        tb.add_row({"test_exporters", "36"});
+        tb.add_row({"test_filters", "18"});
+        tb.add_row({"[bold]Total[/]", "[bold]181[/]"});
 
         cols.add(std::move(tb), 1);
     }
@@ -456,18 +451,17 @@ int main() {
     show_test_coverage(con);
 
     con.newline();
-    con.print_widget(
-        status_bar_builder()
-            .left("[bold] spearmint [/]")
-            .center("Semantic Tokenization Engine")
-            .right("25 languages | 4 exporters | 181 tests")
-            .style_override(style{colors::bright_white, color::from_rgb(40, 20, 50)}),
-        W);
+    con.print_widget(status_bar_builder()
+                         .left("[bold] spearmint [/]")
+                         .center("Semantic Tokenization Engine")
+                         .right("25 languages | 4 exporters | 181 tests")
+                         .style_override(style{colors::bright_white, color::from_rgb(40, 20, 50)}),
+                     W);
     con.newline();
-    con.print_widget(
-        rule_builder(" spearmint Dashboard Complete ")
-            .rule_style(style{colors::bright_green, {}, attr::bold})
-            .character(U'\x2550'), W);
+    con.print_widget(rule_builder(" spearmint Dashboard Complete ")
+                         .rule_style(style{colors::bright_green, {}, attr::bold})
+                         .character(U'\x2550'),
+                     W);
     con.newline();
 
     return 0;

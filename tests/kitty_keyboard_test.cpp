@@ -3,17 +3,17 @@
  * @brief Tests for Kitty keyboard protocol types and CSI u parsing.
  */
 
-#include <gtest/gtest.h>
-
 #include "tapiru/core/input.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
 // ── key_action enum ─────────────────────────────────────────────────────
 
 TEST(KittyKeyboardTest, KeyActionValues) {
-    EXPECT_EQ(static_cast<uint8_t>(key_action::press),   1u);
-    EXPECT_EQ(static_cast<uint8_t>(key_action::repeat),  2u);
+    EXPECT_EQ(static_cast<uint8_t>(key_action::press), 1u);
+    EXPECT_EQ(static_cast<uint8_t>(key_action::repeat), 2u);
     EXPECT_EQ(static_cast<uint8_t>(key_action::release), 3u);
 }
 
@@ -64,9 +64,8 @@ TEST(KittyKeyboardTest, CombinedKittyModifiers) {
 }
 
 TEST(KittyKeyboardTest, AllModifiersCombined) {
-    auto mods = key_mod::shift | key_mod::ctrl | key_mod::alt
-              | key_mod::super_ | key_mod::hyper
-              | key_mod::caps_lock | key_mod::num_lock;
+    auto mods = key_mod::shift | key_mod::ctrl | key_mod::alt | key_mod::super_ | key_mod::hyper | key_mod::caps_lock |
+                key_mod::num_lock;
     EXPECT_TRUE(has_mod(mods, key_mod::shift));
     EXPECT_TRUE(has_mod(mods, key_mod::ctrl));
     EXPECT_TRUE(has_mod(mods, key_mod::alt));
@@ -83,7 +82,7 @@ TEST(KittyKeyboardTest, InputEventWithAction) {
     key_event ke{U'x', special_key::none, key_mod::ctrl, key_action::repeat};
     input_event ev = ke;
     ASSERT_TRUE(std::holds_alternative<key_event>(ev));
-    auto& got = std::get<key_event>(ev);
+    auto &got = std::get<key_event>(ev);
     EXPECT_EQ(got.codepoint, U'x');
     EXPECT_EQ(got.action, key_action::repeat);
     EXPECT_TRUE(has_mod(got.mods, key_mod::ctrl));

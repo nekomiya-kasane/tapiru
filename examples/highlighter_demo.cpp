@@ -11,7 +11,7 @@
 
 #include <string>
 
-static void section(tapiru::console& con, const char* title) {
+static void section(tapiru::console &con, const char *title) {
     con.print("");
     con.print(std::string("[bold bright_yellow]━━━ ") + title + " ━━━[/]");
     con.print("");
@@ -29,7 +29,7 @@ int main() {
     con.print("[dim]Below, each line is plain text — all colors come from auto-highlight.[/]");
     con.print("");
 
-    const auto& repr = tapiru::repr_highlighter::instance();
+    const auto &repr = tapiru::repr_highlighter::instance();
     con.set_highlighter(&repr);
 
     con.print_highlighted("Numbers:   42   3.14   0xFF00   0b1010   0o755   1.23e-4   -99");
@@ -76,9 +76,9 @@ int main() {
 
     tapiru::regex_highlighter custom;
     // HTTP methods
-    custom.add_word("GET",    tapiru::style{tapiru::colors::bright_green, {}, tapiru::attr::bold});
-    custom.add_word("POST",   tapiru::style{tapiru::colors::bright_yellow, {}, tapiru::attr::bold});
-    custom.add_word("PUT",    tapiru::style{tapiru::colors::bright_blue, {}, tapiru::attr::bold});
+    custom.add_word("GET", tapiru::style{tapiru::colors::bright_green, {}, tapiru::attr::bold});
+    custom.add_word("POST", tapiru::style{tapiru::colors::bright_yellow, {}, tapiru::attr::bold});
+    custom.add_word("PUT", tapiru::style{tapiru::colors::bright_blue, {}, tapiru::attr::bold});
     custom.add_word("DELETE", tapiru::style{tapiru::colors::bright_red, {}, tapiru::attr::bold});
     // Status codes
     custom.add_rule(R"(\b2\d{2}\b)", tapiru::style{tapiru::colors::green});
@@ -105,13 +105,13 @@ int main() {
     con.print("");
 
     tapiru::regex_highlighter log_levels;
-    log_levels.add_word("INFO",  tapiru::style{tapiru::colors::black, tapiru::colors::green, tapiru::attr::bold});
-    log_levels.add_word("WARN",  tapiru::style{tapiru::colors::black, tapiru::colors::yellow, tapiru::attr::bold});
+    log_levels.add_word("INFO", tapiru::style{tapiru::colors::black, tapiru::colors::green, tapiru::attr::bold});
+    log_levels.add_word("WARN", tapiru::style{tapiru::colors::black, tapiru::colors::yellow, tapiru::attr::bold});
     log_levels.add_word("ERROR", tapiru::style{tapiru::colors::white, tapiru::colors::red, tapiru::attr::bold});
     log_levels.add_word("DEBUG", tapiru::style{tapiru::colors::black, tapiru::colors::bright_blue, tapiru::attr::bold});
 
     tapiru::highlight_chain chain;
-    chain.add(log_levels);                          // log levels first (higher priority)
+    chain.add(log_levels);                           // log levels first (higher priority)
     chain.add(tapiru::repr_highlighter::instance()); // then general patterns
 
     con.set_highlighter(&chain);
@@ -120,7 +120,8 @@ int main() {
     con.print_highlighted("2024-06-15T09:30:01Z  DEBUG  Loading config from /etc/app.json");
     con.print_highlighted("2024-06-15T09:30:02Z  WARN   Connection pool at 90% — max 100");
     con.print_highlighted("2024-06-15T09:30:03Z  ERROR  Failed to reach 10.0.0.5 — timeout 5000ms");
-    con.print_highlighted("2024-06-15T09:30:04Z  INFO   User admin@example.com logged in, session 550e8400-e29b-41d4-a716-446655440000");
+    con.print_highlighted(
+        "2024-06-15T09:30:04Z  INFO   User admin@example.com logged in, session 550e8400-e29b-41d4-a716-446655440000");
 
     // ── 5. Custom theme ──────────────────────────────────────────────────
     section(con, "5. Custom theme for repr_highlighter");
@@ -129,13 +130,14 @@ int main() {
     con.print("");
 
     tapiru::repr_highlighter::theme monokai;
-    monokai.number     = {tapiru::colors::magenta};
+    monokai.number = {tapiru::colors::magenta};
     monokai.number_hex = {tapiru::colors::bright_magenta};
-    monokai.string     = {tapiru::colors::yellow};
-    monokai.url        = {tapiru::color::from_rgb(102, 217, 239), {}, tapiru::attr::underline};
-    monokai.boolean    = {tapiru::colors::magenta, {}, tapiru::attr::italic};
-    monokai.null       = {tapiru::colors::magenta, {}, tapiru::attr::italic};
-    monokai.keyword_todo = {tapiru::color::from_rgb(0, 0, 0), tapiru::color::from_rgb(230, 219, 116), tapiru::attr::bold};
+    monokai.string = {tapiru::colors::yellow};
+    monokai.url = {tapiru::color::from_rgb(102, 217, 239), {}, tapiru::attr::underline};
+    monokai.boolean = {tapiru::colors::magenta, {}, tapiru::attr::italic};
+    monokai.null = {tapiru::colors::magenta, {}, tapiru::attr::italic};
+    monokai.keyword_todo = {tapiru::color::from_rgb(0, 0, 0), tapiru::color::from_rgb(230, 219, 116),
+                            tapiru::attr::bold};
 
     tapiru::repr_highlighter monokai_hl(monokai);
     con.set_highlighter(&monokai_hl);
@@ -152,11 +154,9 @@ int main() {
 
     tapiru::regex_highlighter kv_hl;
     // Highlight only the value (group 2) in key=value pairs
-    kv_hl.add_rule(R"((\w+)=(\S+))",
-                   tapiru::style{tapiru::colors::bright_green, {}, tapiru::attr::bold}, 2);
+    kv_hl.add_rule(R"((\w+)=(\S+))", tapiru::style{tapiru::colors::bright_green, {}, tapiru::attr::bold}, 2);
     // Highlight only the key (group 1) in key: value pairs
-    kv_hl.add_rule(R"((\w+):\s+(\S+))",
-                   tapiru::style{tapiru::colors::bright_cyan, {}, tapiru::attr::bold}, 1);
+    kv_hl.add_rule(R"((\w+):\s+(\S+))", tapiru::style{tapiru::colors::bright_cyan, {}, tapiru::attr::bold}, 1);
 
     con.set_highlighter(&kv_hl);
 

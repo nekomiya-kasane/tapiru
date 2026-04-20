@@ -3,10 +3,10 @@
  * @brief Tests for the auto-highlight system.
  */
 
-#include <gtest/gtest.h>
-
-#include "tapiru/text/highlighter.h"
 #include "tapiru/core/console.h"
+#include "tapiru/text/highlighter.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
@@ -61,7 +61,7 @@ TEST(MergeSpans, OverlappingEarlierWins) {
 TEST(MergeSpans, FullyOverlappedSkipped) {
     std::vector<highlight_span> spans = {
         {0, 10, {colors::red}},
-        {2, 3, {colors::blue}},  // fully inside first
+        {2, 3, {colors::blue}}, // fully inside first
     };
     auto merged = merge_spans(spans, 10);
     ASSERT_EQ(merged.size(), 1u);
@@ -128,7 +128,7 @@ TEST(RegexHighlighter, BasicPattern) {
     // Find the span for "42"
     bool found_42 = false;
     bool found_100 = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         if (s.offset == 4 && s.length == 2) found_42 = true;
         if (s.offset == 11 && s.length == 3) found_100 = true;
     }
@@ -148,7 +148,7 @@ TEST(RegexHighlighter, AddWord) {
 
 TEST(RegexHighlighter, InvalidPatternSkipped) {
     regex_highlighter hl;
-    hl.add_rule("[invalid(", style{colors::red});  // bad regex
+    hl.add_rule("[invalid(", style{colors::red}); // bad regex
     hl.add_rule(R"(\d+)", style{colors::cyan});
 
     auto spans = hl.highlight("test 42");
@@ -158,7 +158,7 @@ TEST(RegexHighlighter, InvalidPatternSkipped) {
 
 TEST(RegexHighlighter, CaptureGroup) {
     regex_highlighter hl;
-    hl.add_rule(R"((\w+)=(\w+))", style{colors::green}, 2);  // highlight value only
+    hl.add_rule(R"((\w+)=(\w+))", style{colors::green}, 2); // highlight value only
 
     auto spans = hl.highlight("key=value");
     ASSERT_GE(spans.size(), 1u);
@@ -171,10 +171,10 @@ TEST(RegexHighlighter, CaptureGroup) {
 // ═══════════════════════════════════════════════════════════════════════
 
 TEST(ReprHighlighter, DetectsIntegers) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("count is 42 items");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         if (s.offset == 9 && s.length == 2) {
             found = true;
             EXPECT_EQ(s.sty.fg, hl.get_theme().number.fg);
@@ -184,10 +184,10 @@ TEST(ReprHighlighter, DetectsIntegers) {
 }
 
 TEST(ReprHighlighter, DetectsFloats) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("pi is 3.14");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "pi is 3.14";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "3.14") found = true;
@@ -196,10 +196,10 @@ TEST(ReprHighlighter, DetectsFloats) {
 }
 
 TEST(ReprHighlighter, DetectsHex) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("address 0xFF00");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "address 0xFF00";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "0xFF00") {
@@ -211,10 +211,10 @@ TEST(ReprHighlighter, DetectsHex) {
 }
 
 TEST(ReprHighlighter, DetectsUrl) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("visit https://example.com/path today");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "visit https://example.com/path today";
         auto matched = text.substr(s.offset, s.length);
         if (matched.find("https://example.com") != std::string_view::npos) {
@@ -227,10 +227,10 @@ TEST(ReprHighlighter, DetectsUrl) {
 }
 
 TEST(ReprHighlighter, DetectsIPv4) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("server at 192.168.1.1 port 80");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "server at 192.168.1.1 port 80";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "192.168.1.1") {
@@ -242,10 +242,10 @@ TEST(ReprHighlighter, DetectsIPv4) {
 }
 
 TEST(ReprHighlighter, DetectsUUID) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("id: 550e8400-e29b-41d4-a716-446655440000");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "id: 550e8400-e29b-41d4-a716-446655440000";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "550e8400-e29b-41d4-a716-446655440000") {
@@ -257,10 +257,10 @@ TEST(ReprHighlighter, DetectsUUID) {
 }
 
 TEST(ReprHighlighter, DetectsBooleans) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("enabled: true disabled: false");
     int bool_count = 0;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "enabled: true disabled: false";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "true" || matched == "false") {
@@ -272,10 +272,10 @@ TEST(ReprHighlighter, DetectsBooleans) {
 }
 
 TEST(ReprHighlighter, DetectsNull) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("value is null or nullptr");
     int null_count = 0;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "value is null or nullptr";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "null" || matched == "nullptr") {
@@ -286,10 +286,10 @@ TEST(ReprHighlighter, DetectsNull) {
 }
 
 TEST(ReprHighlighter, DetectsStrings) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight(R"(name is "hello world" done)");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = R"(name is "hello world" done)";
         auto matched = text.substr(s.offset, s.length);
         if (matched == R"("hello world")") {
@@ -301,10 +301,10 @@ TEST(ReprHighlighter, DetectsStrings) {
 }
 
 TEST(ReprHighlighter, DetectsEmail) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("contact user@example.com for help");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "contact user@example.com for help";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "user@example.com") {
@@ -316,10 +316,10 @@ TEST(ReprHighlighter, DetectsEmail) {
 }
 
 TEST(ReprHighlighter, DetectsKeywords) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("TODO fix this FIXME later");
     int kw_count = 0;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "TODO fix this FIXME later";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "TODO" || matched == "FIXME") ++kw_count;
@@ -328,10 +328,10 @@ TEST(ReprHighlighter, DetectsKeywords) {
 }
 
 TEST(ReprHighlighter, DetectsEnvVars) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("path is $HOME or ${PATH}");
     int env_count = 0;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "path is $HOME or ${PATH}";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "$HOME" || matched == "${PATH}") ++env_count;
@@ -340,10 +340,10 @@ TEST(ReprHighlighter, DetectsEnvVars) {
 }
 
 TEST(ReprHighlighter, DetectsISODate) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("date: 2024-01-15 done");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "date: 2024-01-15 done";
         auto matched = text.substr(s.offset, s.length);
         if (matched.find("2024-01-15") != std::string_view::npos) {
@@ -360,7 +360,7 @@ TEST(ReprHighlighter, CustomTheme) {
 
     auto spans = hl.highlight("value 42");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "value 42";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "42") {
@@ -372,8 +372,8 @@ TEST(ReprHighlighter, CustomTheme) {
 }
 
 TEST(ReprHighlighter, Singleton) {
-    const auto& a = repr_highlighter::instance();
-    const auto& b = repr_highlighter::instance();
+    const auto &a = repr_highlighter::instance();
+    const auto &b = repr_highlighter::instance();
     EXPECT_EQ(&a, &b);
 }
 
@@ -396,7 +396,7 @@ TEST(HighlightChain, CombinesMultiple) {
     // Should have spans from both highlighters
     bool found_num = false;
     bool found_kw = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "TODO: fix 42 bugs";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "42") found_num = true;
@@ -422,21 +422,21 @@ TEST(HighlightChain, SharedOwnership) {
 // ═══════════════════════════════════════════════════════════════════════
 
 TEST(HighlightText, EndToEnd) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto frags = highlight_text("visit https://example.com port 8080", hl);
 
     // Should have multiple fragments, some styled
     EXPECT_GE(frags.size(), 2u);
 
     bool has_styled = false;
-    for (const auto& f : frags) {
+    for (const auto &f : frags) {
         if (!f.sty.is_default()) has_styled = true;
     }
     EXPECT_TRUE(has_styled) << "Should have at least one styled fragment";
 }
 
 TEST(HighlightText, EmptyInput) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto frags = highlight_text("", hl);
     EXPECT_TRUE(frags.empty());
 }
@@ -465,7 +465,7 @@ TEST(ConsoleHighlight, SetHighlighter) {
     EXPECT_EQ(con.get_highlighter(), nullptr);
     EXPECT_FALSE(con.auto_highlight());
 
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     con.set_highlighter(&hl);
     EXPECT_EQ(con.get_highlighter(), &hl);
 
@@ -484,8 +484,7 @@ TEST(ConsoleHighlight, PrintHighlighted) {
 
     con.print_highlighted("count is 42 at https://example.com");
     // Should contain ANSI escape sequences
-    EXPECT_NE(output.find("\033["), std::string::npos)
-        << "Should contain ANSI sequences";
+    EXPECT_NE(output.find("\033["), std::string::npos) << "Should contain ANSI sequences";
     // Should contain the text
     EXPECT_NE(output.find("count"), std::string::npos);
     EXPECT_NE(output.find("42"), std::string::npos);
@@ -515,15 +514,14 @@ TEST(ConsoleHighlight, AutoHighlightOnPrint) {
 
     con.print("plain text with 42 and https://example.com");
     // Should contain ANSI sequences from auto-highlighting
-    EXPECT_NE(output.find("\033["), std::string::npos)
-        << "Auto-highlight should produce ANSI sequences";
+    EXPECT_NE(output.find("\033["), std::string::npos) << "Auto-highlight should produce ANSI sequences";
 }
 
 TEST(ConsoleHighlight, MarkupOverridesAutoHighlight) {
     std::string output_with_markup;
     std::string output_plain;
 
-    auto make_console = [](std::string& out) {
+    auto make_console = [](std::string &out) {
         console_config cfg;
         cfg.sink = [&out](std::string_view s) { out += s; };
         cfg.force_color = true;
@@ -552,28 +550,27 @@ TEST(ConsoleHighlight, MarkupOverridesAutoHighlight) {
 // ═══════════════════════════════════════════════════════════════════════
 
 TEST(ReprHighlighter, StringsProtectContent) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     // Numbers inside strings should be matched as strings, not numbers
     // (strings are matched first and take priority via merge_spans)
     auto frags = highlight_text(R"(msg "error 404" done)", hl);
 
     // The "error 404" should be one styled fragment (string style)
     bool found_string = false;
-    for (const auto& f : frags) {
+    for (const auto &f : frags) {
         if (f.text.find("error 404") != std::string::npos) {
             found_string = true;
-            EXPECT_EQ(f.sty.fg, hl.get_theme().string.fg)
-                << "Content inside quotes should get string style";
+            EXPECT_EQ(f.sty.fg, hl.get_theme().string.fg) << "Content inside quotes should get string style";
         }
     }
     EXPECT_TRUE(found_string);
 }
 
 TEST(ReprHighlighter, BinaryNumber) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("mask 0b1010");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "mask 0b1010";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "0b1010") found = true;
@@ -582,10 +579,10 @@ TEST(ReprHighlighter, BinaryNumber) {
 }
 
 TEST(ReprHighlighter, OctalNumber) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("perms 0o755");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "perms 0o755";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "0o755") found = true;
@@ -594,10 +591,10 @@ TEST(ReprHighlighter, OctalNumber) {
 }
 
 TEST(ReprHighlighter, ScientificNotation) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("speed 3e8");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "speed 3e8";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "3e8") found = true;
@@ -606,10 +603,10 @@ TEST(ReprHighlighter, ScientificNotation) {
 }
 
 TEST(ReprHighlighter, WindowsEnvVar) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("dir is %USERPROFILE%");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         std::string_view text = "dir is %USERPROFILE%";
         auto matched = text.substr(s.offset, s.length);
         if (matched == "%USERPROFILE%") found = true;
@@ -622,10 +619,10 @@ TEST(ReprHighlighter, WindowsEnvVar) {
 // ═══════════════════════════════════════════════════════════════════════
 
 TEST(HyperlinkSpan, UrlHasLink) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("visit https://example.com today");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         if (s.link.find("https://example.com") != std::string::npos) {
             found = true;
             EXPECT_EQ(s.link, "https://example.com");
@@ -635,10 +632,10 @@ TEST(HyperlinkSpan, UrlHasLink) {
 }
 
 TEST(HyperlinkSpan, UnixPathHasFileUri) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("path /usr/local/bin/app done");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         if (!s.link.empty()) {
             found = true;
             EXPECT_NE(s.link.find("file:///"), std::string::npos)
@@ -650,36 +647,33 @@ TEST(HyperlinkSpan, UnixPathHasFileUri) {
 }
 
 TEST(HyperlinkSpan, WindowsPathHasFileUri) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight(R"(dir C:\Windows\System32 end)");
     bool found = false;
-    for (const auto& s : spans) {
+    for (const auto &s : spans) {
         if (!s.link.empty()) {
             found = true;
-            EXPECT_NE(s.link.find("file:///"), std::string::npos)
-                << "Path link should be a file:// URI";
+            EXPECT_NE(s.link.find("file:///"), std::string::npos) << "Path link should be a file:// URI";
             // Backslashes should be converted to forward slashes
-            EXPECT_EQ(s.link.find('\\'), std::string::npos)
-                << "file:// URI should not contain backslashes";
+            EXPECT_EQ(s.link.find('\\'), std::string::npos) << "file:// URI should not contain backslashes";
         }
     }
     EXPECT_TRUE(found) << "Windows path span should carry file:// link";
 }
 
 TEST(HyperlinkSpan, NonLinkSpansHaveEmptyLink) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto spans = hl.highlight("count 42 and true");
-    for (const auto& s : spans) {
-        EXPECT_TRUE(s.link.empty())
-            << "Numbers and booleans should not have links";
+    for (const auto &s : spans) {
+        EXPECT_TRUE(s.link.empty()) << "Numbers and booleans should not have links";
     }
 }
 
 TEST(LinkedFragment, UrlPreservesLink) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto frags = highlight_text_linked("see https://example.com here", hl);
     bool found = false;
-    for (const auto& f : frags) {
+    for (const auto &f : frags) {
         if (!f.link.empty()) {
             found = true;
             EXPECT_EQ(f.link, "https://example.com");
@@ -690,9 +684,9 @@ TEST(LinkedFragment, UrlPreservesLink) {
 }
 
 TEST(LinkedFragment, PlainTextHasNoLink) {
-    const auto& hl = repr_highlighter::instance();
+    const auto &hl = repr_highlighter::instance();
     auto frags = highlight_text_linked("just plain text", hl);
-    for (const auto& f : frags) {
+    for (const auto &f : frags) {
         EXPECT_TRUE(f.link.empty());
     }
 }
@@ -711,8 +705,7 @@ TEST(ConsoleHyperlink, PrintHighlightedEmitsOSC8) {
     EXPECT_NE(output.find("\033]8;;https://example.com\033\\"), std::string::npos)
         << "Should emit OSC 8 hyperlink open for URL";
     // Should contain OSC 8 close sequence
-    EXPECT_NE(output.find("\033]8;;\033\\"), std::string::npos)
-        << "Should emit OSC 8 hyperlink close";
+    EXPECT_NE(output.find("\033]8;;\033\\"), std::string::npos) << "Should emit OSC 8 hyperlink close";
 }
 
 TEST(ConsoleHyperlink, AutoHighlightEmitsOSC8) {
@@ -740,8 +733,7 @@ TEST(ConsoleHyperlink, PathEmitsFileUri) {
     con.set_highlighter(&repr_highlighter::instance());
 
     con.print_highlighted("path /usr/local/bin/app done");
-    EXPECT_NE(output.find("\033]8;;file:///"), std::string::npos)
-        << "Path should emit OSC 8 with file:// URI";
+    EXPECT_NE(output.find("\033]8;;file:///"), std::string::npos) << "Path should emit OSC 8 with file:// URI";
 }
 
 TEST(ConsoleHyperlink, NoLinkForPlainNumbers) {
@@ -755,8 +747,7 @@ TEST(ConsoleHyperlink, NoLinkForPlainNumbers) {
 
     con.print_highlighted("count 42");
     // Should NOT contain OSC 8 open (numbers aren't links)
-    EXPECT_EQ(output.find("\033]8;;"), std::string::npos)
-        << "Numbers should not produce OSC 8 hyperlinks";
+    EXPECT_EQ(output.find("\033]8;;"), std::string::npos) << "Numbers should not produce OSC 8 hyperlinks";
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -882,8 +873,7 @@ TEST(ConsoleAlias, PrintHl) {
 
     con.print_hl("count 42");
     EXPECT_NE(output.find("42"), std::string::npos);
-    EXPECT_NE(output.find("\033["), std::string::npos)
-        << "print_hl should produce ANSI sequences";
+    EXPECT_NE(output.find("\033["), std::string::npos) << "print_hl should produce ANSI sequences";
     EXPECT_EQ(output.back(), '\n');
 }
 
@@ -934,7 +924,7 @@ TEST(ConsoleAlias, PrintHlInlineFormat) {
 
 TEST(GlobalTcon, Exists) {
     // tcon is a global tapiru::console — verify it's usable
-    tcon.write("");  // should not crash
+    tcon.write(""); // should not crash
 }
 
 TEST(GlobalTcon, PrintWorks) {

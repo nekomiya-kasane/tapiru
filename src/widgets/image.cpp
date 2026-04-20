@@ -4,9 +4,10 @@
  */
 
 #include "tapiru/widgets/image.h"
-#include "tapiru/widgets/builders.h"
+
 #include "detail/scene.h"
 #include "detail/widget_types.h"
+#include "tapiru/widgets/builders.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -14,20 +15,18 @@
 
 namespace tapiru {
 
-image_builder& image_builder::key(std::string_view k) {
+image_builder &image_builder::key(std::string_view k) {
     key_ = detail::fnv1a_hash(k);
     return *this;
 }
 
 // Nearest-neighbor sample from source image
-static pixel_rgba sample(const std::vector<pixel_rgba>& px,
-                         uint32_t sw, uint32_t sh,
-                         uint32_t x, uint32_t y) {
+static pixel_rgba sample(const std::vector<pixel_rgba> &px, uint32_t sw, uint32_t sh, uint32_t x, uint32_t y) {
     if (x >= sw || y >= sh) return {};
     return px[static_cast<size_t>(y) * sw + x];
 }
 
-node_id image_builder::flatten_into(detail::scene& s) const {
+node_id image_builder::flatten_into(detail::scene &s) const {
     if (pixels_.empty() || src_w_ == 0 || src_h_ == 0 || target_w_ == 0) {
         return text_builder("").flatten_into(s);
     }
@@ -46,7 +45,7 @@ node_id image_builder::flatten_into(detail::scene& s) const {
     // Build text_data directly with per-cell styled fragments.
     // Each cell is a ▀ (U+2580) with fg=top pixel, bg=bottom pixel.
     // This avoids the markup parser which would corrupt raw ANSI escapes.
-    static const std::string half_block = "\xe2\x96\x80";  // ▀
+    static const std::string half_block = "\xe2\x96\x80"; // ▀
 
     detail::text_data td;
     td.overflow = overflow_mode::truncate;
@@ -57,12 +56,12 @@ node_id image_builder::flatten_into(detail::scene& s) const {
         }
         for (uint32_t cx = 0; cx < tw; ++cx) {
             // Map to source coordinates
-            uint32_t sx = static_cast<uint32_t>(
-                static_cast<float>(cx) / static_cast<float>(tw) * static_cast<float>(src_w_));
-            uint32_t sy_top = static_cast<uint32_t>(
-                static_cast<float>(cy * 2) / static_cast<float>(th_pixels) * static_cast<float>(src_h_));
-            uint32_t sy_bot = static_cast<uint32_t>(
-                static_cast<float>(cy * 2 + 1) / static_cast<float>(th_pixels) * static_cast<float>(src_h_));
+            uint32_t sx =
+                static_cast<uint32_t>(static_cast<float>(cx) / static_cast<float>(tw) * static_cast<float>(src_w_));
+            uint32_t sy_top = static_cast<uint32_t>(static_cast<float>(cy * 2) / static_cast<float>(th_pixels) *
+                                                    static_cast<float>(src_h_));
+            uint32_t sy_bot = static_cast<uint32_t>(static_cast<float>(cy * 2 + 1) / static_cast<float>(th_pixels) *
+                                                    static_cast<float>(src_h_));
 
             auto top = sample(pixels_, src_w_, src_h_, sx, sy_top);
             auto bot = sample(pixels_, src_w_, src_h_, sx, sy_bot);
@@ -79,4 +78,4 @@ node_id image_builder::flatten_into(detail::scene& s) const {
     return s.add_node(detail::widget_type::text, pi);
 }
 
-}  // namespace tapiru
+} // namespace tapiru

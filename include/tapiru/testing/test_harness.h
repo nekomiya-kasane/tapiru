@@ -27,14 +27,6 @@
  *   ah.screen().dump(std::cerr);
  */
 
-#include <algorithm>
-#include <cassert>
-#include <cstdint>
-#include <functional>
-#include <iostream>
-#include <string>
-#include <vector>
-
 #include "tapiru/core/canvas.h"
 #include "tapiru/core/console.h"
 #include "tapiru/core/input.h"
@@ -44,6 +36,14 @@
 #include "tapiru/widgets/classic_app.h"
 #include "tapiru/widgets/menu_bar.h"
 #include "tapiru/widgets/status_bar.h"
+
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <functional>
+#include <iostream>
+#include <string>
+#include <vector>
 
 namespace tapiru::testing {
 
@@ -57,13 +57,11 @@ namespace tapiru::testing {
  * inspection when color is enabled.
  */
 class virtual_screen {
-public:
-    explicit virtual_screen(uint32_t width = 80, uint32_t height = 24)
-        : width_(width), height_(height) {}
+  public:
+    explicit virtual_screen(uint32_t width = 80, uint32_t height = 24) : width_(width), height_(height) {}
 
     /** @brief Render a widget builder into this screen. */
-    template <typename Builder>
-    void render(const Builder& builder) {
+    template <typename Builder> void render(const Builder &builder) {
         // Capture raw ANSI output
         raw_.clear();
         console_config cfg;
@@ -90,19 +88,17 @@ public:
     }
 
     /** @brief Number of rendered rows. */
-    [[nodiscard]] uint32_t row_count() const noexcept {
-        return static_cast<uint32_t>(rows_.size());
-    }
+    [[nodiscard]] uint32_t row_count() const noexcept { return static_cast<uint32_t>(rows_.size()); }
 
     /** @brief Plain text content of a specific row. */
-    [[nodiscard]] const std::string& row_text(uint32_t y) const {
+    [[nodiscard]] const std::string &row_text(uint32_t y) const {
         assert(y < rows_.size());
         return rows_[y];
     }
 
     /** @brief Check if any row contains the given substring. */
     [[nodiscard]] bool contains(std::string_view text) const {
-        for (auto& row : rows_) {
+        for (auto &row : rows_) {
             if (row.find(text) != std::string::npos) return true;
         }
         return false;
@@ -111,8 +107,7 @@ public:
     /** @brief Find the first row containing the given substring. Returns -1 if not found. */
     [[nodiscard]] int find_row(std::string_view text) const {
         for (size_t i = 0; i < rows_.size(); ++i) {
-            if (rows_[i].find(text) != std::string::npos)
-                return static_cast<int>(i);
+            if (rows_[i].find(text) != std::string::npos) return static_cast<int>(i);
         }
         return -1;
     }
@@ -131,10 +126,10 @@ public:
     [[nodiscard]] uint32_t height() const noexcept { return height_; }
 
     /** @brief Get the raw captured output. */
-    [[nodiscard]] const std::string& raw() const noexcept { return raw_; }
+    [[nodiscard]] const std::string &raw() const noexcept { return raw_; }
 
     /** @brief Dump the screen to an output stream with row numbers. */
-    void dump(std::ostream& os) const {
+    void dump(std::ostream &os) const {
         os << "=== virtual_screen " << width_ << "x" << rows_.size() << " ===\n";
         for (size_t i = 0; i < rows_.size(); ++i) {
             os << std::format("{:3d}|", i) << rows_[i] << "|\n";
@@ -143,8 +138,7 @@ public:
     }
 
     /** @brief Render a widget builder to canvas for cell-level inspection. */
-    template <typename Builder>
-    void render_canvas(const Builder& builder) {
+    template <typename Builder> void render_canvas(const Builder &builder) {
         wc_ = render_to_canvas(builder, width_);
         // Also update text rows from canvas
         rows_.clear();
@@ -154,13 +148,13 @@ public:
     }
 
     /** @brief Access the widget_canvas (only valid after render_canvas). */
-    [[nodiscard]] const widget_canvas& canvas() const noexcept { return wc_; }
+    [[nodiscard]] const widget_canvas &canvas() const noexcept { return wc_; }
 
     /** @brief Check if canvas is available. */
     [[nodiscard]] bool has_canvas() const noexcept { return wc_.width > 0; }
 
     /** @brief Dump the screen with a ruler showing column positions. */
-    void dump_with_ruler(std::ostream& os) const {
+    void dump_with_ruler(std::ostream &os) const {
         // Tens ruler
         os << "   |";
         for (uint32_t x = 0; x < width_; ++x) {
@@ -187,7 +181,7 @@ public:
         os << "---+" << std::string(width_, '-') << "+\n";
     }
 
-private:
+  private:
     uint32_t width_;
     uint32_t height_;
     std::string raw_;
@@ -205,20 +199,18 @@ private:
  * fake input events for testing interactive behavior.
  */
 class app_harness {
-public:
-    using content_fn = std::function<void(rows_builder& content, int scroll_y, int viewport_h)>;
-    using status_fn  = std::function<void(status_bar_builder& sb)>;
+  public:
+    using content_fn = std::function<void(rows_builder &content, int scroll_y, int viewport_h)>;
+    using status_fn = std::function<void(status_bar_builder &sb)>;
 
     struct config {
-        uint32_t width  = 80;
+        uint32_t width = 80;
         uint32_t height = 24;
         std::vector<menu_bar_entry> menus;
         classic_app_theme theme = classic_app_theme::dark();
     };
 
-    explicit app_harness(config cfg)
-        : cfg_(std::move(cfg))
-        , screen_(cfg_.width, cfg_.height) {}
+    explicit app_harness(config cfg) : cfg_(std::move(cfg)), screen_(cfg_.width, cfg_.height) {}
 
     void set_content(content_fn fn) { content_fn_ = std::move(fn); }
     void set_status(status_fn fn) { status_fn_ = std::move(fn); }
@@ -229,14 +221,12 @@ public:
 
         // Menu bar (same logic as classic_app::impl::build_menu_bar_row)
         std::string bar = " ";
-        for (auto& m : cfg_.menus) {
-            bar += "[rgb(" + std::to_string(cfg_.theme.menu_bar_bg.fg.r) + ","
-                + std::to_string(cfg_.theme.menu_bar_bg.fg.g) + ","
-                + std::to_string(cfg_.theme.menu_bar_bg.fg.b) + ") on_rgb("
-                + std::to_string(cfg_.theme.menu_bar_bg.bg.r) + ","
-                + std::to_string(cfg_.theme.menu_bar_bg.bg.g) + ","
-                + std::to_string(cfg_.theme.menu_bar_bg.bg.b) + ")] "
-                + m.label + " [/]";
+        for (auto &m : cfg_.menus) {
+            bar += "[rgb(" + std::to_string(cfg_.theme.menu_bar_bg.fg.r) + "," +
+                   std::to_string(cfg_.theme.menu_bar_bg.fg.g) + "," + std::to_string(cfg_.theme.menu_bar_bg.fg.b) +
+                   ") on_rgb(" + std::to_string(cfg_.theme.menu_bar_bg.bg.r) + "," +
+                   std::to_string(cfg_.theme.menu_bar_bg.bg.g) + "," + std::to_string(cfg_.theme.menu_bar_bg.bg.b) +
+                   ")] " + m.label + " [/]";
         }
         auto menu_bar = text_builder(bar);
         menu_bar.style_override(cfg_.theme.menu_bar_bg);
@@ -267,7 +257,7 @@ public:
     }
 
     /** @brief Access the captured screen. */
-    [[nodiscard]] const virtual_screen& screen() const noexcept { return screen_; }
+    [[nodiscard]] const virtual_screen &screen() const noexcept { return screen_; }
 
     /** @brief Number of frames rendered so far. */
     [[nodiscard]] int frame_count() const noexcept { return frame_count_; }
@@ -277,11 +267,9 @@ public:
     void set_scroll_y(int y) { scroll_y_ = y; }
 
     /** @brief Viewport height (height - 2 for menu + status). */
-    [[nodiscard]] int viewport_h() const noexcept {
-        return static_cast<int>(cfg_.height) - 3;
-    }
+    [[nodiscard]] int viewport_h() const noexcept { return static_cast<int>(cfg_.height) - 3; }
 
-private:
+  private:
     config cfg_;
     virtual_screen screen_;
     content_fn content_fn_;
@@ -290,4 +278,4 @@ private:
     int frame_count_ = 0;
 };
 
-}  // namespace tapiru::testing
+} // namespace tapiru::testing

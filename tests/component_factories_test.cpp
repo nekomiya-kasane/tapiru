@@ -3,18 +3,18 @@
  * @brief Tests for interactive widget component factories.
  */
 
-#include <gtest/gtest.h>
-
-#include "tapiru/widgets/component_factories.h"
 #include "tapiru/core/console.h"
 #include "tapiru/widgets/builders.h"
+#include "tapiru/widgets/component_factories.h"
+
+#include <gtest/gtest.h>
 
 using namespace tapiru;
 
 // ── Helper ──────────────────────────────────────────────────────────────
 
 class virtual_terminal {
-public:
+  public:
     [[nodiscard]] console make_console() {
         console_config cfg;
         cfg.sink = [this](std::string_view data) { buffer_ += data; };
@@ -22,9 +22,10 @@ public:
         cfg.no_color = true;
         return console(cfg);
     }
-    [[nodiscard]] const std::string& raw() const noexcept { return buffer_; }
+    [[nodiscard]] const std::string &raw() const noexcept { return buffer_; }
     void clear() { buffer_.clear(); }
-private:
+
+  private:
     std::string buffer_;
 };
 
@@ -51,7 +52,7 @@ TEST(ComponentFactoryTest, ButtonIsFocusable) {
 
 TEST(ComponentFactoryTest, ButtonOnClickFires) {
     bool clicked = false;
-    auto btn = make_button({.label = "Go", .on_click = [&]{ clicked = true; }});
+    auto btn = make_button({.label = "Go", .on_click = [&] { clicked = true; }});
     btn->set_focused(true);
     key_event enter{0, special_key::enter, key_mod::none};
     EXPECT_TRUE(btn->on_event(enter));
@@ -60,7 +61,7 @@ TEST(ComponentFactoryTest, ButtonOnClickFires) {
 
 TEST(ComponentFactoryTest, ButtonIgnoresEnterWhenNotFocused) {
     bool clicked = false;
-    auto btn = make_button({.label = "Go", .on_click = [&]{ clicked = true; }});
+    auto btn = make_button({.label = "Go", .on_click = [&] { clicked = true; }});
     key_event enter{0, special_key::enter, key_mod::none};
     EXPECT_FALSE(btn->on_event(enter));
     EXPECT_FALSE(clicked);
@@ -115,7 +116,7 @@ TEST(ComponentFactoryTest, RadioGroupNavigates) {
     EXPECT_TRUE(rg->on_event(down));
     EXPECT_EQ(sel, 2);
     EXPECT_TRUE(rg->on_event(down));
-    EXPECT_EQ(sel, 0);  // wraps
+    EXPECT_EQ(sel, 0); // wraps
 }
 
 TEST(ComponentFactoryTest, RadioGroupNavigatesUp) {
@@ -123,7 +124,7 @@ TEST(ComponentFactoryTest, RadioGroupNavigatesUp) {
     auto rg = make_radio_group({.options = {"A", "B"}, .selected = &sel});
     key_event up{0, special_key::up, key_mod::none};
     EXPECT_TRUE(rg->on_event(up));
-    EXPECT_EQ(sel, 1);  // wraps to last
+    EXPECT_EQ(sel, 1); // wraps to last
 }
 
 // ── selectable_list ─────────────────────────────────────────────────────
@@ -147,11 +148,8 @@ TEST(ComponentFactoryTest, SelectableListNavigates) {
 TEST(ComponentFactoryTest, SelectableListOnSelect) {
     int cursor = 0;
     int selected = -1;
-    auto sl = make_selectable_list({
-        .items = {"X", "Y"},
-        .cursor = &cursor,
-        .on_select = [&](int idx) { selected = idx; }
-    });
+    auto sl =
+        make_selectable_list({.items = {"X", "Y"}, .cursor = &cursor, .on_select = [&](int idx) { selected = idx; }});
     key_event enter{0, special_key::enter, key_mod::none};
     EXPECT_TRUE(sl->on_event(enter));
     EXPECT_EQ(selected, 0);
@@ -192,10 +190,7 @@ TEST(ComponentFactoryTest, TextInputBackspace) {
 TEST(ComponentFactoryTest, TextInputOnChange) {
     std::string buf;
     std::string last_change;
-    auto ti = make_text_input({
-        .buffer = &buf,
-        .on_change = [&](const std::string& s) { last_change = s; }
-    });
+    auto ti = make_text_input({.buffer = &buf, .on_change = [&](const std::string &s) { last_change = s; }});
     ti->set_focused(true);
     key_event x{U'x', special_key::none, key_mod::none};
     ti->on_event(x);
