@@ -11,8 +11,8 @@
 
 namespace tapiru {
 
-using tapioca::char_width;
-using tapioca::string_width;
-using tapioca::utf8_decode;
+    using tapioca::char_width;
+    using tapioca::string_width;
+    using tapioca::utf8_decode;
 
 } // namespace tapiru

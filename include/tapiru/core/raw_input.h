@@ -11,7 +11,7 @@
 
 namespace tapiru {
 
-using tapioca::poll_event;
-using tapioca::raw_mode;
+    using tapioca::poll_event;
+    using tapioca::raw_mode;
 
 } // namespace tapiru

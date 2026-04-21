@@ -101,25 +101,25 @@ TEST(ComponentTest, EmptyContainerDoesNotCrash) {
 // ── container focus cycling ─────────────────────────────────────────────
 
 namespace {
-class focusable_component : public component_base {
-  public:
-    explicit focusable_component(std::string label) : label_(std::move(label)) {}
-    element render() override { return element(text_builder(label_)); }
-    bool focusable() const override { return true; }
-    bool on_event(const input_event &ev) override {
-        if (auto *ke = std::get_if<key_event>(&ev)) {
-            if (ke->key == special_key::enter) {
-                activated_ = true;
-                return true;
+    class focusable_component : public component_base {
+      public:
+        explicit focusable_component(std::string label) : label_(std::move(label)) {}
+        element render() override { return element(text_builder(label_)); }
+        bool focusable() const override { return true; }
+        bool on_event(const input_event &ev) override {
+            if (auto *ke = std::get_if<key_event>(&ev)) {
+                if (ke->key == special_key::enter) {
+                    activated_ = true;
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
-    }
-    bool activated_ = false;
+        bool activated_ = false;
 
-  private:
-    std::string label_;
-};
+      private:
+        std::string label_;
+    };
 } // anonymous namespace
 
 TEST(ComponentTest, ContainerFocusCycleTab) {

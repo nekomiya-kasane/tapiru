@@ -16,8 +16,8 @@
 
 namespace tapiru {
 
-TAPIRU_API element make_gauge(float progress);
-TAPIRU_API element make_gauge(float progress, const style &filled, const style &remaining);
-TAPIRU_API element make_gauge_direction(float progress, gauge_direction dir);
+    TAPIRU_API element make_gauge(float progress);
+    TAPIRU_API element make_gauge(float progress, const style &filled, const style &remaining);
+    TAPIRU_API element make_gauge_direction(float progress, gauge_direction dir);
 
 } // namespace tapiru

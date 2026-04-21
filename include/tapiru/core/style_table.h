@@ -9,8 +9,8 @@
 
 namespace tapiru {
 
-using tapioca::default_style_id;
-using tapioca::style_id;
-using tapioca::style_table;
+    using tapioca::default_style_id;
+    using tapioca::style_id;
+    using tapioca::style_table;
 
 } // namespace tapiru

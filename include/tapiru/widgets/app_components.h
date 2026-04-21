@@ -21,17 +21,17 @@
 
 namespace tapiru {
 
-// ── menu_bar component ──────────────────────────────────────────────────
+    // ── menu_bar component ──────────────────────────────────────────────────
 
-TAPIRU_API component make_menu_bar(std::vector<menu_bar_entry> entries, int *selected);
+    TAPIRU_API component make_menu_bar(std::vector<menu_bar_entry> entries, int *selected);
 
-// ── status_bar component ────────────────────────────────────────────────
+    // ── status_bar component ────────────────────────────────────────────────
 
-TAPIRU_API component make_status_bar(std::function<element()> content_fn);
+    TAPIRU_API component make_status_bar(std::function<element()> content_fn);
 
-// ── resizable_split ─────────────────────────────────────────────────────
+    // ── resizable_split ─────────────────────────────────────────────────────
 
-TAPIRU_API component resizable_split_left(component left, component right, int *split_pos);
-TAPIRU_API component resizable_split_top(component top, component bottom, int *split_pos);
+    TAPIRU_API component resizable_split_left(component left, component right, int *split_pos);
+    TAPIRU_API component resizable_split_top(component top, component bottom, int *split_pos);
 
 } // namespace tapiru

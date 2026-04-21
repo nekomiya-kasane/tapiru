@@ -21,65 +21,65 @@
 
 namespace tapiru {
 
-// We fuzz the key_event construction from arbitrary codepoints and
-// special_key values to ensure no UB in the event types themselves.
+    // We fuzz the key_event construction from arbitrary codepoints and
+    // special_key values to ensure no UB in the event types themselves.
 
-static void fuzz_key_event(const uint8_t *data, size_t size) {
-    if (size < 7) {
-        return;
+    static void fuzz_key_event(const uint8_t *data, size_t size) {
+        if (size < 7) {
+            return;
+        }
+
+        char32_t cp = 0;
+        std::memcpy(&cp, data, 4);
+
+        auto sk = static_cast<special_key>(data[4]);
+        auto mods = static_cast<key_mod>(data[5]);
+        auto act = static_cast<key_action>((data[6] % 3) + 1); // 1..3
+
+        key_event ke{cp, sk, mods, act};
+        (void)ke.codepoint;
+        (void)ke.key;
+        (void)ke.mods;
+        (void)ke.action;
+
+        // Construct input_event variant
+        input_event ev = ke;
+        (void)std::get_if<key_event>(&ev);
     }
 
-    char32_t cp = 0;
-    std::memcpy(&cp, data, 4);
+    static void fuzz_mouse_event(const uint8_t *data, size_t size) {
+        if (size < 10) {
+            return;
+        }
 
-    auto sk = static_cast<special_key>(data[4]);
-    auto mods = static_cast<key_mod>(data[5]);
-    auto act = static_cast<key_action>((data[6] % 3) + 1); // 1..3
+        uint32_t mx = 0, my = 0;
+        std::memcpy(&mx, data, 4);
+        std::memcpy(&my, data + 4, 4);
 
-    key_event ke{cp, sk, mods, act};
-    (void)ke.codepoint;
-    (void)ke.key;
-    (void)ke.mods;
-    (void)ke.action;
+        auto btn = static_cast<mouse_button>(data[8]);
+        auto action = static_cast<mouse_action>(data[9]);
 
-    // Construct input_event variant
-    input_event ev = ke;
-    (void)std::get_if<key_event>(&ev);
-}
+        mouse_event me{mx, my, btn, action, key_mod::none};
+        (void)me.x;
+        (void)me.y;
 
-static void fuzz_mouse_event(const uint8_t *data, size_t size) {
-    if (size < 10) {
-        return;
+        input_event ev = me;
+        (void)std::get_if<mouse_event>(&ev);
     }
 
-    uint32_t mx = 0, my = 0;
-    std::memcpy(&mx, data, 4);
-    std::memcpy(&my, data + 4, 4);
+    static void fuzz_resize_event(const uint8_t *data, size_t size) {
+        if (size < 8) {
+            return;
+        }
 
-    auto btn = static_cast<mouse_button>(data[8]);
-    auto action = static_cast<mouse_action>(data[9]);
+        uint32_t w = 0, h = 0;
+        std::memcpy(&w, data, 4);
+        std::memcpy(&h, data + 4, 4);
 
-    mouse_event me{mx, my, btn, action, key_mod::none};
-    (void)me.x;
-    (void)me.y;
-
-    input_event ev = me;
-    (void)std::get_if<mouse_event>(&ev);
-}
-
-static void fuzz_resize_event(const uint8_t *data, size_t size) {
-    if (size < 8) {
-        return;
+        resize_event re{w, h};
+        input_event ev = re;
+        (void)std::get_if<resize_event>(&ev);
     }
-
-    uint32_t w = 0, h = 0;
-    std::memcpy(&w, data, 4);
-    std::memcpy(&h, data + 4, 4);
-
-    resize_event re{w, h};
-    input_event ev = re;
-    (void)std::get_if<resize_event>(&ev);
-}
 
 } // namespace tapiru
 

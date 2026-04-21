@@ -21,29 +21,29 @@
 
 namespace tapiru {
 
-/**
- * @brief A collection of named styles that can be referenced in markup.
- */
-class TAPIRU_API theme {
-  public:
-    theme() = default;
+    /**
+     * @brief A collection of named styles that can be referenced in markup.
+     */
+    class TAPIRU_API theme {
+      public:
+        theme() = default;
 
-    void define(std::string name, const style &s);
-    [[nodiscard]] const style *lookup(std::string_view name) const;
-    [[nodiscard]] bool has(std::string_view name) const;
-    void remove(std::string_view name);
-    void clear();
+        void define(std::string name, const style &s);
+        [[nodiscard]] const style *lookup(std::string_view name) const;
+        [[nodiscard]] bool has(std::string_view name) const;
+        void remove(std::string_view name);
+        void clear();
 
-    [[nodiscard]] size_t size() const noexcept { return styles_.size(); }
+        [[nodiscard]] size_t size() const noexcept { return styles_.size(); }
 
-    // ── Preset themes ──────────────────────────────────────────────────
+        // ── Preset themes ──────────────────────────────────────────────────
 
-    [[nodiscard]] static theme dark();
-    [[nodiscard]] static theme light();
-    [[nodiscard]] static theme monokai();
+        [[nodiscard]] static theme dark();
+        [[nodiscard]] static theme light();
+        [[nodiscard]] static theme monokai();
 
-  private:
-    std::unordered_map<std::string, style> styles_;
-};
+      private:
+        std::unordered_map<std::string, style> styles_;
+    };
 
 } // namespace tapiru

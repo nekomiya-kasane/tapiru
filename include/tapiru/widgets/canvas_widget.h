@@ -30,35 +30,36 @@
 
 namespace tapiru {
 
-namespace detail {
-class scene;
-}
-using node_id = uint32_t;
+    namespace detail {
+        class scene;
+    }
+    using node_id = uint32_t;
 
-class TAPIRU_API canvas_widget_builder {
-  public:
-    canvas_widget_builder(uint32_t pixel_w, uint32_t pixel_h);
+    class TAPIRU_API canvas_widget_builder {
+      public:
+        canvas_widget_builder(uint32_t pixel_w, uint32_t pixel_h);
 
-    canvas_widget_builder &draw_point(int x, int y, const color &c = color::from_rgb(255, 255, 255));
-    canvas_widget_builder &draw_line(int x1, int y1, int x2, int y2, const color &c = color::from_rgb(255, 255, 255));
-    canvas_widget_builder &draw_circle(int cx, int cy, int r, const color &c = color::from_rgb(255, 255, 255));
-    canvas_widget_builder &draw_rect(int x, int y, int w, int h, const color &c = color::from_rgb(255, 255, 255));
-    canvas_widget_builder &draw_text(int x, int y, std::string_view text, const style &s = {});
-    canvas_widget_builder &draw_block_line(int x1, int y1, int x2, int y2,
-                                           const color &c = color::from_rgb(255, 255, 255));
+        canvas_widget_builder &draw_point(int x, int y, const color &c = color::from_rgb(255, 255, 255));
+        canvas_widget_builder &draw_line(int x1, int y1, int x2, int y2,
+                                         const color &c = color::from_rgb(255, 255, 255));
+        canvas_widget_builder &draw_circle(int cx, int cy, int r, const color &c = color::from_rgb(255, 255, 255));
+        canvas_widget_builder &draw_rect(int x, int y, int w, int h, const color &c = color::from_rgb(255, 255, 255));
+        canvas_widget_builder &draw_text(int x, int y, std::string_view text, const style &s = {});
+        canvas_widget_builder &draw_block_line(int x1, int y1, int x2, int y2,
+                                               const color &c = color::from_rgb(255, 255, 255));
 
-    [[nodiscard]] uint32_t pixel_width() const noexcept { return pixel_w_; }
-    [[nodiscard]] uint32_t pixel_height() const noexcept { return pixel_h_; }
+        [[nodiscard]] uint32_t pixel_width() const noexcept { return pixel_w_; }
+        [[nodiscard]] uint32_t pixel_height() const noexcept { return pixel_h_; }
 
-    node_id flatten_into(detail::scene &s) const;
+        node_id flatten_into(detail::scene &s) const;
 
-  private:
-    struct impl;
-    std::shared_ptr<impl> impl_;
-    uint32_t pixel_w_;
-    uint32_t pixel_h_;
-};
+      private:
+        struct impl;
+        std::shared_ptr<impl> impl_;
+        uint32_t pixel_w_;
+        uint32_t pixel_h_;
+    };
 
-TAPIRU_API element make_canvas(uint32_t w, uint32_t h, std::function<void(canvas_widget_builder &)> draw_fn);
+    TAPIRU_API element make_canvas(uint32_t w, uint32_t h, std::function<void(canvas_widget_builder &)> draw_fn);
 
 } // namespace tapiru

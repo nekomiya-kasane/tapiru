@@ -20,27 +20,27 @@
 
 namespace tapiru {
 
-// ── form_option ─────────────────────────────────────────────────────────
+    // ── form_option ─────────────────────────────────────────────────────────
 
-struct form_option {
-    struct field {
-        std::string label;
-        std::string *value = nullptr;
-        std::function<bool(std::string_view)> validator;
-        std::string error_message;
+    struct form_option {
+        struct field {
+            std::string label;
+            std::string *value = nullptr;
+            std::function<bool(std::string_view)> validator;
+            std::string error_message;
+        };
+
+        std::vector<field> fields;
+        std::function<void()> on_submit;
+
+        // Optional styling
+        style label_sty;
+        style input_sty;
+        style error_sty;
+        style focused_sty;
+        uint32_t input_width = 30;
     };
 
-    std::vector<field> fields;
-    std::function<void()> on_submit;
-
-    // Optional styling
-    style label_sty;
-    style input_sty;
-    style error_sty;
-    style focused_sty;
-    uint32_t input_width = 30;
-};
-
-TAPIRU_API component make_form(form_option opt);
+    TAPIRU_API component make_form(form_option opt);
 
 } // namespace tapiru

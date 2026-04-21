@@ -9,6 +9,6 @@
 
 namespace tapiru {
 
-using tapioca::cell;
+    using tapioca::cell;
 
 } // namespace tapiru

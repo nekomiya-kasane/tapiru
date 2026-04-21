@@ -27,25 +27,25 @@
 
 namespace tapiru {
 
-/**
- * @brief A fragment of text with an associated style.
- */
-struct text_fragment {
-    std::string text;
-    style sty;
-};
+    /**
+     * @brief A fragment of text with an associated style.
+     */
+    struct text_fragment {
+        std::string text;
+        style sty;
+    };
 
-/**
- * @brief Parse a markup string into styled text fragments.
- *
- * @param markup  the input string with [tag] markup
- * @return vector of text_fragment, each with its resolved style
- */
-[[nodiscard]] TAPIRU_API std::vector<text_fragment> parse_markup(std::string_view markup);
+    /**
+     * @brief Parse a markup string into styled text fragments.
+     *
+     * @param markup  the input string with [tag] markup
+     * @return vector of text_fragment, each with its resolved style
+     */
+    [[nodiscard]] TAPIRU_API std::vector<text_fragment> parse_markup(std::string_view markup);
 
-/**
- * @brief Strip all markup tags from a string, returning plain text.
- */
-[[nodiscard]] TAPIRU_API std::string strip_markup(std::string_view markup);
+    /**
+     * @brief Strip all markup tags from a string, returning plain text.
+     */
+    [[nodiscard]] TAPIRU_API std::string strip_markup(std::string_view markup);
 
 } // namespace tapiru

@@ -12,7 +12,7 @@
 
 namespace tapiru {
 
-TAPIRU_API element make_paragraph(std::string_view text);
-TAPIRU_API element make_paragraph_justify(std::string_view text);
+    TAPIRU_API element make_paragraph(std::string_view text);
+    TAPIRU_API element make_paragraph_justify(std::string_view text);
 
 } // namespace tapiru

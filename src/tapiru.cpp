@@ -7,8 +7,8 @@
 
 namespace tapiru {
 
-const char *version() noexcept {
-    return "0.1.0";
-}
+    const char *version() noexcept {
+        return "0.1.0";
+    }
 
 } // namespace tapiru

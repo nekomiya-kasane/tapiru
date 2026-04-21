@@ -9,7 +9,7 @@
 
 namespace tapiru {
 
-/** @brief Returns the library version as a string literal. */
-[[nodiscard]] TAPIRU_API const char *version() noexcept;
+    /** @brief Returns the library version as a string literal. */
+    [[nodiscard]] TAPIRU_API const char *version() noexcept;
 
 } // namespace tapiru
