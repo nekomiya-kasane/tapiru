@@ -42,9 +42,9 @@
 #include <string>
 
 #ifdef _WIN32
-#define NOMINMAX
-#include <crtdbg.h>
-#include <windows.h>
+#    define NOMINMAX
+#    include <crtdbg.h>
+#    include <windows.h>
 #endif
 
 #include "tapiru/core/ansi.h"
