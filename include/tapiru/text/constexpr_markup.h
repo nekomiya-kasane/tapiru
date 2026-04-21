@@ -31,26 +31,40 @@ namespace tapiru {
 namespace detail {
 
 constexpr bool sv_eq(const char *a, size_t alen, const char *b, size_t blen) {
-    if (alen != blen) return false;
+    if (alen != blen) {
+        return false;
+    }
     for (size_t i = 0; i < alen; ++i) {
-        if (a[i] != b[i]) return false;
+        if (a[i] != b[i]) {
+            return false;
+        }
     }
     return true;
 }
 
 constexpr uint8_t hex_digit(char c) {
-    if (c >= '0' && c <= '9') return static_cast<uint8_t>(c - '0');
-    if (c >= 'a' && c <= 'f') return static_cast<uint8_t>(c - 'a' + 10);
-    if (c >= 'A' && c <= 'F') return static_cast<uint8_t>(c - 'A' + 10);
+    if (c >= '0' && c <= '9') {
+        return static_cast<uint8_t>(c - '0');
+    }
+    if (c >= 'a' && c <= 'f') {
+        return static_cast<uint8_t>(c - 'a' + 10);
+    }
+    if (c >= 'A' && c <= 'F') {
+        return static_cast<uint8_t>(c - 'A' + 10);
+    }
     return 0xFF;
 }
 
 constexpr bool try_parse_hex_color_ct(const char *s, size_t len, color &out) {
-    if (len != 7 || s[0] != '#') return false;
+    if (len != 7 || s[0] != '#') {
+        return false;
+    }
     uint8_t r1 = hex_digit(s[1]), r2 = hex_digit(s[2]);
     uint8_t g1 = hex_digit(s[3]), g2 = hex_digit(s[4]);
     uint8_t b1 = hex_digit(s[5]), b2 = hex_digit(s[6]);
-    if (r1 == 0xFF || r2 == 0xFF || g1 == 0xFF || g2 == 0xFF || b1 == 0xFF || b2 == 0xFF) return false;
+    if (r1 == 0xFF || r2 == 0xFF || g1 == 0xFF || g2 == 0xFF || b1 == 0xFF || b2 == 0xFF) {
+        return false;
+    }
     out = color::from_rgb(static_cast<uint8_t>(r1 * 16 + r2), static_cast<uint8_t>(g1 * 16 + g2),
                           static_cast<uint8_t>(b1 * 16 + b2));
     return true;
@@ -69,27 +83,40 @@ constexpr uint8_t ct_parse_uint8(const char *s, size_t len, size_t &pos) {
 // Try parse rgb(R,G,B) or on_rgb(R,G,B) at compile time
 constexpr bool try_parse_rgb_func_ct(const char *tag, size_t len, color &out, bool is_bg) {
     // Expected: "rgb(R,G,B)" or "on_rgb(R,G,B)"
-    size_t prefix = is_bg ? 7 : 4;      // "on_rgb(" vs "rgb("
-    if (len < prefix + 5) return false; // minimum "rgb(0,0,0)" = 10 chars
+    size_t prefix = is_bg ? 7 : 4; // "on_rgb(" vs "rgb("
+    if (len < prefix + 5) {
+        return false; // minimum "rgb(0,0,0)" = 10 chars
+    }
     // Check prefix
     if (is_bg) {
         if (tag[0] != 'o' || tag[1] != 'n' || tag[2] != '_' || tag[3] != 'r' || tag[4] != 'g' || tag[5] != 'b' ||
-            tag[6] != '(')
+            tag[6] != '(') {
             return false;
+        }
     } else {
-        if (tag[0] != 'r' || tag[1] != 'g' || tag[2] != 'b' || tag[3] != '(') return false;
+        if (tag[0] != 'r' || tag[1] != 'g' || tag[2] != 'b' || tag[3] != '(') {
+            return false;
+        }
     }
     // Check closing paren
-    if (tag[len - 1] != ')') return false;
+    if (tag[len - 1] != ')') {
+        return false;
+    }
     size_t pos = prefix;
     uint8_t r = ct_parse_uint8(tag, len - 1, pos);
-    if (pos >= len - 1 || tag[pos] != ',') return false;
+    if (pos >= len - 1 || tag[pos] != ',') {
+        return false;
+    }
     ++pos;
     uint8_t g = ct_parse_uint8(tag, len - 1, pos);
-    if (pos >= len - 1 || tag[pos] != ',') return false;
+    if (pos >= len - 1 || tag[pos] != ',') {
+        return false;
+    }
     ++pos;
     uint8_t b = ct_parse_uint8(tag, len - 1, pos);
-    if (pos != len - 1) return false;
+    if (pos != len - 1) {
+        return false;
+    }
     out = color::from_rgb(r, g, b);
     return true;
 }
@@ -97,17 +124,27 @@ constexpr bool try_parse_rgb_func_ct(const char *tag, size_t len, color &out, bo
 // Try parse color256(N) or on_color256(N) at compile time
 constexpr bool try_parse_color256_ct(const char *tag, size_t len, color &out, bool is_bg) {
     // Expected: "color256(N)" or "on_color256(N)"
-    size_t prefix = is_bg ? 12 : 9;     // "on_color256(" vs "color256("
-    if (len < prefix + 2) return false; // minimum "color256(0)" = 11 chars
-    if (is_bg) {
-        if (!sv_eq(tag, 12, "on_color256(", 12)) return false;
-    } else {
-        if (!sv_eq(tag, 9, "color256(", 9)) return false;
+    size_t prefix = is_bg ? 12 : 9; // "on_color256(" vs "color256("
+    if (len < prefix + 2) {
+        return false; // minimum "color256(0)" = 11 chars
     }
-    if (tag[len - 1] != ')') return false;
+    if (is_bg) {
+        if (!sv_eq(tag, 12, "on_color256(", 12)) {
+            return false;
+        }
+    } else {
+        if (!sv_eq(tag, 9, "color256(", 9)) {
+            return false;
+        }
+    }
+    if (tag[len - 1] != ')') {
+        return false;
+    }
     size_t pos = prefix;
     uint8_t idx = ct_parse_uint8(tag, len - 1, pos);
-    if (pos != len - 1) return false;
+    if (pos != len - 1) {
+        return false;
+    }
     out = color::from_index_256(idx);
     return true;
 }
@@ -264,10 +301,16 @@ constexpr bool apply_tag_ct(const char *tag, size_t len, style &s) {
 constexpr void apply_compound_tag_ct(const char *tag, size_t len, style &s) {
     size_t pos = 0;
     while (pos < len) {
-        while (pos < len && tag[pos] == ' ') ++pos;
-        if (pos >= len) break;
+        while (pos < len && tag[pos] == ' ') {
+            ++pos;
+        }
+        if (pos >= len) {
+            break;
+        }
         size_t end = pos;
-        while (end < len && tag[end] != ' ') ++end;
+        while (end < len && tag[end] != ' ') {
+            ++end;
+        }
         apply_tag_ct(tag + pos, end - pos, s);
         pos = end;
     }
@@ -352,7 +395,9 @@ template <size_t N, size_t MaxFragments> consteval static_markup<MaxFragments> c
 
             // Find closing ]
             size_t close = i + 1;
-            while (close < len && markup[close] != ']') ++close;
+            while (close < len && markup[close] != ']') {
+                ++close;
+            }
             if (close >= len) {
                 // No closing ] — treat as literal
                 if (!in_text) {
@@ -376,7 +421,9 @@ template <size_t N, size_t MaxFragments> consteval static_markup<MaxFragments> c
                 style_stack[0] = style{};
             } else if (tag_len > 0 && markup[tag_start] == '/') {
                 // [/tag] — pop
-                if (stack_depth > 1) stack_depth--;
+                if (stack_depth > 1) {
+                    stack_depth--;
+                }
             } else {
                 // [tag] — push
                 if (stack_depth < 32) {
@@ -498,9 +545,14 @@ template <size_t MaxFragments = 64> struct static_rich_markup {
 namespace detail {
 
 constexpr bool sv_starts_with(const char *s, size_t slen, const char *prefix, size_t plen) {
-    if (slen < plen) return false;
-    for (size_t i = 0; i < plen; ++i)
-        if (s[i] != prefix[i]) return false;
+    if (slen < plen) {
+        return false;
+    }
+    for (size_t i = 0; i < plen; ++i) {
+        if (s[i] != prefix[i]) {
+            return false;
+        }
+    }
     return true;
 }
 
@@ -565,7 +617,9 @@ constexpr bool try_block_tag_ct(const char *tag, size_t len, const char *markup,
             if (sv_starts_with(tag + i, len - i, "title=\"", 7)) {
                 size_t start = i + 7;
                 size_t end = start;
-                while (end < len && tag[end] != '"') ++end;
+                while (end < len && tag[end] != '"') {
+                    ++end;
+                }
                 frag.block.title_offset = static_cast<uint16_t>(tag_abs_offset + start);
                 frag.block.title_length = static_cast<uint16_t>(end - start);
                 break;
@@ -687,18 +741,36 @@ constexpr bool try_block_tag_ct(const char *tag, size_t len, const char *markup,
 // Map closing tag name to block_kind
 constexpr block_kind closing_block_kind(const char *tag, size_t len) {
     // tag starts after '/', e.g. "box", "indent", etc.
-    if (sv_eq(tag, len, "box", 3) || sv_starts_with(tag, len, "box.", 4) || sv_starts_with(tag, len, "box ", 4))
+    if (sv_eq(tag, len, "box", 3) || sv_starts_with(tag, len, "box.", 4) || sv_starts_with(tag, len, "box ", 4)) {
         return block_kind::box_close;
-    if (sv_eq(tag, len, "indent", 6) || sv_starts_with(tag, len, "indent=", 7)) return block_kind::indent_close;
-    if (sv_eq(tag, len, "center", 6) || sv_eq(tag, len, "right", 5)) return block_kind::align_close;
-    if (sv_eq(tag, len, "quote", 5)) return block_kind::quote_close;
-    if (sv_eq(tag, len, "code", 4)) return block_kind::code_close;
-    if (sv_eq(tag, len, "h1", 2) || sv_eq(tag, len, "h2", 2) || sv_eq(tag, len, "h3", 2))
+    }
+    if (sv_eq(tag, len, "indent", 6) || sv_starts_with(tag, len, "indent=", 7)) {
+        return block_kind::indent_close;
+    }
+    if (sv_eq(tag, len, "center", 6) || sv_eq(tag, len, "right", 5)) {
+        return block_kind::align_close;
+    }
+    if (sv_eq(tag, len, "quote", 5)) {
+        return block_kind::quote_close;
+    }
+    if (sv_eq(tag, len, "code", 4)) {
+        return block_kind::code_close;
+    }
+    if (sv_eq(tag, len, "h1", 2) || sv_eq(tag, len, "h2", 2) || sv_eq(tag, len, "h3", 2)) {
         return block_kind::heading_close;
-    if (sv_eq(tag, len, "ul", 2) || sv_eq(tag, len, "ol", 2)) return block_kind::list_close;
-    if (sv_eq(tag, len, "columns", 7)) return block_kind::columns_close;
-    if (sv_starts_with(tag, len, "pad=", 4) || sv_eq(tag, len, "pad", 3)) return block_kind::pad_close;
-    if (sv_eq(tag, len, "link", 4) || sv_starts_with(tag, len, "link=", 5)) return block_kind::link_close;
+    }
+    if (sv_eq(tag, len, "ul", 2) || sv_eq(tag, len, "ol", 2)) {
+        return block_kind::list_close;
+    }
+    if (sv_eq(tag, len, "columns", 7)) {
+        return block_kind::columns_close;
+    }
+    if (sv_starts_with(tag, len, "pad=", 4) || sv_eq(tag, len, "pad", 3)) {
+        return block_kind::pad_close;
+    }
+    if (sv_eq(tag, len, "link", 4) || sv_starts_with(tag, len, "link=", 5)) {
+        return block_kind::link_close;
+    }
     return block_kind::none;
 }
 
@@ -737,7 +809,9 @@ consteval static_rich_markup<MaxFragments> ct_parse_rich_impl(const char (&marku
             }
 
             size_t close = i + 1;
-            while (close < len && markup[close] != ']') ++close;
+            while (close < len && markup[close] != ']') {
+                ++close;
+            }
             if (close >= len) {
                 if (!in_text) {
                     text_start = i;
@@ -767,7 +841,9 @@ consteval static_rich_markup<MaxFragments> ct_parse_rich_impl(const char (&marku
                     result.count++;
                 }
 
-                if (stack_depth > 1) stack_depth--;
+                if (stack_depth > 1) {
+                    stack_depth--;
+                }
             } else {
                 // [tag] — opening tag
                 // Try block tag first

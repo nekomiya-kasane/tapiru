@@ -66,7 +66,9 @@ class TAPIRU_API progress_task {
     /** @brief Get progress as a fraction [0.0, 1.0]. */
     [[nodiscard]] double fraction() const noexcept {
         auto t = total();
-        if (t == 0) return 0.0;
+        if (t == 0) {
+            return 0.0;
+        }
         auto c = current();
         return static_cast<double>(c > t ? t : c) / static_cast<double>(t);
     }

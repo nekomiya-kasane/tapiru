@@ -33,10 +33,14 @@ class menu_bar_component final : public component_base {
     }
 
     bool on_event(const input_event &ev) override {
-        if (!selected_) return false;
+        if (!selected_) {
+            return false;
+        }
         if (auto *ke = std::get_if<key_event>(&ev)) {
             int n = static_cast<int>(entries_.size());
-            if (n == 0) return false;
+            if (n == 0) {
+                return false;
+            }
             if (ke->key == special_key::left) {
                 state_.move_left(n);
                 *selected_ = state_.active_index();
@@ -113,7 +117,9 @@ class resizable_split_component final : public component_base {
     bool on_event(const input_event &ev) override {
         // Dispatch to active child first
         auto &active_child = (active_ == 0) ? left_ : right_;
-        if (active_child && active_child->on_event(ev)) return true;
+        if (active_child && active_child->on_event(ev)) {
+            return true;
+        }
 
         if (auto *ke = std::get_if<key_event>(&ev)) {
             // Tab switches between left and right
@@ -146,8 +152,12 @@ class resizable_split_component final : public component_base {
 
     std::vector<component> children() override {
         std::vector<component> kids;
-        if (left_) kids.push_back(left_);
-        if (right_) kids.push_back(right_);
+        if (left_) {
+            kids.push_back(left_);
+        }
+        if (right_) {
+            kids.push_back(right_);
+        }
         return kids;
     }
 

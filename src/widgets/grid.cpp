@@ -27,7 +27,9 @@ node_id grid_builder::flatten_into(detail::scene &s) const {
     rd.gap = row_gap_;
     auto rows_pi = s.add_rows(std::move(rd));
     auto rows_id = s.add_node(detail::widget_type::rows, rows_pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(rows_id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(rows_id, z_order_);
+    }
 
     for (uint32_t r = 0; r < num_rows; ++r) {
         auto cols = columns_builder();

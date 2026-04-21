@@ -33,8 +33,12 @@ class typewriter {
     }
 
     [[nodiscard]] std::string value(time_point now) const {
-        if (!started_) return "";
-        if (text_.empty()) return "";
+        if (!started_) {
+            return "";
+        }
+        if (text_.empty()) {
+            return "";
+        }
 
         auto elapsed = std::chrono::duration_cast<duration_ms>(now - start_);
         int total_chars = static_cast<int>(text_.size());
@@ -44,7 +48,9 @@ class typewriter {
             visible = static_cast<int>(elapsed.count() / char_delay_.count());
         } else if (total_dur_.count() > 0) {
             float t = static_cast<float>(elapsed.count()) / static_cast<float>(total_dur_.count());
-            if (t > 1.0f) t = 1.0f;
+            if (t > 1.0f) {
+                t = 1.0f;
+            }
             visible = static_cast<int>(t * static_cast<float>(total_chars));
         } else {
             visible = total_chars;
@@ -55,7 +61,9 @@ class typewriter {
     }
 
     [[nodiscard]] bool finished(time_point now) const {
-        if (!started_) return false;
+        if (!started_) {
+            return false;
+        }
         auto elapsed = std::chrono::duration_cast<duration_ms>(now - start_);
         if (char_delay_.count() > 0) {
             return elapsed.count() >= char_delay_.count() * static_cast<long long>(text_.size());
@@ -110,9 +118,13 @@ class marquee {
     }
 
     [[nodiscard]] std::string value(time_point now) const {
-        if (!started_ || text_.empty() || visible_w_ == 0) return "";
+        if (!started_ || text_.empty() || visible_w_ == 0) {
+            return "";
+        }
 
-        if (text_.size() <= visible_w_) return std::string(text_);
+        if (text_.size() <= visible_w_) {
+            return std::string(text_);
+        }
 
         auto elapsed = std::chrono::duration_cast<duration_ms>(now - start_);
         int total_len = static_cast<int>(text_.size()) + static_cast<int>(visible_w_);

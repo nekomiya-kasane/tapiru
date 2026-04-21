@@ -27,7 +27,9 @@ node_id text_builder::flatten_into(detail::scene &s) const {
 
     auto pi = s.add_text(std::move(td));
     auto id = s.add_node(detail::widget_type::text, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(id, z_order_);
+    }
     return id;
 }
 
@@ -43,7 +45,9 @@ node_id rule_builder::flatten_into(detail::scene &s) const {
 
     auto pi = s.add_rule(std::move(rd));
     auto id = s.add_node(detail::widget_type::rule, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(id, z_order_);
+    }
     return id;
 }
 
@@ -58,7 +62,9 @@ node_id padding_builder::flatten_into(detail::scene &s) const {
 
     auto pi = s.add_padding(std::move(pd));
     auto pad_id = s.add_node(detail::widget_type::padding, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(pad_id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(pad_id, z_order_);
+    }
 
     if (content_) {
         auto child_id = content_->flatten(s);
@@ -82,11 +88,15 @@ node_id panel_builder::flatten_into(detail::scene &s) const {
         pd.shadow = detail::shadow_config{shadow_->offset_x, shadow_->offset_y, shadow_->blur, shadow_->shadow_color,
                                           shadow_->opacity};
     }
-    if (shader_) pd.shader = shader_;
+    if (shader_) {
+        pd.shader = shader_;
+    }
 
     auto pi = s.add_panel(std::move(pd));
     auto panel_id = s.add_node(detail::widget_type::panel, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(panel_id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(panel_id, z_order_);
+    }
 
     if (content_) {
         auto child_id = content_->flatten(s);
@@ -105,7 +115,9 @@ node_id columns_builder::flatten_into(detail::scene &s) const {
 
     auto pi = s.add_columns(std::move(cd));
     auto cols_id = s.add_node(detail::widget_type::columns, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(cols_id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(cols_id, z_order_);
+    }
 
     for (size_t i = 0; i < children_.size(); ++i) {
         auto child_id = children_[i]->flatten(s);
@@ -147,7 +159,9 @@ node_id table_builder::flatten_into(detail::scene &s) const {
 
     auto pi = s.add_table(std::move(td));
     auto id = s.add_node(detail::widget_type::table, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(id, z_order_);
+    }
     return id;
 }
 
@@ -159,7 +173,9 @@ node_id overlay_builder::flatten_into(detail::scene &s) const {
 
     auto pi = s.add_overlay(std::move(od));
     auto ov_id = s.add_node(detail::widget_type::overlay, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(ov_id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(ov_id, z_order_);
+    }
 
     if (base_) {
         auto base_id = base_->flatten(s);
@@ -182,7 +198,9 @@ node_id rows_builder::flatten_into(detail::scene &s) const {
 
     auto pi = s.add_rows(std::move(rd));
     auto rows_id = s.add_node(detail::widget_type::rows, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(rows_id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(rows_id, z_order_);
+    }
 
     for (size_t i = 0; i < children_.size(); ++i) {
         auto child_id = children_[i]->flatten(s);
@@ -197,7 +215,9 @@ node_id rows_builder::flatten_into(detail::scene &s) const {
 
 node_id spacer_builder::flatten_into(detail::scene &s) const {
     auto id = s.add_node(detail::widget_type::spacer, 0, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(id, z_order_);
+    }
     return id;
 }
 
@@ -214,7 +234,9 @@ node_id sized_box_builder::flatten_into(detail::scene &s) const {
 
     auto pi = s.add_sized_box(std::move(sd));
     auto id = s.add_node(detail::widget_type::sized_box, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(id, z_order_);
+    }
 
     if (content_) {
         auto child_id = content_->flatten(s);
@@ -233,7 +255,9 @@ node_id center_builder::flatten_into(detail::scene &s) const {
 
     auto pi = s.add_center(std::move(cd));
     auto id = s.add_node(detail::widget_type::center, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(id, z_order_);
+    }
 
     if (content_) {
         auto child_id = content_->flatten(s);

@@ -148,7 +148,9 @@ static std::vector<std::string> generate_document() {
                     "\xe2\x94\x80\xe2\x94\x80[/]");
     lines.push_back("");
     // Reserve blank lines for the Sixel image area (10 rows)
-    for (int i = 0; i < 10; ++i) lines.push_back("");
+    for (int i = 0; i < 10; ++i) {
+        lines.push_back("");
+    }
     lines.push_back("");
     lines.push_back("[dim]// End of demo content[/]");
     return lines;
@@ -221,7 +223,9 @@ static std::string generate_sixel_image(int width, int height) {
                     // Paint all 6 rows in this band that are within image height
                     for (int r = 0; r < 6; ++r) {
                         int py = band * 6 + r;
-                        if (py < height) mask |= (1 << r);
+                        if (py < height) {
+                            mask |= (1 << r);
+                        }
                     }
                 }
                 s += static_cast<char>(63 + mask);
@@ -253,7 +257,9 @@ int main() {
     app.set_content([&](rows_builder &content, int scroll_y, int viewport_h) {
         int start = scroll_y;
         int end_line = start + viewport_h;
-        if (end_line > static_cast<int>(doc.size())) end_line = static_cast<int>(doc.size());
+        if (end_line > static_cast<int>(doc.size())) {
+            end_line = static_cast<int>(doc.size());
+        }
 
         for (int i = start; i < end_line; ++i) {
             int screen_row = i - start + 1;
@@ -344,7 +350,9 @@ int main() {
         for (const auto &lk : links) {
             int doc_line = k_link_doc_line + lk.line_offset;
             int screen_line = doc_line - scroll_y;
-            if (screen_line < 0 || screen_line >= viewport_h) continue;
+            if (screen_line < 0 || screen_line >= viewport_h) {
+                continue;
+            }
             int screen_row = screen_line + 1; // +1 for menu bar
 
             char pos[24];

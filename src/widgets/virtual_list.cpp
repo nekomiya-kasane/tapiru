@@ -28,7 +28,9 @@ node_id virtual_list_builder::flatten_into(detail::scene &s) const {
 
     auto pi = s.add_rows(std::move(rd));
     auto rows_id = s.add_node(detail::widget_type::rows, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(rows_id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(rows_id, z_order_);
+    }
 
     for (uint32_t i = eff_offset; i < end; ++i) {
         auto tb = item_fn_(i);

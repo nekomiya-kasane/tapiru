@@ -137,13 +137,17 @@ inline char32_t select_join(bool up, bool down, bool left, bool right, border_st
 inline void apply_border_joins(canvas &cv) {
     uint32_t w = cv.width();
     uint32_t h = cv.height();
-    if (w == 0 || h == 0) return;
+    if (w == 0 || h == 0) {
+        return;
+    }
 
     for (uint32_t y = 0; y < h; ++y) {
         for (uint32_t x = 0; x < w; ++x) {
             auto &c = cv.get(x, y);
             auto bs = classify_border_char(c.codepoint);
-            if (bs == border_style::none) continue;
+            if (bs == border_style::none) {
+                continue;
+            }
 
             // Check neighbors (same border_style only)
             bool up = (y > 0) && classify_border_char(cv.get(x, y - 1).codepoint) == bs &&

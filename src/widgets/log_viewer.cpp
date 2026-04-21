@@ -20,16 +20,22 @@ node_id log_viewer_builder::flatten_into(detail::scene &s) const {
     std::vector<const log_entry *> visible;
     if (entries_) {
         for (const auto &e : *entries_) {
-            if (e.level < min_level_) continue;
+            if (e.level < min_level_) {
+                continue;
+            }
             if (filter_ && !filter_->empty()) {
-                if (e.message.find(*filter_) == std::string::npos) continue;
+                if (e.message.find(*filter_) == std::string::npos) {
+                    continue;
+                }
             }
             visible.push_back(&e);
         }
     }
 
     int scroll = scroll_ ? *scroll_ : 0;
-    if (scroll < 0) scroll = 0;
+    if (scroll < 0) {
+        scroll = 0;
+    }
 
     // Build rows of visible log lines
     detail::rows_data rd;
@@ -65,11 +71,15 @@ node_id log_viewer_builder::flatten_into(detail::scene &s) const {
         pd.content = rows_id;
         auto panel_pi = s.add_panel(std::move(pd));
         auto panel_id = s.add_node(detail::widget_type::panel, panel_pi, detail::no_node, key_);
-        if (z_order_ != 0) s.set_z_order(panel_id, z_order_);
+        if (z_order_ != 0) {
+            s.set_z_order(panel_id, z_order_);
+        }
         return panel_id;
     }
 
-    if (z_order_ != 0) s.set_z_order(rows_id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(rows_id, z_order_);
+    }
     return rows_id;
 }
 

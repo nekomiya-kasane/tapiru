@@ -22,7 +22,9 @@ node_id accordion_builder::flatten_into(detail::scene &s) const {
 
     auto pi = s.add_rows(std::move(rd));
     auto rows_id = s.add_node(detail::widget_type::rows, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(rows_id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(rows_id, z_order_);
+    }
 
     for (size_t i = 0; i < sections_.size(); ++i) {
         bool is_expanded = expanded_ && i < expanded_->size() && (*expanded_)[i];

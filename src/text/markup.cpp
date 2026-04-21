@@ -30,15 +30,23 @@ constexpr color make_fg(uint8_t idx) {
 
 // Tag lookup table (sorted for potential binary search, but linear is fine for ~40 entries)
 bool try_parse_hex_color(std::string_view s, color &out) {
-    if (s.size() != 7 || s[0] != '#') return false;
+    if (s.size() != 7 || s[0] != '#') {
+        return false;
+    }
     uint8_t r, g, b;
     auto parse_byte = [](const char *p, uint8_t &v) -> bool {
         auto [ptr, ec] = std::from_chars(p, p + 2, v, 16);
         return ec == std::errc{};
     };
-    if (!parse_byte(s.data() + 1, r)) return false;
-    if (!parse_byte(s.data() + 3, g)) return false;
-    if (!parse_byte(s.data() + 5, b)) return false;
+    if (!parse_byte(s.data() + 1, r)) {
+        return false;
+    }
+    if (!parse_byte(s.data() + 3, g)) {
+        return false;
+    }
+    if (!parse_byte(s.data() + 5, b)) {
+        return false;
+    }
     out = color::from_rgb(r, g, b);
     return true;
 }
@@ -46,31 +54,47 @@ bool try_parse_hex_color(std::string_view s, color &out) {
 bool try_parse_rgb_func(std::string_view tag, color &out, bool is_bg) {
     // "rgb(R,G,B)" or "on_rgb(R,G,B)"
     auto prefix = is_bg ? std::string_view("on_rgb(") : std::string_view("rgb(");
-    if (!tag.starts_with(prefix) || tag.back() != ')') return false;
+    if (!tag.starts_with(prefix) || tag.back() != ')') {
+        return false;
+    }
     auto inner = tag.substr(prefix.size(), tag.size() - prefix.size() - 1);
     // Parse 3 comma-separated values
     auto c1 = inner.find(',');
-    if (c1 == std::string_view::npos) return false;
+    if (c1 == std::string_view::npos) {
+        return false;
+    }
     auto c2 = inner.find(',', c1 + 1);
-    if (c2 == std::string_view::npos) return false;
+    if (c2 == std::string_view::npos) {
+        return false;
+    }
     uint8_t r = 0, g = 0, b = 0;
     auto pr = std::from_chars(inner.data(), inner.data() + c1, r);
-    if (pr.ec != std::errc{}) return false;
+    if (pr.ec != std::errc{}) {
+        return false;
+    }
     auto pg = std::from_chars(inner.data() + c1 + 1, inner.data() + c2, g);
-    if (pg.ec != std::errc{}) return false;
+    if (pg.ec != std::errc{}) {
+        return false;
+    }
     auto pb = std::from_chars(inner.data() + c2 + 1, inner.data() + inner.size(), b);
-    if (pb.ec != std::errc{}) return false;
+    if (pb.ec != std::errc{}) {
+        return false;
+    }
     out = color::from_rgb(r, g, b);
     return true;
 }
 
 bool try_parse_color256(std::string_view tag, color &out, bool is_bg) {
     auto prefix = is_bg ? std::string_view("on_color256(") : std::string_view("color256(");
-    if (!tag.starts_with(prefix) || tag.back() != ')') return false;
+    if (!tag.starts_with(prefix) || tag.back() != ')') {
+        return false;
+    }
     auto inner = tag.substr(prefix.size(), tag.size() - prefix.size() - 1);
     uint8_t idx = 0;
     auto res = std::from_chars(inner.data(), inner.data() + inner.size(), idx);
-    if (res.ec != std::errc{}) return false;
+    if (res.ec != std::errc{}) {
+        return false;
+    }
     out = color::from_index_256(idx);
     return true;
 }
@@ -446,12 +470,18 @@ void apply_compound_tag(std::string_view tag_content, style &s) {
     size_t pos = 0;
     while (pos < tag_content.size()) {
         // Skip whitespace
-        while (pos < tag_content.size() && tag_content[pos] == ' ') ++pos;
-        if (pos >= tag_content.size()) break;
+        while (pos < tag_content.size() && tag_content[pos] == ' ') {
+            ++pos;
+        }
+        if (pos >= tag_content.size()) {
+            break;
+        }
 
         // Find end of token
         size_t end = tag_content.find(' ', pos);
-        if (end == std::string_view::npos) end = tag_content.size();
+        if (end == std::string_view::npos) {
+            end = tag_content.size();
+        }
 
         auto token = tag_content.substr(pos, end - pos);
         if (!token.empty()) {

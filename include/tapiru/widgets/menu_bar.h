@@ -42,10 +42,14 @@ class TAPIRU_API menu_bar_state {
     }
     void deactivate() { open_ = false; }
     void move_left(int count) {
-        if (count > 0) active_ = (active_ - 1 + count) % count;
+        if (count > 0) {
+            active_ = (active_ - 1 + count) % count;
+        }
     }
     void move_right(int count) {
-        if (count > 0) active_ = (active_ + 1) % count;
+        if (count > 0) {
+            active_ = (active_ + 1) % count;
+        }
     }
 
     void set_selected(int global_index) {

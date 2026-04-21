@@ -93,7 +93,9 @@ node_id popup_builder::flatten_into(detail::scene &s) const {
     od.overlay = rows_id;
     auto ov_pi = s.add_overlay(std::move(od));
     auto ov_id = s.add_node(detail::widget_type::overlay, ov_pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(ov_id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(ov_id, z_order_);
+    }
     return ov_id;
 }
 

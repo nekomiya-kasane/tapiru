@@ -33,7 +33,9 @@ void flatten_node(flatten_ctx &ctx, const tree_node &node, int depth, int &flat_
     bool is_expanded = ctx.expanded && ctx.expanded->count(node.label) > 0;
 
     std::string line;
-    for (int i = 0; i < depth; ++i) line += "  ";
+    for (int i = 0; i < depth; ++i) {
+        line += "  ";
+    }
     if (has_children) {
         line += is_expanded ? "\xe2\x96\xbe " : "\xe2\x96\xb8 ";
     } else {
@@ -68,7 +70,9 @@ node_id tree_view_builder::flatten_into(detail::scene &s) const {
 
     auto pi = s.add_rows(std::move(rd));
     auto rows_id = s.add_node(detail::widget_type::rows, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(rows_id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(rows_id, z_order_);
+    }
 
     flatten_ctx ctx{s, pi, expanded_, cursor_, node_sty_, highlight_sty_};
     int flat_index = 0;

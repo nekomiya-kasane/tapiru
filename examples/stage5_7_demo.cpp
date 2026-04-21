@@ -109,12 +109,16 @@ static void demo_canvas(console &con) {
             // sin(x) in green
             for (int x = 1; x < 80; ++x) {
                 int y = 14 + static_cast<int>(12.0 * std::sin(x * 0.12));
-                if (y >= 0 && y < 28) c.draw_point(x, y, colors::bright_green);
+                if (y >= 0 && y < 28) {
+                    c.draw_point(x, y, colors::bright_green);
+                }
             }
             // cos(x) in cyan
             for (int x = 1; x < 80; ++x) {
                 int y = 14 + static_cast<int>(12.0 * std::cos(x * 0.12));
-                if (y >= 0 && y < 28) c.draw_point(x, y, colors::bright_cyan);
+                if (y >= 0 && y < 28) {
+                    c.draw_point(x, y, colors::bright_cyan);
+                }
             }
 
             c.draw_text(2, 1, "sin(x)", style{colors::bright_green, {}, attr::bold});
@@ -505,7 +509,9 @@ static void demo_combined(console &con) {
                 c.draw_circle(20, 10, 8, colors::bright_cyan);
                 for (int x = 0; x < 40; ++x) {
                     int y = 10 + static_cast<int>(8.0 * std::sin(x * 0.3));
-                    if (y >= 0 && y < 20) c.draw_point(x, y, colors::bright_green);
+                    if (y >= 0 && y < 20) {
+                        c.draw_point(x, y, colors::bright_green);
+                    }
                 }
             });
             panel_builder pb(std::move(cvs));

@@ -129,8 +129,12 @@ TEST(RegexHighlighter, BasicPattern) {
     bool found_42 = false;
     bool found_100 = false;
     for (const auto &s : spans) {
-        if (s.offset == 4 && s.length == 2) found_42 = true;
-        if (s.offset == 11 && s.length == 3) found_100 = true;
+        if (s.offset == 4 && s.length == 2) {
+            found_42 = true;
+        }
+        if (s.offset == 11 && s.length == 3) {
+            found_100 = true;
+        }
     }
     EXPECT_TRUE(found_42);
     EXPECT_TRUE(found_100);
@@ -190,7 +194,9 @@ TEST(ReprHighlighter, DetectsFloats) {
     for (const auto &s : spans) {
         std::string_view text = "pi is 3.14";
         auto matched = text.substr(s.offset, s.length);
-        if (matched == "3.14") found = true;
+        if (matched == "3.14") {
+            found = true;
+        }
     }
     EXPECT_TRUE(found) << "Should detect float 3.14";
 }
@@ -322,7 +328,9 @@ TEST(ReprHighlighter, DetectsKeywords) {
     for (const auto &s : spans) {
         std::string_view text = "TODO fix this FIXME later";
         auto matched = text.substr(s.offset, s.length);
-        if (matched == "TODO" || matched == "FIXME") ++kw_count;
+        if (matched == "TODO" || matched == "FIXME") {
+            ++kw_count;
+        }
     }
     EXPECT_GE(kw_count, 2) << "Should detect TODO and FIXME";
 }
@@ -334,7 +342,9 @@ TEST(ReprHighlighter, DetectsEnvVars) {
     for (const auto &s : spans) {
         std::string_view text = "path is $HOME or ${PATH}";
         auto matched = text.substr(s.offset, s.length);
-        if (matched == "$HOME" || matched == "${PATH}") ++env_count;
+        if (matched == "$HOME" || matched == "${PATH}") {
+            ++env_count;
+        }
     }
     EXPECT_GE(env_count, 2) << "Should detect $HOME and ${PATH}";
 }
@@ -399,8 +409,12 @@ TEST(HighlightChain, CombinesMultiple) {
     for (const auto &s : spans) {
         std::string_view text = "TODO: fix 42 bugs";
         auto matched = text.substr(s.offset, s.length);
-        if (matched == "42") found_num = true;
-        if (matched == "TODO") found_kw = true;
+        if (matched == "42") {
+            found_num = true;
+        }
+        if (matched == "TODO") {
+            found_kw = true;
+        }
     }
     EXPECT_TRUE(found_num);
     EXPECT_TRUE(found_kw);
@@ -430,7 +444,9 @@ TEST(HighlightText, EndToEnd) {
 
     bool has_styled = false;
     for (const auto &f : frags) {
-        if (!f.sty.is_default()) has_styled = true;
+        if (!f.sty.is_default()) {
+            has_styled = true;
+        }
     }
     EXPECT_TRUE(has_styled) << "Should have at least one styled fragment";
 }
@@ -573,7 +589,9 @@ TEST(ReprHighlighter, BinaryNumber) {
     for (const auto &s : spans) {
         std::string_view text = "mask 0b1010";
         auto matched = text.substr(s.offset, s.length);
-        if (matched == "0b1010") found = true;
+        if (matched == "0b1010") {
+            found = true;
+        }
     }
     EXPECT_TRUE(found) << "Should detect binary number";
 }
@@ -585,7 +603,9 @@ TEST(ReprHighlighter, OctalNumber) {
     for (const auto &s : spans) {
         std::string_view text = "perms 0o755";
         auto matched = text.substr(s.offset, s.length);
-        if (matched == "0o755") found = true;
+        if (matched == "0o755") {
+            found = true;
+        }
     }
     EXPECT_TRUE(found) << "Should detect octal number";
 }
@@ -597,7 +617,9 @@ TEST(ReprHighlighter, ScientificNotation) {
     for (const auto &s : spans) {
         std::string_view text = "speed 3e8";
         auto matched = text.substr(s.offset, s.length);
-        if (matched == "3e8") found = true;
+        if (matched == "3e8") {
+            found = true;
+        }
     }
     EXPECT_TRUE(found) << "Should detect scientific notation";
 }
@@ -609,7 +631,9 @@ TEST(ReprHighlighter, WindowsEnvVar) {
     for (const auto &s : spans) {
         std::string_view text = "dir is %USERPROFILE%";
         auto matched = text.substr(s.offset, s.length);
-        if (matched == "%USERPROFILE%") found = true;
+        if (matched == "%USERPROFILE%") {
+            found = true;
+        }
     }
     EXPECT_TRUE(found) << "Should detect Windows env var";
 }

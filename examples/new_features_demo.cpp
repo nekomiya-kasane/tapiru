@@ -499,7 +499,9 @@ static void demo_complex_layout(console &con) {
             // Right column: mini chart
             {
                 std::vector<float> data;
-                for (int i = 0; i < 40; ++i) data.push_back(static_cast<float>(std::sin(i * 0.2) * 30 + 50));
+                for (int i = 0; i < 40; ++i) {
+                    data.push_back(static_cast<float>(std::sin(i * 0.2) * 30 + 50));
+                }
 
                 panel_builder right_panel(
                     line_chart_builder(data, 30, 5).style_override(style{colors::bright_green}).key("cpu-chart"));

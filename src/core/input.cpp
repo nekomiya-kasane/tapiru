@@ -33,13 +33,17 @@ void event_table::on_mouse(node_id id, mouse_handler handler) {
 
 bool event_table::dispatch_key(node_id id, const key_event &ev) const {
     auto *e = find(id);
-    if (e && e->on_key) return e->on_key(ev);
+    if (e && e->on_key) {
+        return e->on_key(ev);
+    }
     return false;
 }
 
 bool event_table::dispatch_mouse(node_id id, const mouse_event &ev) const {
     auto *e = find(id);
-    if (e && e->on_mouse) return e->on_mouse(ev);
+    if (e && e->on_mouse) {
+        return e->on_mouse(ev);
+    }
     return false;
 }
 
@@ -49,14 +53,18 @@ void event_table::clear() {
 
 event_table::entry *event_table::find(node_id id) {
     for (auto &e : entries_) {
-        if (e.id == id) return &e;
+        if (e.id == id) {
+            return &e;
+        }
     }
     return nullptr;
 }
 
 const event_table::entry *event_table::find(node_id id) const {
     for (const auto &e : entries_) {
-        if (e.id == id) return &e;
+        if (e.id == id) {
+            return &e;
+        }
     }
     return nullptr;
 }
@@ -84,7 +92,9 @@ void focus_manager::focus(node_id id) {
 }
 
 void focus_manager::focus_next() {
-    if (focusable_.empty()) return;
+    if (focusable_.empty()) {
+        return;
+    }
     auto it = std::find(focusable_.begin(), focusable_.end(), focused_);
     if (it == focusable_.end() || ++it == focusable_.end()) {
         focused_ = focusable_.front();
@@ -94,7 +104,9 @@ void focus_manager::focus_next() {
 }
 
 void focus_manager::focus_prev() {
-    if (focusable_.empty()) return;
+    if (focusable_.empty()) {
+        return;
+    }
     auto it = std::find(focusable_.begin(), focusable_.end(), focused_);
     if (it == focusable_.end() || it == focusable_.begin()) {
         focused_ = focusable_.back();
@@ -116,14 +128,18 @@ node_id hit_test(const detail::scene &sc, uint32_t x, uint32_t y) {
 
     uint32_t count = sc.node_count();
     for (uint32_t i = 0; i < count; ++i) {
-        if (!sc.is_focusable(i)) continue;
+        if (!sc.is_focusable(i)) {
+            continue;
+        }
         auto r = sc.area(i);
         if (x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h) {
             candidates.push_back({sc.z_order(i), i});
         }
     }
 
-    if (candidates.empty()) return UINT32_MAX;
+    if (candidates.empty()) {
+        return UINT32_MAX;
+    }
 
     // Sort by z_order descending — highest z wins
     std::stable_sort(candidates.begin(), candidates.end(),

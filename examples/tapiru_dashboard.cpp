@@ -53,7 +53,9 @@ struct bench_result {
 
 template <typename F> static bench_result bench(const char *name, int ops, F &&fn) {
     auto t0 = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < ops; ++i) fn();
+    for (int i = 0; i < ops; ++i) {
+        fn();
+    }
     auto t1 = std::chrono::high_resolution_clock::now();
     double us = std::chrono::duration<double, std::micro>(t1 - t0).count();
     return {name, us, ops};
@@ -220,7 +222,9 @@ static void show_perf_benchmarks(console &con) {
         // Short label: first word
         std::string label(r.name);
         auto sp = label.find(' ');
-        if (sp != std::string::npos) label = label.substr(0, sp);
+        if (sp != std::string::npos) {
+            label = label.substr(0, sp);
+        }
         bar_labels.push_back(label);
     }
     con.print_widget(bar_chart_builder(bar_data, 6).labels(bar_labels).style_override(style{colors::bright_green}), W);
@@ -281,7 +285,9 @@ static void show_widget_showcase(console &con) {
     columns_builder chart_cols;
     {
         std::vector<float> sine;
-        for (int i = 0; i < 40; ++i) sine.push_back(static_cast<float>(std::sin(i * 0.2) * 40 + 50));
+        for (int i = 0; i < 40; ++i) {
+            sine.push_back(static_cast<float>(std::sin(i * 0.2) * 40 + 50));
+        }
         panel_builder cp(line_chart_builder(sine, 30, 5));
         cp.title("Line Chart");
         cp.border(border_style::rounded);
@@ -324,11 +330,15 @@ static void show_canvas_demo(console &con) {
         c.draw_rect(0, 0, 59, 23, colors::bright_black);
         for (int x = 0; x < 60; ++x) {
             int y = 12 + static_cast<int>(8.0 * std::sin(x * 0.2));
-            if (y >= 0 && y < 24) c.draw_point(x, y, colors::bright_green);
+            if (y >= 0 && y < 24) {
+                c.draw_point(x, y, colors::bright_green);
+            }
         }
         for (int x = 0; x < 60; ++x) {
             int y = 12 + static_cast<int>(6.0 * std::cos(x * 0.15));
-            if (y >= 0 && y < 24) c.draw_point(x, y, colors::bright_cyan);
+            if (y >= 0 && y < 24) {
+                c.draw_point(x, y, colors::bright_cyan);
+            }
         }
         c.draw_text(2, 1, "sin(x) + cos(x)", style{colors::bright_yellow, {}, attr::bold});
     });

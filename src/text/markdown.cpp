@@ -28,18 +28,24 @@ std::vector<md_block> parse_markdown(std::string_view md) {
     while (i < md.size()) {
         // Find end of line
         size_t eol = md.find('\n', i);
-        if (eol == std::string_view::npos) eol = md.size();
+        if (eol == std::string_view::npos) {
+            eol = md.size();
+        }
         auto line = md.substr(i, eol - i);
         i = eol + 1;
 
         // Skip empty lines
-        if (line.empty() || (line.size() == 1 && line[0] == '\r')) continue;
+        if (line.empty() || (line.size() == 1 && line[0] == '\r')) {
+            continue;
+        }
 
         // Strip trailing \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.size() - 1);
         }
-        if (line.empty()) continue;
+        if (line.empty()) {
+            continue;
+        }
 
         // Horizontal rule: --- or *** or ___  (3+ chars)
         if (line.size() >= 3) {
@@ -67,7 +73,9 @@ std::vector<md_block> parse_markdown(std::string_view md) {
                 ++level;
                 ++pos;
             }
-            if (pos < line.size() && line[pos] == ' ') ++pos;
+            if (pos < line.size() && line[pos] == ' ') {
+                ++pos;
+            }
             blocks.push_back({md_block_type::heading, level, std::string(line.substr(pos))});
             continue;
         }
@@ -88,18 +96,28 @@ std::vector<md_block> parse_markdown(std::string_view md) {
             if (line.size() > 3) {
                 lang = std::string(line.substr(3));
                 // Trim whitespace
-                while (!lang.empty() && (lang.back() == ' ' || lang.back() == '\r')) lang.pop_back();
+                while (!lang.empty() && (lang.back() == ' ' || lang.back() == '\r')) {
+                    lang.pop_back();
+                }
             }
             // Collect lines until closing ```
             std::string code_content;
             while (i < md.size()) {
                 size_t ceol = md.find('\n', i);
-                if (ceol == std::string_view::npos) ceol = md.size();
+                if (ceol == std::string_view::npos) {
+                    ceol = md.size();
+                }
                 auto cline = md.substr(i, ceol - i);
                 i = ceol + 1;
-                if (!cline.empty() && cline.back() == '\r') cline = cline.substr(0, cline.size() - 1);
-                if (cline.size() >= 3 && cline[0] == '`' && cline[1] == '`' && cline[2] == '`') break;
-                if (!code_content.empty()) code_content += '\n';
+                if (!cline.empty() && cline.back() == '\r') {
+                    cline = cline.substr(0, cline.size() - 1);
+                }
+                if (cline.size() >= 3 && cline[0] == '`' && cline[1] == '`' && cline[2] == '`') {
+                    break;
+                }
+                if (!code_content.empty()) {
+                    code_content += '\n';
+                }
                 code_content += cline;
             }
             md_block blk;
@@ -118,14 +136,22 @@ std::vector<md_block> parse_markdown(std::string_view md) {
             auto parse_row = [](std::string_view row) -> std::vector<std::string> {
                 std::vector<std::string> cells;
                 size_t p = 0;
-                if (p < row.size() && row[p] == '|') ++p;
+                if (p < row.size() && row[p] == '|') {
+                    ++p;
+                }
                 while (p < row.size()) {
                     size_t pipe = row.find('|', p);
-                    if (pipe == std::string_view::npos) break;
+                    if (pipe == std::string_view::npos) {
+                        break;
+                    }
                     auto cell = row.substr(p, pipe - p);
                     // Trim
-                    while (!cell.empty() && cell.front() == ' ') cell = cell.substr(1);
-                    while (!cell.empty() && cell.back() == ' ') cell = cell.substr(0, cell.size() - 1);
+                    while (!cell.empty() && cell.front() == ' ') {
+                        cell = cell.substr(1);
+                    }
+                    while (!cell.empty() && cell.back() == ' ') {
+                        cell = cell.substr(0, cell.size() - 1);
+                    }
                     cells.push_back(std::string(cell));
                     p = pipe + 1;
                 }
@@ -135,10 +161,16 @@ std::vector<md_block> parse_markdown(std::string_view md) {
             // Continue reading table lines
             while (i < md.size()) {
                 size_t teol = md.find('\n', i);
-                if (teol == std::string_view::npos) teol = md.size();
+                if (teol == std::string_view::npos) {
+                    teol = md.size();
+                }
                 auto tline = md.substr(i, teol - i);
-                if (!tline.empty() && tline.back() == '\r') tline = tline.substr(0, tline.size() - 1);
-                if (tline.empty() || tline[0] != '|') break;
+                if (!tline.empty() && tline.back() == '\r') {
+                    tline = tline.substr(0, tline.size() - 1);
+                }
+                if (tline.empty() || tline[0] != '|') {
+                    break;
+                }
                 i = teol + 1;
                 // Skip separator rows (|---|---| etc)
                 bool is_sep = true;
@@ -149,7 +181,9 @@ std::vector<md_block> parse_markdown(std::string_view md) {
                         break;
                     }
                 }
-                if (is_sep) continue;
+                if (is_sep) {
+                    continue;
+                }
                 tblk.table_rows.push_back(parse_row(tline));
             }
             blocks.push_back(std::move(tblk));
@@ -163,7 +197,9 @@ std::vector<md_block> parse_markdown(std::string_view md) {
             blk.type = md_block_type::task_list;
             blk.checked = (line[3] == 'x' || line[3] == 'X');
             blk.content = std::string(line.substr(5));
-            if (!blk.content.empty() && blk.content[0] == ' ') blk.content = blk.content.substr(1);
+            if (!blk.content.empty() && blk.content[0] == ' ') {
+                blk.content = blk.content.substr(1);
+            }
             blocks.push_back(std::move(blk));
             continue;
         }
@@ -221,10 +257,11 @@ std::string md_inline_to_markup(std::string_view text) {
                 // Escape brackets so content isn't parsed as markup
                 auto code = text.substr(i + 1, close - i - 1);
                 for (char ch : code) {
-                    if (ch == '[')
+                    if (ch == '[') {
                         result += "[[";
-                    else
+                    } else {
                         result += ch;
+                    }
                 }
                 result += "[/bold cyan]";
                 i = close + 1;
@@ -260,17 +297,20 @@ node_id markdown_builder::flatten_into(detail::scene &s) const {
         case md_block_type::heading: {
             // Headings: bold, with level-based color
             std::string markup = "[bold";
-            if (blk.level == 1)
+            if (blk.level == 1) {
                 markup += " bright_white on_blue";
-            else if (blk.level == 2)
+            } else if (blk.level == 2) {
                 markup += " bright_cyan";
-            else
+            } else {
                 markup += " bright_yellow";
+            }
             markup += "]";
             markup += md_inline_to_markup(blk.content);
             markup += "[/]";
             auto frags = parse_markup(markup);
-            for (auto &f : frags) td.fragments.push_back(std::move(f));
+            for (auto &f : frags) {
+                td.fragments.push_back(std::move(f));
+            }
             break;
         }
         case md_block_type::rule: {
@@ -290,14 +330,18 @@ node_id markdown_builder::flatten_into(detail::scene &s) const {
             markup += md_inline_to_markup(blk.content);
             markup += "[/italic]";
             auto frags = parse_markup(markup);
-            for (auto &f : frags) td.fragments.push_back(std::move(f));
+            for (auto &f : frags) {
+                td.fragments.push_back(std::move(f));
+            }
             break;
         }
         case md_block_type::list_item: {
             std::string markup = " [bold]\xe2\x80\xa2[/bold] "; // •
             markup += md_inline_to_markup(blk.content);
             auto frags = parse_markup(markup);
-            for (auto &f : frags) td.fragments.push_back(std::move(f));
+            for (auto &f : frags) {
+                td.fragments.push_back(std::move(f));
+            }
             break;
         }
         case md_block_type::code_block: {
@@ -308,17 +352,20 @@ node_id markdown_builder::flatten_into(detail::scene &s) const {
             } else {
                 // Escape brackets in raw code
                 for (char ch : blk.content) {
-                    if (ch == '[')
+                    if (ch == '[') {
                         highlighted += "[[";
-                    else
+                    } else {
                         highlighted += ch;
+                    }
                 }
             }
             std::string markup = "[on_bright_black] ";
             markup += highlighted;
             markup += " [/]";
             auto frags = parse_markup(markup);
-            for (auto &f : frags) td.fragments.push_back(std::move(f));
+            for (auto &f : frags) {
+                td.fragments.push_back(std::move(f));
+            }
             break;
         }
         case md_block_type::task_list: {
@@ -330,7 +377,9 @@ node_id markdown_builder::flatten_into(detail::scene &s) const {
             }
             markup += md_inline_to_markup(blk.content);
             auto frags = parse_markup(markup);
-            for (auto &f : frags) td.fragments.push_back(std::move(f));
+            for (auto &f : frags) {
+                td.fragments.push_back(std::move(f));
+            }
             break;
         }
         case md_block_type::table: {
@@ -342,7 +391,9 @@ node_id markdown_builder::flatten_into(detail::scene &s) const {
                 }
                 std::string markup;
                 for (size_t ci = 0; ci < row.size(); ++ci) {
-                    if (ci > 0) markup += " | ";
+                    if (ci > 0) {
+                        markup += " | ";
+                    }
                     if (first_row) {
                         markup += "[bold]" + row[ci] + "[/bold]";
                     } else {
@@ -350,7 +401,9 @@ node_id markdown_builder::flatten_into(detail::scene &s) const {
                     }
                 }
                 auto frags = parse_markup(markup);
-                for (auto &f : frags) td.fragments.push_back(std::move(f));
+                for (auto &f : frags) {
+                    td.fragments.push_back(std::move(f));
+                }
                 first_row = false;
             }
             break;
@@ -359,7 +412,9 @@ node_id markdown_builder::flatten_into(detail::scene &s) const {
         default: {
             std::string markup = md_inline_to_markup(blk.content);
             auto frags = parse_markup(markup);
-            for (auto &f : frags) td.fragments.push_back(std::move(f));
+            for (auto &f : frags) {
+                td.fragments.push_back(std::move(f));
+            }
             break;
         }
         }
@@ -398,21 +453,23 @@ std::string syntax_highlight(std::string_view code, std::string_view language) {
     };
 
     const std::unordered_set<std::string> *kw_set = nullptr;
-    if (language == "cpp" || language == "c++" || language == "c" || language == "h")
+    if (language == "cpp" || language == "c++" || language == "c" || language == "h") {
         kw_set = &cpp_keywords;
-    else if (language == "python" || language == "py")
+    } else if (language == "python" || language == "py") {
         kw_set = &py_keywords;
-    else if (language == "javascript" || language == "js" || language == "typescript" || language == "ts")
+    } else if (language == "javascript" || language == "js" || language == "typescript" || language == "ts") {
         kw_set = &js_keywords;
+    }
 
     if (!kw_set) {
         // No highlighting — just escape brackets
         std::string result;
         for (char ch : code) {
-            if (ch == '[')
+            if (ch == '[') {
                 result += "[[";
-            else
+            } else {
                 result += ch;
+            }
         }
         return result;
     }
@@ -429,13 +486,16 @@ std::string syntax_highlight(std::string_view code, std::string_view language) {
                 if (code[i] == '\\' && i + 1 < code.size()) {
                     result += code[i++];
                 }
-                if (code[i] == '[')
+                if (code[i] == '[') {
                     result += "[[";
-                else
+                } else {
                     result += code[i];
+                }
                 ++i;
             }
-            if (i < code.size()) result += code[i++];
+            if (i < code.size()) {
+                result += code[i++];
+            }
             result += "[/green]";
             continue;
         }
@@ -445,10 +505,11 @@ std::string syntax_highlight(std::string_view code, std::string_view language) {
             (code[i] == '#' && (language == "python" || language == "py"))) {
             result += "[dim]";
             while (i < code.size() && code[i] != '\n') {
-                if (code[i] == '[')
+                if (code[i] == '[') {
                     result += "[[";
-                else
+                } else {
                     result += code[i];
+                }
                 ++i;
             }
             result += "[/dim]";
@@ -481,10 +542,11 @@ std::string syntax_highlight(std::string_view code, std::string_view language) {
         }
 
         // Escape brackets
-        if (code[i] == '[')
+        if (code[i] == '[') {
             result += "[[";
-        else
+        } else {
             result += code[i];
+        }
         ++i;
     }
 

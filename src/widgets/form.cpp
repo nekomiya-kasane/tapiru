@@ -57,7 +57,9 @@ class form_component : public component_base {
             if (focused) {
                 // Show cursor position with brackets
                 int cp = cursor_positions_[static_cast<size_t>(i)];
-                if (cp > static_cast<int>(val.size())) cp = static_cast<int>(val.size());
+                if (cp > static_cast<int>(val.size())) {
+                    cp = static_cast<int>(val.size());
+                }
                 input_display =
                     "  > " + val.substr(0, static_cast<size_t>(cp)) + "|" + val.substr(static_cast<size_t>(cp));
             } else {
@@ -105,10 +107,14 @@ class form_component : public component_base {
 
     bool on_event(const input_event &ev) override {
         auto *ke = std::get_if<key_event>(&ev);
-        if (!ke) return false;
+        if (!ke) {
+            return false;
+        }
 
         int n = static_cast<int>(opt_.fields.size());
-        if (n == 0) return false;
+        if (n == 0) {
+            return false;
+        }
 
         // Tab navigation
         if (ke->key == special_key::tab) {
@@ -128,10 +134,14 @@ class form_component : public component_base {
 
         // Editing the current field
         auto &f = opt_.fields[static_cast<size_t>(focused_field_)];
-        if (!f.value) return false;
+        if (!f.value) {
+            return false;
+        }
         auto &val = *f.value;
         int &cp = cursor_positions_[static_cast<size_t>(focused_field_)];
-        if (cp > static_cast<int>(val.size())) cp = static_cast<int>(val.size());
+        if (cp > static_cast<int>(val.size())) {
+            cp = static_cast<int>(val.size());
+        }
 
         if (ke->key == special_key::backspace) {
             if (cp > 0) {
@@ -151,11 +161,15 @@ class form_component : public component_base {
             return true;
         }
         if (ke->key == special_key::left) {
-            if (cp > 0) --cp;
+            if (cp > 0) {
+                --cp;
+            }
             return true;
         }
         if (ke->key == special_key::right) {
-            if (cp < static_cast<int>(val.size())) ++cp;
+            if (cp < static_cast<int>(val.size())) {
+                ++cp;
+            }
             return true;
         }
         if (ke->key == special_key::home) {
@@ -200,12 +214,16 @@ class form_component : public component_base {
             if (f.validator && f.value) {
                 bool ok = f.validator(*f.value);
                 errors_[static_cast<size_t>(i)] = !ok;
-                if (!ok) all_valid = false;
+                if (!ok) {
+                    all_valid = false;
+                }
             }
         }
         if (all_valid) {
             submit_blocked_ = false;
-            if (opt_.on_submit) opt_.on_submit();
+            if (opt_.on_submit) {
+                opt_.on_submit();
+            }
             return true;
         }
         submit_blocked_ = true;

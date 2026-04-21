@@ -69,8 +69,12 @@ void log_handler::log(log_level lv, std::string_view message) {
 }
 
 void log_handler::log(const log_record &record) {
-    if (record.level < min_level_) return;
-    if (!passes_filter(record)) return;
+    if (record.level < min_level_) {
+        return;
+    }
+    if (!passes_filter(record)) {
+        return;
+    }
 
     std::string markup;
     markup.reserve(128);
@@ -102,7 +106,9 @@ void log_handler::log(const log_record &record) {
 
         // Pad level name to 5 chars
         markup += level_name;
-        for (size_t i = level_name.size(); i < 5; ++i) markup += ' ';
+        for (size_t i = level_name.size(); i < 5; ++i) {
+            markup += ' ';
+        }
 
         markup += "[/] ";
     }
@@ -122,7 +128,9 @@ void log_handler::log(const log_record &record) {
         markup += " [dim]";
         bool first = true;
         for (const auto &[k, v] : record.fields) {
-            if (!first) markup += ", ";
+            if (!first) {
+                markup += ", ";
+            }
             markup += k;
             markup += '=';
             markup += v;
@@ -148,10 +156,14 @@ void log_handler::log_structured(log_level lv, std::string_view message,
 
 bool log_handler::passes_filter(const log_record &r) const {
     if (!allowed_modules_.empty() && !r.module.empty()) {
-        if (allowed_modules_.find(r.module) == allowed_modules_.end()) return false;
+        if (allowed_modules_.find(r.module) == allowed_modules_.end()) {
+            return false;
+        }
     }
     if (!allowed_tags_.empty() && !r.tag.empty()) {
-        if (allowed_tags_.find(r.tag) == allowed_tags_.end()) return false;
+        if (allowed_tags_.find(r.tag) == allowed_tags_.end()) {
+            return false;
+        }
     }
     return true;
 }
@@ -167,7 +179,9 @@ void log_panel_builder::push(const log_record &record) {
     line += style_tag;
     line += ']';
     line += level_name;
-    for (size_t i = level_name.size(); i < 5; ++i) line += ' ';
+    for (size_t i = level_name.size(); i < 5; ++i) {
+        line += ' ';
+    }
     line += "[/] ";
     line += record.message;
 
@@ -175,7 +189,9 @@ void log_panel_builder::push(const log_record &record) {
         line += " [dim]";
         bool first = true;
         for (const auto &[k, v] : record.fields) {
-            if (!first) line += ", ";
+            if (!first) {
+                line += ", ";
+            }
             line += k;
             line += '=';
             line += v;
@@ -210,7 +226,9 @@ node_id log_panel_builder::flatten_into(detail::scene &s) const {
 
     std::string markup;
     for (uint32_t i = 0; i < count; ++i) {
-        if (i > 0) markup += '\n';
+        if (i > 0) {
+            markup += '\n';
+        }
         markup += lines_[start + i];
     }
 

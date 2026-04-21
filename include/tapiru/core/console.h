@@ -208,7 +208,9 @@ struct TAPIRU_API widget_canvas {
 
     /** @brief Get the codepoint at (x, y). Returns U' ' for empty/null cells. */
     [[nodiscard]] char32_t char_at(uint32_t x, uint32_t y) const {
-        if (x >= width || y >= height) return U' ';
+        if (x >= width || y >= height) {
+            return U' ';
+        }
         auto cp = cv.get(x, y).codepoint;
         return (cp == 0) ? U' ' : cp;
     }
@@ -290,7 +292,9 @@ void console::emit_rich_plan(const static_rich_markup<MaxFragments> &plan, const
 
     execute_rich(plan, ctx);
 
-    if (color_enabled()) emitter_.reset(buf);
+    if (color_enabled()) {
+        emitter_.reset(buf);
+    }
 
     buf += '\n';
     config_.sink(buf);

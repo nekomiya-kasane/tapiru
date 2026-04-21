@@ -167,10 +167,11 @@ static void show_performance(console &con) {
         std::snprintf(v3, sizeof(v3), "%.1f", e.v3_us);
         std::snprintf(v4, sizeof(v4), "%.1f", e.v4_us);
         double pct = (e.v4_us - e.v3_us) / e.v3_us * 100.0;
-        if (pct <= 0)
+        if (pct <= 0) {
             std::snprintf(diff, sizeof(diff), "[green]%.0f%%[/]", pct);
-        else
+        } else {
             std::snprintf(diff, sizeof(diff), "[yellow]+%.0f%%[/]", pct);
+        }
         tb.add_row({e.name, v3, v4, diff});
     }
     con.print_widget(tb, W);

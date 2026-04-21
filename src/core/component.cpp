@@ -68,13 +68,17 @@ class container_component : public component_base {
         if (vertical_) {
             auto rb = rows_builder();
             for (auto &child : children_) {
-                if (child) rb.add(child->render());
+                if (child) {
+                    rb.add(child->render());
+                }
             }
             return element(std::move(rb));
         } else {
             auto cb = columns_builder();
             for (auto &child : children_) {
-                if (child) cb.add(child->render());
+                if (child) {
+                    cb.add(child->render());
+                }
             }
             return element(std::move(cb));
         }
@@ -83,7 +87,9 @@ class container_component : public component_base {
     bool on_event(const input_event &ev) override {
         // First, try to dispatch to the active child
         if (active_ >= 0 && active_ < static_cast<int>(children_.size())) {
-            if (children_[active_]->on_event(ev)) return true;
+            if (children_[active_]->on_event(ev)) {
+                return true;
+            }
         }
 
         // Handle Tab/Shift-Tab for focus cycling
@@ -107,7 +113,9 @@ class container_component : public component_base {
     std::vector<component> children() override { return children_; }
 
     component active_child() override {
-        if (active_ >= 0 && active_ < static_cast<int>(children_.size())) return children_[active_];
+        if (active_ >= 0 && active_ < static_cast<int>(children_.size())) {
+            return children_[active_];
+        }
         return nullptr;
     }
 
@@ -163,13 +171,17 @@ class tab_container : public component_base {
 
     element render() override {
         int idx = selected_ ? *selected_ : 0;
-        if (idx >= 0 && idx < static_cast<int>(children_.size()) && children_[idx]) return children_[idx]->render();
+        if (idx >= 0 && idx < static_cast<int>(children_.size()) && children_[idx]) {
+            return children_[idx]->render();
+        }
         return element{};
     }
 
     bool on_event(const input_event &ev) override {
         int idx = selected_ ? *selected_ : 0;
-        if (idx >= 0 && idx < static_cast<int>(children_.size()) && children_[idx]) return children_[idx]->on_event(ev);
+        if (idx >= 0 && idx < static_cast<int>(children_.size()) && children_[idx]) {
+            return children_[idx]->on_event(ev);
+        }
         return false;
     }
 
@@ -178,7 +190,9 @@ class tab_container : public component_base {
 
     component active_child() override {
         int idx = selected_ ? *selected_ : 0;
-        if (idx >= 0 && idx < static_cast<int>(children_.size())) return children_[idx];
+        if (idx >= 0 && idx < static_cast<int>(children_.size())) {
+            return children_[idx];
+        }
         return nullptr;
     }
 
@@ -195,16 +209,24 @@ class stacked_container : public component_base {
 
     element render() override {
         // Render all children stacked, with the selected one on top
-        if (children_.empty()) return element{};
+        if (children_.empty()) {
+            return element{};
+        }
         int idx = selected_ ? *selected_ : 0;
-        if (idx < 0 || idx >= static_cast<int>(children_.size())) idx = 0;
-        if (children_[idx]) return children_[idx]->render();
+        if (idx < 0 || idx >= static_cast<int>(children_.size())) {
+            idx = 0;
+        }
+        if (children_[idx]) {
+            return children_[idx]->render();
+        }
         return element{};
     }
 
     bool on_event(const input_event &ev) override {
         int idx = selected_ ? *selected_ : 0;
-        if (idx >= 0 && idx < static_cast<int>(children_.size()) && children_[idx]) return children_[idx]->on_event(ev);
+        if (idx >= 0 && idx < static_cast<int>(children_.size()) && children_[idx]) {
+            return children_[idx]->on_event(ev);
+        }
         return false;
     }
 
@@ -213,7 +235,9 @@ class stacked_container : public component_base {
 
     component active_child() override {
         int idx = selected_ ? *selected_ : 0;
-        if (idx >= 0 && idx < static_cast<int>(children_.size())) return children_[idx];
+        if (idx >= 0 && idx < static_cast<int>(children_.size())) {
+            return children_[idx];
+        }
         return nullptr;
     }
 
@@ -232,7 +256,9 @@ class catch_event_component final : public component_base {
     element render() override { return inner_->render(); }
 
     bool on_event(const input_event &ev) override {
-        if (handler_(ev)) return true;
+        if (handler_(ev)) {
+            return true;
+        }
         return inner_->on_event(ev);
     }
 

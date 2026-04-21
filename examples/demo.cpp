@@ -389,7 +389,9 @@ static void demo_theme(console &con) {
 
     auto show = [&](const char *name) {
         auto *s = th.lookup(name);
-        if (!s) return;
+        if (!s) {
+            return;
+        }
         char buf[128];
         std::snprintf(buf, sizeof(buf), "  [#%02X%02X%02X]%s[/]  fg=(%u,%u,%u)", s->fg.r, s->fg.g, s->fg.b, name,
                       s->fg.r, s->fg.g, s->fg.b);
@@ -633,7 +635,9 @@ static void demo_canvas(console &con) {
             // Sine wave
             for (int x = 0; x < 80; ++x) {
                 int y = 12 + static_cast<int>(10.0 * std::sin(x * 0.15));
-                if (y >= 0 && y < 24) c.draw_point(x, y, colors::bright_green);
+                if (y >= 0 && y < 24) {
+                    c.draw_point(x, y, colors::bright_green);
+                }
             }
 
             // Text label

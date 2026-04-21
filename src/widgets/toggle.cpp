@@ -38,7 +38,9 @@ node_id toggle_builder::flatten_into(detail::scene &s) const {
     }
 
     auto id = cols.flatten_into(s);
-    if (z_order_ != 0) s.set_z_order(id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(id, z_order_);
+    }
     return id;
 }
 

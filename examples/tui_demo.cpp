@@ -75,27 +75,51 @@ static void enable_raw_input() {
 }
 
 static void restore_input() {
-    if (g_stdin != INVALID_HANDLE_VALUE) SetConsoleMode(g_stdin, g_old_mode);
+    if (g_stdin != INVALID_HANDLE_VALUE) {
+        SetConsoleMode(g_stdin, g_old_mode);
+    }
 }
 
 static input_event poll_input(int timeout_ms) {
-    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0) return input_event::none;
+    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0) {
+        return input_event::none;
+    }
     INPUT_RECORD rec;
     DWORD count = 0;
-    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0) return input_event::none;
+    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0) {
+        return input_event::none;
+    }
     if (rec.EventType == KEY_EVENT && rec.Event.KeyEvent.bKeyDown) {
         auto vk = rec.Event.KeyEvent.wVirtualKeyCode;
         auto ch = rec.Event.KeyEvent.uChar.UnicodeChar;
         bool shift = (rec.Event.KeyEvent.dwControlKeyState & SHIFT_PRESSED) != 0;
-        if (vk == VK_UP) return input_event::up;
-        if (vk == VK_DOWN) return input_event::down;
-        if (vk == VK_LEFT) return input_event::left;
-        if (vk == VK_RIGHT) return input_event::right;
-        if (vk == VK_RETURN) return input_event::enter;
-        if (vk == VK_TAB) return shift ? input_event::shift_tab : input_event::tab;
-        if (vk == VK_ESCAPE) return input_event::quit;
-        if (ch == L'q' || ch == L'Q') return input_event::quit;
-        if (ch == L' ') return input_event::enter;
+        if (vk == VK_UP) {
+            return input_event::up;
+        }
+        if (vk == VK_DOWN) {
+            return input_event::down;
+        }
+        if (vk == VK_LEFT) {
+            return input_event::left;
+        }
+        if (vk == VK_RIGHT) {
+            return input_event::right;
+        }
+        if (vk == VK_RETURN) {
+            return input_event::enter;
+        }
+        if (vk == VK_TAB) {
+            return shift ? input_event::shift_tab : input_event::tab;
+        }
+        if (vk == VK_ESCAPE) {
+            return input_event::quit;
+        }
+        if (ch == L'q' || ch == L'Q') {
+            return input_event::quit;
+        }
+        if (ch == L' ') {
+            return input_event::enter;
+        }
     }
     return input_event::none;
 }
@@ -124,20 +148,40 @@ static input_event poll_input(int timeout_ms) {
     struct timeval tv;
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
-    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0) return input_event::none;
+    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0) {
+        return input_event::none;
+    }
     char buf[16];
     int n = read(STDIN_FILENO, buf, sizeof(buf));
-    if (n <= 0) return input_event::none;
+    if (n <= 0) {
+        return input_event::none;
+    }
     if (n == 1) {
-        if (buf[0] == 'q' || buf[0] == 'Q' || buf[0] == 27) return input_event::quit;
-        if (buf[0] == '\n' || buf[0] == '\r' || buf[0] == ' ') return input_event::enter;
-        if (buf[0] == '\t') return input_event::tab;
+        if (buf[0] == 'q' || buf[0] == 'Q' || buf[0] == 27) {
+            return input_event::quit;
+        }
+        if (buf[0] == '\n' || buf[0] == '\r' || buf[0] == ' ') {
+            return input_event::enter;
+        }
+        if (buf[0] == '\t') {
+            return input_event::tab;
+        }
     } else if (n >= 3 && buf[0] == 27 && buf[1] == '[') {
-        if (buf[2] == 'A') return input_event::up;
-        if (buf[2] == 'B') return input_event::down;
-        if (buf[2] == 'C') return input_event::right;
-        if (buf[2] == 'D') return input_event::left;
-        if (buf[2] == 'Z') return input_event::shift_tab;
+        if (buf[2] == 'A') {
+            return input_event::up;
+        }
+        if (buf[2] == 'B') {
+            return input_event::down;
+        }
+        if (buf[2] == 'C') {
+            return input_event::right;
+        }
+        if (buf[2] == 'D') {
+            return input_event::left;
+        }
+        if (buf[2] == 'Z') {
+            return input_event::shift_tab;
+        }
     }
     return input_event::none;
 }
@@ -207,7 +251,9 @@ static std::string render_tab_bar(const app_state &st) {
             out += page_names[i];
             out += " [/]";
         }
-        if (i < NUM_PAGES - 1) out += " ";
+        if (i < NUM_PAGES - 1) {
+            out += " ";
+        }
     }
     return out;
 }
@@ -217,13 +263,18 @@ static int g_fixed_height = 30;
 
 static int count_newlines(const std::string &s) {
     int n = 0;
-    for (char c : s)
-        if (c == '\n') ++n;
+    for (char c : s) {
+        if (c == '\n') {
+            ++n;
+        }
+    }
     return n;
 }
 
 static void pad_to_height(std::string &ui, int target = 0) {
-    if (target <= 0) target = g_fixed_height;
+    if (target <= 0) {
+        target = g_fixed_height;
+    }
     int lines = count_newlines(ui);
     while (lines < target) {
         ui += '\n';
@@ -252,8 +303,11 @@ static std::string render_dashboard(const app_state &st) {
 
     // Count done
     int done = 0;
-    for (auto &t : st.todos)
-        if (t.done) ++done;
+    for (auto &t : st.todos) {
+        if (t.done) {
+            ++done;
+        }
+    }
     int total = static_cast<int>(st.todos.size());
     float pct = total > 0 ? static_cast<float>(done) / static_cast<float>(total) : 0.0f;
 
@@ -274,7 +328,9 @@ static std::string render_dashboard(const app_state &st) {
             ui += item.text;
             // Pad
             int pad = 40 - static_cast<int>(item.text.size());
-            if (pad > 0) ui += std::string(pad, ' ');
+            if (pad > 0) {
+                ui += std::string(pad, ' ');
+            }
             ui += " [/]\n";
         } else {
             ui += "    ";
@@ -321,10 +377,18 @@ static std::string render_widgets(const app_state &st) {
     // Preview
     ui += "\n  [dim]Preview:[/] ";
     std::string tags;
-    if (st.cb_bold) tags += "bold ";
-    if (st.cb_italic) tags += "italic ";
-    if (st.cb_underline) tags += "underline ";
-    if (tags.empty()) tags = "";
+    if (st.cb_bold) {
+        tags += "bold ";
+    }
+    if (st.cb_italic) {
+        tags += "italic ";
+    }
+    if (st.cb_underline) {
+        tags += "underline ";
+    }
+    if (tags.empty()) {
+        tags = "";
+    }
     if (!tags.empty()) {
         ui += "[" + tags + "]The quick brown fox[/]";
     } else {
@@ -356,13 +420,21 @@ static std::string render_widgets(const app_state &st) {
 
         int bar_w = 30;
         int filled = static_cast<int>(st.slider_val * bar_w);
-        if (filled > bar_w) filled = bar_w;
-        if (filled < 0) filled = 0;
+        if (filled > bar_w) {
+            filled = bar_w;
+        }
+        if (filled < 0) {
+            filled = 0;
+        }
 
         ui += "[bright_cyan]";
-        for (int i = 0; i < filled; ++i) ui += "\xe2\x96\x88";
+        for (int i = 0; i < filled; ++i) {
+            ui += "\xe2\x96\x88";
+        }
         ui += "[/][dim]";
-        for (int i = filled; i < bar_w; ++i) ui += "\xe2\x96\x91";
+        for (int i = filled; i < bar_w; ++i) {
+            ui += "\xe2\x96\x91";
+        }
         ui += "[/] ";
 
         char pct[8];
@@ -403,14 +475,22 @@ static std::string render_theme_gallery(const app_state &st) {
         const char *keys[] = {"text", "danger", "success", "warning", "info", "accent", "muted"};
         for (auto k : keys) {
             auto *s = th.lookup(k);
-            if (!s) continue;
+            if (!s) {
+                continue;
+            }
             char buf[80];
             std::snprintf(buf, sizeof(buf), "    [#%02X%02X%02X]%-10s[/]  fg=(%3u,%3u,%3u)", s->fg.r, s->fg.g, s->fg.b,
                           k, s->fg.r, s->fg.g, s->fg.b);
             ui += buf;
-            if (has_attr(s->attrs, attr::bold)) ui += " [dim]+bold[/]";
-            if (has_attr(s->attrs, attr::dim)) ui += " [dim]+dim[/]";
-            if (has_attr(s->attrs, attr::underline)) ui += " [dim]+underline[/]";
+            if (has_attr(s->attrs, attr::bold)) {
+                ui += " [dim]+bold[/]";
+            }
+            if (has_attr(s->attrs, attr::dim)) {
+                ui += " [dim]+dim[/]";
+            }
+            if (has_attr(s->attrs, attr::underline)) {
+                ui += " [dim]+underline[/]";
+            }
             ui += "\n";
         }
         ui += "\n";
@@ -523,8 +603,12 @@ class chart_page_view {
             uint32_t dx = static_cast<uint32_t>(static_cast<float>(i) / static_cast<float>(sine_data.size()) *
                                                 static_cast<float>(grid.dot_width()));
             float norm = (sine_data[i] - mn) / (mx - mn);
-            if (norm < 0.0f) norm = 0.0f;
-            if (norm > 1.0f) norm = 1.0f;
+            if (norm < 0.0f) {
+                norm = 0.0f;
+            }
+            if (norm > 1.0f) {
+                norm = 1.0f;
+            }
             uint32_t dy = static_cast<uint32_t>((1.0f - norm) * static_cast<float>(grid.dot_height() - 1));
             grid.set(dx, dy);
         }
@@ -533,7 +617,9 @@ class chart_page_view {
         size_t pos = 0;
         while (pos < chart_str.size()) {
             size_t nl = chart_str.find('\n', pos);
-            if (nl == std::string::npos) nl = chart_str.size();
+            if (nl == std::string::npos) {
+                nl = chart_str.size();
+            }
             ui += "    [bright_cyan]";
             ui += chart_str.substr(pos, nl - pos);
             ui += "[/]\n";
@@ -564,7 +650,9 @@ class chart_page_view {
             ui += "[dim]";
             ui += bar_labels[b];
             // Pad to 3 chars
-            for (size_t j = std::strlen(bar_labels[b]); j < 3; ++j) ui += " ";
+            for (size_t j = std::strlen(bar_labels[b]); j < 3; ++j) {
+                ui += " ";
+            }
             ui += "[/]";
         }
         ui += "\n";
@@ -613,7 +701,9 @@ class logging_page_view {
         auto &lines = st_.log_panel.lines();
         // Calculate how many lines we can show (total height minus header/footer overhead)
         int avail = g_fixed_height - 12; // ~12 lines for header + footer + padding
-        if (avail < 3) avail = 3;
+        if (avail < 3) {
+            avail = 3;
+        }
         size_t start = 0;
         size_t count = lines.size();
         if (count > static_cast<size_t>(avail)) {
@@ -709,35 +799,44 @@ static void handle_input(app_state &st, input_event ev) {
         st.cursor = 0;
         break;
     case input_event::up:
-        if (st.cursor > 0) --st.cursor;
+        if (st.cursor > 0) {
+            --st.cursor;
+        }
         break;
     case input_event::down:
-        if (st.cursor < max_cursor_for_page(st)) ++st.cursor;
+        if (st.cursor < max_cursor_for_page(st)) {
+            ++st.cursor;
+        }
         break;
     case input_event::enter:
         if (st.page == 0 && st.cursor < static_cast<int>(st.todos.size())) {
             st.todos[st.cursor].done = !st.todos[st.cursor].done;
         } else if (st.page == 1) {
-            if (st.cursor == 0)
+            if (st.cursor == 0) {
                 st.cb_bold = !st.cb_bold;
-            else if (st.cursor == 1)
+            } else if (st.cursor == 1) {
                 st.cb_italic = !st.cb_italic;
-            else if (st.cursor == 2)
+            } else if (st.cursor == 2) {
                 st.cb_underline = !st.cb_underline;
-            else if (st.cursor >= 3 && st.cursor <= 6)
+            } else if (st.cursor >= 3 && st.cursor <= 6) {
                 st.radio_sel = st.cursor - 3;
+            }
         }
         break;
     case input_event::left:
         if (st.page == 1 && st.cursor == 7) {
             st.slider_val -= 0.05f;
-            if (st.slider_val < 0.0f) st.slider_val = 0.0f;
+            if (st.slider_val < 0.0f) {
+                st.slider_val = 0.0f;
+            }
         }
         break;
     case input_event::right:
         if (st.page == 1 && st.cursor == 7) {
             st.slider_val += 0.05f;
-            if (st.slider_val > 1.0f) st.slider_val = 1.0f;
+            if (st.slider_val > 1.0f) {
+                st.slider_val = 1.0f;
+            }
         }
         break;
     case input_event::quit:
@@ -773,10 +872,14 @@ int main() {
 
     // Set fixed height to fit within terminal (leave 1 line margin)
     g_fixed_height = static_cast<int>(height) - 1;
-    if (g_fixed_height < 10) g_fixed_height = 10;
+    if (g_fixed_height < 10) {
+        g_fixed_height = 10;
+    }
 
     // Pre-populate some log entries
-    for (int i = 0; i < 8; ++i) generate_log(st);
+    for (int i = 0; i < 8; ++i) {
+        generate_log(st);
+    }
 
     auto last_log = std::chrono::steady_clock::now();
 

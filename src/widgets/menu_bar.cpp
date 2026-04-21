@@ -39,7 +39,9 @@ node_id menu_bar_builder::flatten_into(detail::scene &s) const {
     // If no dropdown is open, just return the bar
     if (!is_open || active < 0 || active >= static_cast<int>(entries_.size())) {
         auto bar_id = bar.flatten_into(s);
-        if (z_order_ != 0) s.set_z_order(bar_id, z_order_);
+        if (z_order_ != 0) {
+            s.set_z_order(bar_id, z_order_);
+        }
         return bar_id;
     }
 
@@ -60,7 +62,9 @@ node_id menu_bar_builder::flatten_into(detail::scene &s) const {
 
     // Compose bar + dropdown using overlay
     auto ov = overlay_builder(std::move(bar), std::move(dropdown));
-    if (z_order_ != 0) ov.z_order(z_order_);
+    if (z_order_ != 0) {
+        ov.z_order(z_order_);
+    }
 
     return ov.flatten_into(s);
 }

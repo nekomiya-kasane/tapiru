@@ -41,11 +41,17 @@ inline shader_fn scanline(float intensity = 0.3f) {
         dark_sty.bg = color::from_rgb(0, 0, 0);
         auto d_sid = styles.intern(dark_sty);
         uint8_t alpha = static_cast<uint8_t>(intensity * 128.0f);
-        if (alpha == 0) return;
+        if (alpha == 0) {
+            return;
+        }
         for (uint32_t y = region.y; y < region.y + region.h; ++y) {
-            if ((y - region.y) % 2 == 0) continue; // dim odd rows
+            if ((y - region.y) % 2 == 0) {
+                continue; // dim odd rows
+            }
             for (uint32_t x = region.x; x < region.x + region.w; ++x) {
-                if (x >= cv.width() || y >= cv.height()) continue;
+                if (x >= cv.width() || y >= cv.height()) {
+                    continue;
+                }
                 cv.set_blended(x, y, cell{U' ', d_sid, 1, alpha}, styles);
             }
         }
@@ -68,7 +74,9 @@ inline shader_fn shimmer(color c, float speed = 2.0f) {
 
         for (uint32_t y = region.y; y < region.y + region.h; ++y) {
             for (uint32_t x = region.x; x < region.x + region.w; ++x) {
-                if (x >= cv.width() || y >= cv.height()) continue;
+                if (x >= cv.width() || y >= cv.height()) {
+                    continue;
+                }
                 float diag = static_cast<float>((x - region.x) + (y - region.y));
                 float dist = std::abs(diag - band_pos);
                 if (dist < 3.0f) {
@@ -95,13 +103,17 @@ inline shader_fn vignette(float strength = 0.5f) {
 
         for (uint32_t y = region.y; y < region.y + region.h; ++y) {
             for (uint32_t x = region.x; x < region.x + region.w; ++x) {
-                if (x >= cv.width() || y >= cv.height()) continue;
+                if (x >= cv.width() || y >= cv.height()) {
+                    continue;
+                }
                 float dx = (static_cast<float>(x - region.x) - hw) / hw;
                 float dy = (static_cast<float>(y - region.y) - hh) / hh;
                 // Aspect ratio correction: terminal cells are ~2:1
                 dy *= 2.0f;
                 float dist = dx * dx + dy * dy;
-                if (dist > 1.0f) dist = 1.0f;
+                if (dist > 1.0f) {
+                    dist = 1.0f;
+                }
                 uint8_t alpha = static_cast<uint8_t>(strength * dist * 128.0f);
                 if (alpha > 0) {
                     cv.set_blended(x, y, cell{U' ', d_sid, 1, alpha}, styles);
@@ -126,21 +138,29 @@ inline shader_fn glow_pulse(color c, float bpm = 60.0f) {
         auto g_sid = styles.intern(glow_sty);
 
         uint8_t alpha = static_cast<uint8_t>(pulse * 80.0f);
-        if (alpha == 0) return;
+        if (alpha == 0) {
+            return;
+        }
 
         // Glow on border cells only (1-cell border)
         for (uint32_t x = region.x; x < region.x + region.w; ++x) {
             if (x < cv.width()) {
-                if (region.y < cv.height()) cv.set_blended(x, region.y, cell{U' ', g_sid, 1, alpha}, styles);
-                if (region.y + region.h > 0 && region.y + region.h - 1 < cv.height())
+                if (region.y < cv.height()) {
+                    cv.set_blended(x, region.y, cell{U' ', g_sid, 1, alpha}, styles);
+                }
+                if (region.y + region.h > 0 && region.y + region.h - 1 < cv.height()) {
                     cv.set_blended(x, region.y + region.h - 1, cell{U' ', g_sid, 1, alpha}, styles);
+                }
             }
         }
         for (uint32_t y = region.y + 1; y + 1 < region.y + region.h; ++y) {
             if (y < cv.height()) {
-                if (region.x < cv.width()) cv.set_blended(region.x, y, cell{U' ', g_sid, 1, alpha}, styles);
-                if (region.x + region.w > 0 && region.x + region.w - 1 < cv.width())
+                if (region.x < cv.width()) {
+                    cv.set_blended(region.x, y, cell{U' ', g_sid, 1, alpha}, styles);
+                }
+                if (region.x + region.w > 0 && region.x + region.w - 1 < cv.width()) {
                     cv.set_blended(region.x + region.w - 1, y, cell{U' ', g_sid, 1, alpha}, styles);
+                }
             }
         }
     };

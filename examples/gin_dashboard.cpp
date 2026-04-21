@@ -175,10 +175,11 @@ static void show_performance(console &con) {
         char per[16], thr[32];
         std::snprintf(per, sizeof(per), "%.2f", e.us);
         double ops_per_sec = 1000000.0 / e.us;
-        if (ops_per_sec >= 1000000.0)
+        if (ops_per_sec >= 1000000.0) {
             std::snprintf(thr, sizeof(thr), "%.1fM ops/s", ops_per_sec / 1000000.0);
-        else
+        } else {
             std::snprintf(thr, sizeof(thr), "%.1fK ops/s", ops_per_sec / 1000.0);
+        }
         tb.add_row({e.name, per, thr});
     }
     con.print_widget(tb, W);
@@ -192,8 +193,12 @@ static void show_performance(console &con) {
         throughputs.push_back(static_cast<float>(1.0 / e.us)); // M ops/s
         std::string l(e.name);
         auto sp = l.find(' ');
-        if (sp != std::string::npos) l = l.substr(0, sp);
-        if (l.size() > 6) l = l.substr(0, 6);
+        if (sp != std::string::npos) {
+            l = l.substr(0, sp);
+        }
+        if (l.size() > 6) {
+            l = l.substr(0, 6);
+        }
         labels.push_back(l);
     }
     con.print_widget(bar_chart_builder(throughputs, 6).labels(labels).style_override(style{colors::bright_yellow}), W);

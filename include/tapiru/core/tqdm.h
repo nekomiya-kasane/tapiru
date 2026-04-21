@@ -65,8 +65,12 @@ template <typename T = int> class int_range {
     iterator end() const { return iterator(stop_, step_); }
 
     [[nodiscard]] size_t size() const {
-        if (step_ > 0 && stop_ > start_) return static_cast<size_t>((stop_ - start_ + step_ - 1) / step_);
-        if (step_ < 0 && start_ > stop_) return static_cast<size_t>((start_ - stop_ - step_ - 1) / (-step_));
+        if (step_ > 0 && stop_ > start_) {
+            return static_cast<size_t>((stop_ - start_ + step_ - 1) / step_);
+        }
+        if (step_ < 0 && start_ > stop_) {
+            return static_cast<size_t>((start_ - stop_ - step_ - 1) / (-step_));
+        }
         return 0;
     }
 
@@ -82,25 +86,29 @@ using tqdm_clock = std::chrono::steady_clock;
 using tqdm_time = tqdm_clock::time_point;
 
 inline void format_time(char *buf, size_t n, double secs) {
-    if (secs < 0) secs = 0;
+    if (secs < 0) {
+        secs = 0;
+    }
     int h = static_cast<int>(secs / 3600);
     int m = static_cast<int>(static_cast<int>(secs) % 3600 / 60);
     int s = static_cast<int>(secs) % 60;
-    if (h > 0)
+    if (h > 0) {
         std::snprintf(buf, n, "%d:%02d:%02d", h, m, s);
-    else
+    } else {
         std::snprintf(buf, n, "%02d:%02d", m, s);
+    }
 }
 
 inline void format_rate(char *buf, size_t n, double rate, const char *unit) {
-    if (rate < 1.0)
+    if (rate < 1.0) {
         std::snprintf(buf, n, "%.2f%s/s", rate, unit);
-    else if (rate < 1000.0)
+    } else if (rate < 1000.0) {
         std::snprintf(buf, n, "%.1f%s/s", rate, unit);
-    else if (rate < 1e6)
+    } else if (rate < 1e6) {
         std::snprintf(buf, n, "%.1fk%s/s", rate / 1e3, unit);
-    else
+    } else {
         std::snprintf(buf, n, "%.1fM%s/s", rate / 1e6, unit);
+    }
 }
 
 class tqdm_bar {
@@ -125,15 +133,21 @@ class tqdm_bar {
     }
 
     void update(size_t current) {
-        if (disable_ || !started_) return;
+        if (disable_ || !started_) {
+            return;
+        }
         current_ = current;
         ++since_last_print_;
 
-        if (since_last_print_ < static_cast<size_t>(miniters_)) return;
+        if (since_last_print_ < static_cast<size_t>(miniters_)) {
+            return;
+        }
 
         auto now = tqdm_clock::now();
         double dt = std::chrono::duration<double>(now - last_print_).count();
-        if (dt < mininterval_) return;
+        if (dt < mininterval_) {
+            return;
+        }
 
         print_bar(current_, false);
         last_print_ = now;
@@ -141,9 +155,13 @@ class tqdm_bar {
     }
 
     void close() {
-        if (disable_ || !started_ || closed_) return;
+        if (disable_ || !started_ || closed_) {
+            return;
+        }
         closed_ = true;
-        if (total_ > 0) current_ = total_; // ensure 100% on final print
+        if (total_ > 0) {
+            current_ = total_; // ensure 100% on final print
+        }
         print_bar(current_, true);
         if (leave_) {
             std::fputc('\n', file_);
@@ -168,25 +186,35 @@ class tqdm_bar {
         // Description
         if (!desc_.empty()) {
             int n = std::snprintf(p, static_cast<size_t>(end - p), "%s: ", desc_.c_str());
-            if (n > 0) p += n;
+            if (n > 0) {
+                p += n;
+            }
         }
 
         if (total_ > 0) {
             // Percentage
             double pct = static_cast<double>(current) / static_cast<double>(total_) * 100.0;
-            if (pct > 100.0) pct = 100.0;
+            if (pct > 100.0) {
+                pct = 100.0;
+            }
             int n = std::snprintf(p, static_cast<size_t>(end - p), "%3.0f%%|", pct);
-            if (n > 0) p += n;
+            if (n > 0) {
+                p += n;
+            }
 
             // Bar with colour
             int filled = static_cast<int>(pct / 100.0 * bar_width_);
-            if (filled > bar_width_) filled = bar_width_;
+            if (filled > bar_width_) {
+                filled = bar_width_;
+            }
 
             // ANSI colour start
             if (colour_.r || colour_.g || colour_.b) {
                 n = std::snprintf(p, static_cast<size_t>(end - p), "\x1b[38;2;%u;%u;%um", colour_.r, colour_.g,
                                   colour_.b);
-                if (n > 0) p += n;
+                if (n > 0) {
+                    p += n;
+                }
             }
 
             for (int i = 0; i < filled && p < end; ++i) {
@@ -201,7 +229,9 @@ class tqdm_bar {
             // Reset colour for unfilled
             if (colour_.r || colour_.g || colour_.b) {
                 n = std::snprintf(p, static_cast<size_t>(end - p), "\x1b[0m");
-                if (n > 0) p += n;
+                if (n > 0) {
+                    p += n;
+                }
             }
 
             for (int i = filled; i < bar_width_ && p < end; ++i) {
@@ -218,7 +248,9 @@ class tqdm_bar {
 
             // Counter
             n = std::snprintf(p, static_cast<size_t>(end - p), "%zu/%zu", current, total_);
-            if (n > 0) p += n;
+            if (n > 0) {
+                p += n;
+            }
 
             // Rate
             char rate_buf[32];
@@ -240,7 +272,9 @@ class tqdm_bar {
             }
 
             n = std::snprintf(p, static_cast<size_t>(end - p), " [%s<%s, %s]", elapsed_buf, eta_buf, rate_buf);
-            if (n > 0) p += n;
+            if (n > 0) {
+                p += n;
+            }
         } else {
             // Unknown total: just show count + rate + elapsed
             char elapsed_buf[16];
@@ -250,7 +284,9 @@ class tqdm_bar {
 
             int n = std::snprintf(p, static_cast<size_t>(end - p), "%zu%s [%s, %s]", current, unit_.c_str(),
                                   elapsed_buf, rate_buf);
-            if (n > 0) p += n;
+            if (n > 0) {
+                p += n;
+            }
         }
 
         // Clear to end of line
@@ -366,7 +402,9 @@ template <typename Range> class tqdm_range {
         iterator &operator++() {
             ++it_;
             ++idx_;
-            if (bar_) bar_->update(idx_);
+            if (bar_) {
+                bar_->update(idx_);
+            }
             return *this;
         }
 
@@ -509,7 +547,9 @@ template <typename T = int> class trange_range {
         iterator &operator++() {
             ++it_;
             ++idx_;
-            if (bar_) bar_->update(idx_);
+            if (bar_) {
+                bar_->update(idx_);
+            }
             return *this;
         }
         iterator operator++(int) {

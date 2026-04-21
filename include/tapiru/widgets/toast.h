@@ -35,7 +35,9 @@ class TAPIRU_API toast_state {
     }
 
     void tick(std::chrono::milliseconds dt) {
-        if (!visible_) return;
+        if (!visible_) {
+            return;
+        }
         if (remaining_ <= dt) {
             visible_ = false;
             remaining_ = std::chrono::milliseconds(0);

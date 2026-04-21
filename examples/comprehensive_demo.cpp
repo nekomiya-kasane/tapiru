@@ -95,34 +95,72 @@ static void enable_raw_input() {
 }
 
 static void restore_input() {
-    if (g_stdin != INVALID_HANDLE_VALUE) SetConsoleMode(g_stdin, g_old_mode);
+    if (g_stdin != INVALID_HANDLE_VALUE) {
+        SetConsoleMode(g_stdin, g_old_mode);
+    }
 }
 
 static input_ev poll_input(int timeout_ms) {
-    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0) return input_ev::none;
+    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0) {
+        return input_ev::none;
+    }
     INPUT_RECORD rec;
     DWORD count = 0;
-    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0) return input_ev::none;
+    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0) {
+        return input_ev::none;
+    }
     if (rec.EventType == KEY_EVENT && rec.Event.KeyEvent.bKeyDown) {
         auto vk = rec.Event.KeyEvent.wVirtualKeyCode;
         auto ch = rec.Event.KeyEvent.uChar.UnicodeChar;
         bool shift = (rec.Event.KeyEvent.dwControlKeyState & SHIFT_PRESSED) != 0;
-        if (vk == VK_UP) return input_ev::up;
-        if (vk == VK_DOWN) return input_ev::down;
-        if (vk == VK_LEFT) return input_ev::left;
-        if (vk == VK_RIGHT) return input_ev::right;
-        if (vk == VK_RETURN) return input_ev::enter;
-        if (vk == VK_TAB) return shift ? input_ev::shift_tab : input_ev::tab;
-        if (vk == VK_ESCAPE) return input_ev::quit;
-        if (ch == L'q' || ch == L'Q') return input_ev::quit;
-        if (ch == L' ') return input_ev::space;
-        if (ch == L'1') return input_ev::key_1;
-        if (ch == L'2') return input_ev::key_2;
-        if (ch == L'3') return input_ev::key_3;
-        if (ch == L'4') return input_ev::key_4;
-        if (ch == L'5') return input_ev::key_5;
-        if (ch == L'6') return input_ev::key_6;
-        if (ch == L'7') return input_ev::key_7;
+        if (vk == VK_UP) {
+            return input_ev::up;
+        }
+        if (vk == VK_DOWN) {
+            return input_ev::down;
+        }
+        if (vk == VK_LEFT) {
+            return input_ev::left;
+        }
+        if (vk == VK_RIGHT) {
+            return input_ev::right;
+        }
+        if (vk == VK_RETURN) {
+            return input_ev::enter;
+        }
+        if (vk == VK_TAB) {
+            return shift ? input_ev::shift_tab : input_ev::tab;
+        }
+        if (vk == VK_ESCAPE) {
+            return input_ev::quit;
+        }
+        if (ch == L'q' || ch == L'Q') {
+            return input_ev::quit;
+        }
+        if (ch == L' ') {
+            return input_ev::space;
+        }
+        if (ch == L'1') {
+            return input_ev::key_1;
+        }
+        if (ch == L'2') {
+            return input_ev::key_2;
+        }
+        if (ch == L'3') {
+            return input_ev::key_3;
+        }
+        if (ch == L'4') {
+            return input_ev::key_4;
+        }
+        if (ch == L'5') {
+            return input_ev::key_5;
+        }
+        if (ch == L'6') {
+            return input_ev::key_6;
+        }
+        if (ch == L'7') {
+            return input_ev::key_7;
+        }
     }
     return input_ev::none;
 }
@@ -151,23 +189,46 @@ static input_ev poll_input(int timeout_ms) {
     struct timeval tv;
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
-    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0) return input_ev::none;
+    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0) {
+        return input_ev::none;
+    }
     char buf[16];
     int n = static_cast<int>(read(STDIN_FILENO, buf, sizeof(buf)));
-    if (n <= 0) return input_ev::none;
+    if (n <= 0) {
+        return input_ev::none;
+    }
     if (n == 1) {
-        if (buf[0] == 'q' || buf[0] == 'Q' || buf[0] == 27) return input_ev::quit;
-        if (buf[0] == '\n' || buf[0] == '\r') return input_ev::enter;
-        if (buf[0] == ' ') return input_ev::space;
-        if (buf[0] == '\t') return input_ev::tab;
-        if (buf[0] >= '1' && buf[0] <= '7')
+        if (buf[0] == 'q' || buf[0] == 'Q' || buf[0] == 27) {
+            return input_ev::quit;
+        }
+        if (buf[0] == '\n' || buf[0] == '\r') {
+            return input_ev::enter;
+        }
+        if (buf[0] == ' ') {
+            return input_ev::space;
+        }
+        if (buf[0] == '\t') {
+            return input_ev::tab;
+        }
+        if (buf[0] >= '1' && buf[0] <= '7') {
             return static_cast<input_ev>(static_cast<uint8_t>(input_ev::key_1) + (buf[0] - '1'));
+        }
     } else if (n >= 3 && buf[0] == 27 && buf[1] == '[') {
-        if (buf[2] == 'A') return input_ev::up;
-        if (buf[2] == 'B') return input_ev::down;
-        if (buf[2] == 'C') return input_ev::right;
-        if (buf[2] == 'D') return input_ev::left;
-        if (buf[2] == 'Z') return input_ev::shift_tab;
+        if (buf[2] == 'A') {
+            return input_ev::up;
+        }
+        if (buf[2] == 'B') {
+            return input_ev::down;
+        }
+        if (buf[2] == 'C') {
+            return input_ev::right;
+        }
+        if (buf[2] == 'D') {
+            return input_ev::left;
+        }
+        if (buf[2] == 'Z') {
+            return input_ev::shift_tab;
+        }
     }
     return input_ev::none;
 }
@@ -232,11 +293,14 @@ struct app_state {
 static auto build_tab_bar(const app_state &st) {
     std::string tabs = " ";
     for (int i = 0; i < NUM_PAGES; ++i) {
-        if (i == st.page)
+        if (i == st.page) {
             tabs += std::string("[bold bright_white on_blue] ") + page_names[i] + " [/]";
-        else
+        } else {
             tabs += std::string("[dim] ") + page_names[i] + " [/]";
-        if (i < NUM_PAGES - 1) tabs += " ";
+        }
+        if (i < NUM_PAGES - 1) {
+            tabs += " ";
+        }
     }
     return text_builder(tabs);
 }
@@ -268,10 +332,11 @@ class canvas_page_view {
         {
             std::string sel_line = "  Shape: ";
             for (int i = 0; i < 4; ++i) {
-                if (i == st_.canvas_shape)
+                if (i == st_.canvas_shape) {
                     sel_line += std::string("[bold bright_white on_blue] ") + shapes[i] + " [/] ";
-                else
+                } else {
                     sel_line += std::string("[dim]") + shapes[i] + "[/] ";
+                }
             }
             sel_line += st_.canvas_animate ? "  [green]ANIM ON[/]" : "  [dim]ANIM OFF[/]";
             page.add(text_builder(sel_line));
@@ -300,11 +365,15 @@ class canvas_page_view {
                 c.draw_line(0, 0, 0, 31, colors::bright_black);
                 for (int x = 1; x < 72; ++x) {
                     int y = 16 + static_cast<int>(13.0 * std::sin((x + t * 2) * 0.12));
-                    if (y >= 0 && y < 32) c.draw_point(x, y, colors::bright_green);
+                    if (y >= 0 && y < 32) {
+                        c.draw_point(x, y, colors::bright_green);
+                    }
                 }
                 for (int x = 1; x < 72; ++x) {
                     int y = 16 + static_cast<int>(13.0 * std::cos((x + t * 2) * 0.12));
-                    if (y >= 0 && y < 32) c.draw_point(x, y, colors::bright_cyan);
+                    if (y >= 0 && y < 32) {
+                        c.draw_point(x, y, colors::bright_cyan);
+                    }
                 }
                 c.draw_text(2, 1, "sin(x)", style{colors::bright_green, {}, attr::bold});
                 c.draw_text(2, 3, "cos(x)", style{colors::bright_cyan, {}, attr::bold});
@@ -341,8 +410,9 @@ class canvas_page_view {
                     if (nx >= 0 && nx < 72 && ny >= 0 && ny < 32) {
                         uint8_t g = static_cast<uint8_t>(100 + i * 0.7);
                         c.draw_point(nx, ny, color::from_rgb(0, g, static_cast<uint8_t>(255 - i * 0.7)));
-                        if (i > 0)
+                        if (i > 0) {
                             c.draw_line(px, py, nx, ny, color::from_rgb(0, g, static_cast<uint8_t>(255 - i * 0.7)));
+                        }
                     }
                     px = nx;
                     py = ny;
@@ -539,10 +609,11 @@ class decorator_page_view {
         for (int i = 0; i < 7; ++i) {
             bool sel = (st_.cursor == i);
             std::string line;
-            if (sel)
+            if (sel) {
                 line = "[bold bright_white on_blue] \xe2\x96\xb6 [/] ";
-            else
+            } else {
                 line = "   ";
+            }
             line += items[i].on ? "[green]\xe2\x9c\x93[/] " : "[red]\xe2\x9c\x97[/] ";
             line += items[i].name;
             page.add(text_builder(line));
@@ -554,26 +625,54 @@ class decorator_page_view {
 
         // Build the element with selected decorators
         element e = element(text_builder("[bold]Hello, tapiru![/] Decorator pipes in action."));
-        if (st_.deco_padding) e = std::move(e) | padding(1, 2);
-        if (st_.deco_border) e = std::move(e) | border(border_style::rounded);
-        if (st_.deco_bold) e = std::move(e) | bold();
-        if (st_.deco_italic) e = std::move(e) | italic();
-        if (st_.deco_underline) e = std::move(e) | underline();
-        if (st_.deco_color) e = std::move(e) | fg_color(colors::bright_cyan);
-        if (st_.deco_center) e = std::move(e) | center();
+        if (st_.deco_padding) {
+            e = std::move(e) | padding(1, 2);
+        }
+        if (st_.deco_border) {
+            e = std::move(e) | border(border_style::rounded);
+        }
+        if (st_.deco_bold) {
+            e = std::move(e) | bold();
+        }
+        if (st_.deco_italic) {
+            e = std::move(e) | italic();
+        }
+        if (st_.deco_underline) {
+            e = std::move(e) | underline();
+        }
+        if (st_.deco_color) {
+            e = std::move(e) | fg_color(colors::bright_cyan);
+        }
+        if (st_.deco_center) {
+            e = std::move(e) | center();
+        }
         page.add(std::move(e));
 
         // Show the pipe expression
         page.add(text_builder(""));
         {
             std::string expr = "  [dim]element(text)";
-            if (st_.deco_padding) expr += " | padding(1,2)";
-            if (st_.deco_border) expr += " | border()";
-            if (st_.deco_bold) expr += " | bold()";
-            if (st_.deco_italic) expr += " | italic()";
-            if (st_.deco_underline) expr += " | underline()";
-            if (st_.deco_color) expr += " | fg_color(cyan)";
-            if (st_.deco_center) expr += " | center()";
+            if (st_.deco_padding) {
+                expr += " | padding(1,2)";
+            }
+            if (st_.deco_border) {
+                expr += " | border()";
+            }
+            if (st_.deco_bold) {
+                expr += " | bold()";
+            }
+            if (st_.deco_italic) {
+                expr += " | italic()";
+            }
+            if (st_.deco_underline) {
+                expr += " | underline()";
+            }
+            if (st_.deco_color) {
+                expr += " | fg_color(cyan)";
+            }
+            if (st_.deco_center) {
+                expr += " | center()";
+            }
             expr += "[/]";
             page.add(text_builder(expr));
         }
@@ -703,12 +802,13 @@ class widgets_page_view {
             int filled = static_cast<int>(st_.slider_val * bar_w);
             std::string bar = "    [bright_cyan]";
             for (int i = 0; i < bar_w; ++i) {
-                if (i == filled)
+                if (i == filled) {
                     bar += "[bold bright_white]\xe2\x97\x8f[/][bright_cyan]";
-                else if (i < filled)
+                } else if (i < filled) {
                     bar += "\xe2\x94\x81";
-                else
+                } else {
                     bar += "[dim]\xe2\x94\x81[/][bright_cyan]";
+                }
             }
             char pct[16];
             std::snprintf(pct, sizeof(pct), " %d%%", static_cast<int>(st_.slider_val * 100));
@@ -809,7 +909,9 @@ class dashboard_page_view {
                     c.draw_rect(0, 0, 39, 15, colors::bright_black);
                     for (int x = 0; x < 40; ++x) {
                         int y = 8 + static_cast<int>(6.0 * std::sin((x + st_.tick * 2) * 0.15));
-                        if (y >= 0 && y < 16) c.draw_point(x, y, colors::bright_green);
+                        if (y >= 0 && y < 16) {
+                            c.draw_point(x, y, colors::bright_green);
+                        }
                     }
                     c.draw_circle(20, 8, 6, colors::bright_cyan);
                 });
@@ -820,8 +922,9 @@ class dashboard_page_view {
                 content.add(text_builder("[bold]Performance Metrics[/]"));
                 content.add(rule_builder());
                 std::vector<float> data;
-                for (int i = 0; i < 30; ++i)
+                for (int i = 0; i < 30; ++i) {
                     data.push_back(static_cast<float>(std::sin((i + st_.tick) * 0.2) * 30 + 50));
+                }
                 content.add(
                     line_chart_builder(data, 25, 4).style_override(style{colors::bright_green}).key("metric-chart"));
                 break;
@@ -983,22 +1086,40 @@ static void handle_input(app_state &st, input_ev ev) {
         break;
     case input_ev::up:
         if (st.page == 6) {
-            if (st.dash_sidebar > 0) --st.dash_sidebar;
-        } else if (st.cursor > 0)
+            if (st.dash_sidebar > 0) {
+                --st.dash_sidebar;
+            }
+        } else if (st.cursor > 0) {
             --st.cursor;
+        }
         // Sync page-specific state
-        if (st.page == 0) st.canvas_shape = st.cursor;
-        if (st.page == 1) st.gauge_selected = st.cursor;
-        if (st.page == 5) st.widget_focus = st.cursor;
+        if (st.page == 0) {
+            st.canvas_shape = st.cursor;
+        }
+        if (st.page == 1) {
+            st.gauge_selected = st.cursor;
+        }
+        if (st.page == 5) {
+            st.widget_focus = st.cursor;
+        }
         break;
     case input_ev::down:
         if (st.page == 6) {
-            if (st.dash_sidebar < 4) ++st.dash_sidebar;
-        } else if (st.cursor < max_cursor(st))
+            if (st.dash_sidebar < 4) {
+                ++st.dash_sidebar;
+            }
+        } else if (st.cursor < max_cursor(st)) {
             ++st.cursor;
-        if (st.page == 0) st.canvas_shape = st.cursor;
-        if (st.page == 1) st.gauge_selected = st.cursor;
-        if (st.page == 5) st.widget_focus = st.cursor;
+        }
+        if (st.page == 0) {
+            st.canvas_shape = st.cursor;
+        }
+        if (st.page == 1) {
+            st.gauge_selected = st.cursor;
+        }
+        if (st.page == 5) {
+            st.widget_focus = st.cursor;
+        }
         break;
     case input_ev::left:
         if (st.page == 1) {
@@ -1008,10 +1129,11 @@ static void handle_input(app_state &st, input_ev ev) {
         } else if (st.page == 4) {
             st.color_depth = std::max(0, st.color_depth - 1);
         } else if (st.page == 5) {
-            if (st.widget_focus == 1)
+            if (st.widget_focus == 1) {
                 st.slider_val = std::max(0.0f, st.slider_val - 0.05f);
-            else if (st.widget_focus == 2 && st.radio_sel > 0)
+            } else if (st.widget_focus == 2 && st.radio_sel > 0) {
                 --st.radio_sel;
+            }
         }
         break;
     case input_ev::right:
@@ -1022,10 +1144,11 @@ static void handle_input(app_state &st, input_ev ev) {
         } else if (st.page == 4) {
             st.color_depth = std::min(3, st.color_depth + 1);
         } else if (st.page == 5) {
-            if (st.widget_focus == 1)
+            if (st.widget_focus == 1) {
                 st.slider_val = std::min(1.0f, st.slider_val + 0.05f);
-            else if (st.widget_focus == 2 && st.radio_sel < 2)
+            } else if (st.widget_focus == 2 && st.radio_sel < 2) {
                 ++st.radio_sel;
+            }
         }
         break;
     case input_ev::enter:
@@ -1080,7 +1203,9 @@ static void handle_input(app_state &st, input_ev ev) {
     }
 
     // Paragraph text cycling via up/down on page 2
-    if (st.page == 2) st.para_text_idx = st.cursor;
+    if (st.page == 2) {
+        st.para_text_idx = st.cursor;
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════

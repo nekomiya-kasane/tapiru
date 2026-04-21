@@ -150,7 +150,9 @@ decorator focus_indicator() {
 
 decorator maybe(const bool *show) {
     return [show](element inner) -> element {
-        if (show && !*show) return element{};
+        if (show && !*show) {
+            return element{};
+        }
         return inner;
     };
 }

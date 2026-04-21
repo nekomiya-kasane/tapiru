@@ -43,7 +43,9 @@ node_id tab_builder::flatten_into(detail::scene &s) const {
     const auto &active_tab = tabs_[static_cast<size_t>(active_idx)];
     if (!active_tab.content) {
         auto bar_id = tab_bar.flatten_into(s);
-        if (z_order_ != 0) s.set_z_order(bar_id, z_order_);
+        if (z_order_ != 0) {
+            s.set_z_order(bar_id, z_order_);
+        }
         return bar_id;
     }
 
@@ -53,7 +55,9 @@ node_id tab_builder::flatten_into(detail::scene &s) const {
 
         auto pi = s.add_rows(std::move(rd));
         auto rows_id = s.add_node(detail::widget_type::rows, pi, detail::no_node, key_);
-        if (z_order_ != 0) s.set_z_order(rows_id, z_order_);
+        if (z_order_ != 0) {
+            s.set_z_order(rows_id, z_order_);
+        }
 
         // Flatten tab bar as first child
         auto bar_id = tab_bar.flatten_into(s);
@@ -81,7 +85,9 @@ node_id tab_builder::flatten_into(detail::scene &s) const {
 
         auto pi = s.add_rows(std::move(rd));
         auto rows_id = s.add_node(detail::widget_type::rows, pi, detail::no_node, key_);
-        if (z_order_ != 0) s.set_z_order(rows_id, z_order_);
+        if (z_order_ != 0) {
+            s.set_z_order(rows_id, z_order_);
+        }
 
         auto bar_id = tab_bar.flatten_into(s);
         s.get_rows(pi).children.push_back(bar_id);

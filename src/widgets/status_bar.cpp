@@ -38,17 +38,27 @@ node_id status_bar_builder::flatten_into(detail::scene &s) const {
         // Constrain to exactly 1 row — status bar must never wrap
         sized_box_builder sb(std::move(panel));
         sb.height(1);
-        if (key_ != 0) sb.key(""); // key set below via scene
+        if (key_ != 0) {
+            sb.key(""); // key set below via scene
+        }
         auto id = sb.flatten_into(s);
-        if (key_ != 0) s.set_key(id, key_);
-        if (z_order_ != 0) s.set_z_order(id, z_order_);
+        if (key_ != 0) {
+            s.set_key(id, key_);
+        }
+        if (z_order_ != 0) {
+            s.set_z_order(id, z_order_);
+        }
         return id;
     } else {
         sized_box_builder sb(std::move(cols));
         sb.height(1);
         auto id = sb.flatten_into(s);
-        if (key_ != 0) s.set_key(id, key_);
-        if (z_order_ != 0) s.set_z_order(id, z_order_);
+        if (key_ != 0) {
+            s.set_key(id, key_);
+        }
+        if (z_order_ != 0) {
+            s.set_z_order(id, z_order_);
+        }
         return id;
     }
 }

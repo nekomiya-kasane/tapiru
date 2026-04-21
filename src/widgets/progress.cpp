@@ -74,7 +74,9 @@ void progress_builder::build_task_fragments(std::vector<text_fragment> &frags, c
     // Bar
     double frac = task.fraction();
     uint32_t filled = static_cast<uint32_t>(frac * bar_width_);
-    if (filled > bar_width_) filled = bar_width_;
+    if (filled > bar_width_) {
+        filled = bar_width_;
+    }
 
     std::string bar_str;
     bar_str.reserve(bar_width_ * 4);

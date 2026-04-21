@@ -59,8 +59,12 @@ inline float bounce(float t) {
 }
 
 inline float elastic(float t) {
-    if (t <= 0.0f) return 0.0f;
-    if (t >= 1.0f) return 1.0f;
+    if (t <= 0.0f) {
+        return 0.0f;
+    }
+    if (t >= 1.0f) {
+        return 1.0f;
+    }
     return std::pow(2.0f, -10.0f * t) * std::sin((t - 0.075f) * (2.0f * 3.14159265f) / 0.3f) + 1.0f;
 }
 
@@ -86,19 +90,29 @@ class tween {
 
     /** @brief Get the current interpolated value. */
     [[nodiscard]] float value(time_point now) const {
-        if (!started_) return from_;
+        if (!started_) {
+            return from_;
+        }
         auto elapsed = std::chrono::duration_cast<duration_ms>(now - start_time_);
-        if (elapsed >= duration_) return to_;
+        if (elapsed >= duration_) {
+            return to_;
+        }
         float t = static_cast<float>(elapsed.count()) / static_cast<float>(duration_.count());
-        if (t < 0.0f) t = 0.0f;
-        if (t > 1.0f) t = 1.0f;
+        if (t < 0.0f) {
+            t = 0.0f;
+        }
+        if (t > 1.0f) {
+            t = 1.0f;
+        }
         float eased = ease_ ? ease_(t) : t;
         return from_ + (to_ - from_) * eased;
     }
 
     /** @brief Check if the tween has finished. */
     [[nodiscard]] bool finished(time_point now) const {
-        if (!started_) return false;
+        if (!started_) {
+            return false;
+        }
         return std::chrono::duration_cast<duration_ms>(now - start_time_) >= duration_;
     }
 
@@ -130,9 +144,13 @@ template <typename T> class animated {
 
     /** @brief Get the current animated value. */
     [[nodiscard]] T value(time_point now) const {
-        if (!tw_.started()) return current_;
+        if (!tw_.started()) {
+            return current_;
+        }
         float v = tw_.value(now);
-        if (tw_.finished(now)) return target_;
+        if (tw_.finished(now)) {
+            return target_;
+        }
         return static_cast<T>(static_cast<float>(current_) +
                               (static_cast<float>(target_) - static_cast<float>(current_)) * (v - tw_.from()) /
                                   (tw_.to() - tw_.from()));

@@ -69,7 +69,9 @@ node_id canvas_widget_builder::flatten_into(detail::scene &s) const {
 
 element make_canvas(uint32_t w, uint32_t h, std::function<void(canvas_widget_builder &)> draw_fn) {
     canvas_widget_builder builder(w, h);
-    if (draw_fn) draw_fn(builder);
+    if (draw_fn) {
+        draw_fn(builder);
+    }
     return element(std::move(builder));
 }
 

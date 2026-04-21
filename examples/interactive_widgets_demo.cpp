@@ -104,31 +104,63 @@ static void enable_raw_input() {
 }
 
 static void restore_input() {
-    if (g_stdin != INVALID_HANDLE_VALUE) SetConsoleMode(g_stdin, g_old_mode);
+    if (g_stdin != INVALID_HANDLE_VALUE) {
+        SetConsoleMode(g_stdin, g_old_mode);
+    }
 }
 
 static input_ev poll_input(int timeout_ms) {
-    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0) return input_ev::none;
+    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0) {
+        return input_ev::none;
+    }
     INPUT_RECORD rec;
     DWORD count = 0;
-    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0) return input_ev::none;
+    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0) {
+        return input_ev::none;
+    }
     if (rec.EventType == KEY_EVENT && rec.Event.KeyEvent.bKeyDown) {
         auto vk = rec.Event.KeyEvent.wVirtualKeyCode;
         auto ch = rec.Event.KeyEvent.uChar.UnicodeChar;
         bool shift = (rec.Event.KeyEvent.dwControlKeyState & SHIFT_PRESSED) != 0;
-        if (vk == VK_UP) return input_ev::up;
-        if (vk == VK_DOWN) return input_ev::down;
-        if (vk == VK_LEFT) return input_ev::left;
-        if (vk == VK_RIGHT) return input_ev::right;
-        if (vk == VK_RETURN) return input_ev::enter;
-        if (vk == VK_TAB) return shift ? input_ev::shift_tab : input_ev::tab;
-        if (vk == VK_ESCAPE) return input_ev::quit;
-        if (ch == L'q' || ch == L'Q') return input_ev::quit;
-        if (ch == L' ') return input_ev::space;
-        if (ch == L'1') return input_ev::key_1;
-        if (ch == L'2') return input_ev::key_2;
-        if (ch == L'3') return input_ev::key_3;
-        if (ch == L'4') return input_ev::key_4;
+        if (vk == VK_UP) {
+            return input_ev::up;
+        }
+        if (vk == VK_DOWN) {
+            return input_ev::down;
+        }
+        if (vk == VK_LEFT) {
+            return input_ev::left;
+        }
+        if (vk == VK_RIGHT) {
+            return input_ev::right;
+        }
+        if (vk == VK_RETURN) {
+            return input_ev::enter;
+        }
+        if (vk == VK_TAB) {
+            return shift ? input_ev::shift_tab : input_ev::tab;
+        }
+        if (vk == VK_ESCAPE) {
+            return input_ev::quit;
+        }
+        if (ch == L'q' || ch == L'Q') {
+            return input_ev::quit;
+        }
+        if (ch == L' ') {
+            return input_ev::space;
+        }
+        if (ch == L'1') {
+            return input_ev::key_1;
+        }
+        if (ch == L'2') {
+            return input_ev::key_2;
+        }
+        if (ch == L'3') {
+            return input_ev::key_3;
+        }
+        if (ch == L'4') {
+            return input_ev::key_4;
+        }
     }
     return input_ev::none;
 }
@@ -157,25 +189,55 @@ static input_ev poll_input(int timeout_ms) {
     struct timeval tv;
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
-    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0) return input_ev::none;
+    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0) {
+        return input_ev::none;
+    }
     char buf[16];
     int n = static_cast<int>(read(STDIN_FILENO, buf, sizeof(buf)));
-    if (n <= 0) return input_ev::none;
+    if (n <= 0) {
+        return input_ev::none;
+    }
     if (n == 1) {
-        if (buf[0] == 'q' || buf[0] == 'Q' || buf[0] == 27) return input_ev::quit;
-        if (buf[0] == '\n' || buf[0] == '\r') return input_ev::enter;
-        if (buf[0] == ' ') return input_ev::space;
-        if (buf[0] == '\t') return input_ev::tab;
-        if (buf[0] == '1') return input_ev::key_1;
-        if (buf[0] == '2') return input_ev::key_2;
-        if (buf[0] == '3') return input_ev::key_3;
-        if (buf[0] == '4') return input_ev::key_4;
+        if (buf[0] == 'q' || buf[0] == 'Q' || buf[0] == 27) {
+            return input_ev::quit;
+        }
+        if (buf[0] == '\n' || buf[0] == '\r') {
+            return input_ev::enter;
+        }
+        if (buf[0] == ' ') {
+            return input_ev::space;
+        }
+        if (buf[0] == '\t') {
+            return input_ev::tab;
+        }
+        if (buf[0] == '1') {
+            return input_ev::key_1;
+        }
+        if (buf[0] == '2') {
+            return input_ev::key_2;
+        }
+        if (buf[0] == '3') {
+            return input_ev::key_3;
+        }
+        if (buf[0] == '4') {
+            return input_ev::key_4;
+        }
     } else if (n >= 3 && buf[0] == 27 && buf[1] == '[') {
-        if (buf[2] == 'A') return input_ev::up;
-        if (buf[2] == 'B') return input_ev::down;
-        if (buf[2] == 'C') return input_ev::right;
-        if (buf[2] == 'D') return input_ev::left;
-        if (buf[2] == 'Z') return input_ev::shift_tab;
+        if (buf[2] == 'A') {
+            return input_ev::up;
+        }
+        if (buf[2] == 'B') {
+            return input_ev::down;
+        }
+        if (buf[2] == 'C') {
+            return input_ev::right;
+        }
+        if (buf[2] == 'D') {
+            return input_ev::left;
+        }
+        if (buf[2] == 'Z') {
+            return input_ev::shift_tab;
+        }
     }
     return input_ev::none;
 }
@@ -258,11 +320,14 @@ struct app_state {
 static auto build_tab_bar(const app_state &st) {
     std::string tabs = "  ";
     for (int i = 0; i < NUM_PAGES; ++i) {
-        if (i == st.page)
+        if (i == st.page) {
             tabs += std::string("[bold bright_white on_blue] ") + page_names[i] + " [/]";
-        else
+        } else {
             tabs += std::string("[dim] ") + page_names[i] + " [/]";
-        if (i < NUM_PAGES - 1) tabs += " ";
+        }
+        if (i < NUM_PAGES - 1) {
+            tabs += " ";
+        }
     }
     return text_builder(tabs);
 }
@@ -1044,16 +1109,24 @@ static void handle_input(app_state &st, input_ev ev) {
     case input_ev::up:
         switch (st.page) {
         case 0:
-            if (st.accordion_cursor > 0) --st.accordion_cursor;
+            if (st.accordion_cursor > 0) {
+                --st.accordion_cursor;
+            }
             break;
         case 1:
-            if (st.menu_cursor > 0) --st.menu_cursor;
+            if (st.menu_cursor > 0) {
+                --st.menu_cursor;
+            }
             break;
         case 2:
-            if (st.tree_cursor > 0) --st.tree_cursor;
+            if (st.tree_cursor > 0) {
+                --st.tree_cursor;
+            }
             break;
         case 4:
-            if (st.log_scroll > 0) --st.log_scroll;
+            if (st.log_scroll > 0) {
+                --st.log_scroll;
+            }
             break;
         default:
             break;
@@ -1063,16 +1136,24 @@ static void handle_input(app_state &st, input_ev ev) {
     case input_ev::down:
         switch (st.page) {
         case 0:
-            if (st.accordion_cursor < 2) ++st.accordion_cursor;
+            if (st.accordion_cursor < 2) {
+                ++st.accordion_cursor;
+            }
             break;
         case 1:
-            if (st.menu_cursor < 7) ++st.menu_cursor;
+            if (st.menu_cursor < 7) {
+                ++st.menu_cursor;
+            }
             break;
         case 2:
-            if (st.tree_cursor < TREE_NODE_COUNT - 1) ++st.tree_cursor;
+            if (st.tree_cursor < TREE_NODE_COUNT - 1) {
+                ++st.tree_cursor;
+            }
             break;
         case 4:
-            if (st.log_scroll < static_cast<int>(st.logs.size()) - 1) ++st.log_scroll;
+            if (st.log_scroll < static_cast<int>(st.logs.size()) - 1) {
+                ++st.log_scroll;
+            }
             break;
         default:
             break;
@@ -1082,19 +1163,29 @@ static void handle_input(app_state &st, input_ev ev) {
     case input_ev::left:
         switch (st.page) {
         case 0:
-            if (st.active_tab > 0) --st.active_tab;
+            if (st.active_tab > 0) {
+                --st.active_tab;
+            }
             break;
         case 1:
-            if (st.dropdown_selected > 0) --st.dropdown_selected;
+            if (st.dropdown_selected > 0) {
+                --st.dropdown_selected;
+            }
             break;
         case 2:
-            if (st.scroll_y > 0) --st.scroll_y;
+            if (st.scroll_y > 0) {
+                --st.scroll_y;
+            }
             break;
         case 3:
-            if (st.search_match > 0) --st.search_match;
+            if (st.search_match > 0) {
+                --st.search_match;
+            }
             break;
         case 4:
-            if (st.breadcrumb_active > 0) --st.breadcrumb_active;
+            if (st.breadcrumb_active > 0) {
+                --st.breadcrumb_active;
+            }
             break;
         default:
             break;
@@ -1104,19 +1195,29 @@ static void handle_input(app_state &st, input_ev ev) {
     case input_ev::right:
         switch (st.page) {
         case 0:
-            if (st.active_tab < 2) ++st.active_tab;
+            if (st.active_tab < 2) {
+                ++st.active_tab;
+            }
             break;
         case 1:
-            if (st.dropdown_selected < 4) ++st.dropdown_selected;
+            if (st.dropdown_selected < 4) {
+                ++st.dropdown_selected;
+            }
             break;
         case 2:
-            if (st.scroll_y < 25) ++st.scroll_y;
+            if (st.scroll_y < 25) {
+                ++st.scroll_y;
+            }
             break;
         case 3:
-            if (st.search_match < st.search_total - 1) ++st.search_match;
+            if (st.search_match < st.search_total - 1) {
+                ++st.search_match;
+            }
             break;
         case 4:
-            if (st.breadcrumb_active < 3) ++st.breadcrumb_active;
+            if (st.breadcrumb_active < 3) {
+                ++st.breadcrumb_active;
+            }
             break;
         default:
             break;
@@ -1129,7 +1230,9 @@ static void handle_input(app_state &st, input_ev ev) {
         case 0: {
             // Toggle accordion section
             auto idx = static_cast<size_t>(st.accordion_cursor);
-            if (idx < st.accordion_expanded.size()) st.accordion_expanded[idx] = !st.accordion_expanded[idx];
+            if (idx < st.accordion_expanded.size()) {
+                st.accordion_expanded[idx] = !st.accordion_expanded[idx];
+            }
             break;
         }
         case 1:
@@ -1139,10 +1242,11 @@ static void handle_input(app_state &st, input_ev ev) {
             // Toggle tree node expansion
             if (st.tree_cursor >= 0 && st.tree_cursor < TREE_NODE_COUNT) {
                 std::string label = tree_labels[st.tree_cursor];
-                if (st.tree_expanded.count(label))
+                if (st.tree_expanded.count(label)) {
                     st.tree_expanded.erase(label);
-                else
+                } else {
                     st.tree_expanded.insert(label);
+                }
             }
             break;
         }
@@ -1222,7 +1326,9 @@ int main() {
         if (changed || anim || toast_visible) {
             // Re-detect terminal size for responsive layout
             auto new_sz = terminal::get_size();
-            if (new_sz.width > 0) width = new_sz.width;
+            if (new_sz.width > 0) {
+                width = new_sz.width;
+            }
 
             con.write("\x1b[H");
             con.print_widget(app_view(st), width);

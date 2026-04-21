@@ -56,7 +56,9 @@ node_id radio_group_builder::flatten_into(detail::scene &s) const {
     // Build a multi-line text with radio buttons
     std::string markup;
     for (int i = 0; i < static_cast<int>(options_.size()); ++i) {
-        if (i > 0) markup += "\n";
+        if (i > 0) {
+            markup += "\n";
+        }
         bool is_selected = (i == sel);
         bool is_focused = (i == focused_idx_);
         if (is_focused) {
@@ -93,7 +95,9 @@ node_id selectable_list_builder::flatten_into(detail::scene &s) const {
 
     std::string markup;
     for (uint32_t i = start; i < start + vis && i < total; ++i) {
-        if (i > start) markup += "\n";
+        if (i > start) {
+            markup += "\n";
+        }
         bool is_cursor = (static_cast<int>(i) == cur);
         if (is_cursor) {
             markup += "[bold reverse]> " + items_[i] + "[/]";
@@ -146,8 +150,12 @@ node_id slider_builder::flatten_into(detail::scene &s) const {
     float val = value_ ? *value_ : min_;
     float range = max_ - min_;
     float ratio = (range > 0.0f) ? (val - min_) / range : 0.0f;
-    if (ratio < 0.0f) ratio = 0.0f;
-    if (ratio > 1.0f) ratio = 1.0f;
+    if (ratio < 0.0f) {
+        ratio = 0.0f;
+    }
+    if (ratio > 1.0f) {
+        ratio = 1.0f;
+    }
 
     uint32_t bar_w = width_;
     if (show_pct_) {
@@ -155,7 +163,9 @@ node_id slider_builder::flatten_into(detail::scene &s) const {
     }
 
     uint32_t filled = static_cast<uint32_t>(ratio * static_cast<float>(bar_w) + 0.5f);
-    if (filled > bar_w) filled = bar_w;
+    if (filled > bar_w) {
+        filled = bar_w;
+    }
 
     // Build bar string using markup
     std::string bar = "[";

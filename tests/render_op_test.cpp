@@ -76,8 +76,11 @@ TEST(RenderOpTest, BoxContainsText) {
     RENDER_NO_COLOR(out, "[box]Hello[/box]", 20);
     EXPECT_NE(out.find("Hello"), std::string::npos);
     size_t newlines = 0;
-    for (char c : out)
-        if (c == '\n') ++newlines;
+    for (char c : out) {
+        if (c == '\n') {
+            ++newlines;
+        }
+    }
     EXPECT_GE(newlines, 2u);
 }
 

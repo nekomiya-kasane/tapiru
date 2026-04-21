@@ -101,7 +101,9 @@ void live::render_frame() {
         }
     }
 
-    if (!active_flatten_) return;
+    if (!active_flatten_) {
+        return;
+    }
 
     // 1. Flatten + measure
     detail::scene sc;
@@ -149,14 +151,20 @@ void live::render_frame() {
             buf += "\x1b[2K";
             for (uint32_t x = 0; x < m.width; ++x) {
                 const auto &c = canvas_.get(x, y);
-                if (c.width == 0) continue;
+                if (c.width == 0) {
+                    continue;
+                }
                 if (use_color) {
                     emitter.transition(sc.styles().lookup(c.sid), buf);
                 }
                 emit_cell(buf, c);
             }
-            if (use_color) emitter.reset(buf);
-            if (y + 1 < m.height) buf += '\n';
+            if (use_color) {
+                emitter.reset(buf);
+            }
+            if (y + 1 < m.height) {
+                buf += '\n';
+            }
         }
 
         // Clear leftover lines from previous taller frame
@@ -228,7 +236,9 @@ void live::render_frame() {
 
                 for (uint32_t rx = run_start; rx < x; ++rx) {
                     const auto &c = canvas_.get(rx, y);
-                    if (c.width == 0) continue;
+                    if (c.width == 0) {
+                        continue;
+                    }
                     if (use_color) {
                         emitter.transition(sc.styles().lookup(c.sid), buf);
                     }
@@ -240,7 +250,9 @@ void live::render_frame() {
             (void)line_has_changes;
         }
 
-        if (use_color) emitter.reset(buf);
+        if (use_color) {
+            emitter.reset(buf);
+        }
 
         // If frame is shorter than previous, clear leftover lines
         for (uint32_t y = m.height; y < prev_height_; ++y) {

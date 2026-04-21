@@ -38,7 +38,9 @@ void console::print(std::string_view markup) {
                 // Plain text — apply highlighter with link support
                 auto hl_frags = highlight_text_linked(frag.text, *highlighter_);
                 for (const auto &hf : hl_frags) {
-                    if (!hf.link.empty()) buf += ansi::hyperlink_open(hf.link);
+                    if (!hf.link.empty()) {
+                        buf += ansi::hyperlink_open(hf.link);
+                    }
                     emitter_.transition(hf.sty, buf);
                     buf += hf.text;
                     if (!hf.link.empty()) {
@@ -97,7 +99,9 @@ void console::emit_highlighted_fragments(std::string_view text, bool append_newl
     if (color_enabled() && highlighter_) {
         auto fragments = highlight_text_linked(text, *highlighter_);
         for (const auto &frag : fragments) {
-            if (!frag.link.empty()) buf += ansi::hyperlink_open(frag.link);
+            if (!frag.link.empty()) {
+                buf += ansi::hyperlink_open(frag.link);
+            }
             emitter_.transition(frag.sty, buf);
             buf += frag.text;
             if (!frag.link.empty()) {
@@ -110,7 +114,9 @@ void console::emit_highlighted_fragments(std::string_view text, bool append_newl
         buf += text;
     }
 
-    if (append_newline) buf += '\n';
+    if (append_newline) {
+        buf += '\n';
+    }
 
     config_.sink(buf);
 }
@@ -202,7 +208,9 @@ void console::render_widget_impl(const std::function<uint32_t(void *)> &flatten_
     for (uint32_t y = 0; y < m.height; ++y) {
         for (uint32_t x = 0; x < m.width; ++x) {
             const auto &c = cv.get(x, y);
-            if (c.width == 0) continue; // skip continuation cells
+            if (c.width == 0) {
+                continue; // skip continuation cells
+            }
 
             if (color_enabled()) {
                 auto sty = sc.styles().lookup(c.sid);
@@ -253,10 +261,14 @@ widget_canvas render_to_canvas_impl(const std::function<uint32_t(void *)> &flatt
 
 std::string widget_canvas::row_text(uint32_t y) const {
     std::string out;
-    if (y >= height) return out;
+    if (y >= height) {
+        return out;
+    }
     for (uint32_t x = 0; x < width; ++x) {
         const auto &c = cv.get(x, y);
-        if (c.width == 0) continue; // skip continuation cells
+        if (c.width == 0) {
+            continue; // skip continuation cells
+        }
         char32_t cp = c.codepoint;
         if (cp == 0 || cp == U' ') {
             out += ' ';
@@ -290,7 +302,9 @@ void widget_canvas::dump_styled(std::ostream &os) const {
         os << std::format("{:3d}|", y);
         for (uint32_t x = 0; x < width; ++x) {
             const auto &c = cv.get(x, y);
-            if (c.width == 0) continue;
+            if (c.width == 0) {
+                continue;
+            }
             char32_t cp = c.codepoint;
             if (cp == 0 || cp == U' ') {
                 os << ' ';
@@ -316,7 +330,9 @@ void widget_canvas::dump_styled(std::ostream &os) const {
                                   sty.bg.g, sty.bg.b);
             }
         }
-        if (has_style) os << "\n";
+        if (has_style) {
+            os << "\n";
+        }
     }
     os << "=== end ===\n";
 }

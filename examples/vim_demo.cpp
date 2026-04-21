@@ -143,20 +143,32 @@ static void do_redo(editor_state &st) {
 }
 
 static void clamp_cursor(editor_state &st) {
-    if (st.lines.empty()) st.lines.emplace_back("");
-    if (st.cursor_row < 0) st.cursor_row = 0;
-    if (st.cursor_row >= static_cast<int>(st.lines.size())) st.cursor_row = static_cast<int>(st.lines.size()) - 1;
+    if (st.lines.empty()) {
+        st.lines.emplace_back("");
+    }
+    if (st.cursor_row < 0) {
+        st.cursor_row = 0;
+    }
+    if (st.cursor_row >= static_cast<int>(st.lines.size())) {
+        st.cursor_row = static_cast<int>(st.lines.size()) - 1;
+    }
     int line_len = static_cast<int>(st.lines[static_cast<size_t>(st.cursor_row)].size());
     if (st.mode == vim_mode::normal || st.mode == vim_mode::visual || st.mode == vim_mode::visual_line) {
-        if (line_len > 0 && st.cursor_col >= line_len) st.cursor_col = line_len - 1;
+        if (line_len > 0 && st.cursor_col >= line_len) {
+            st.cursor_col = line_len - 1;
+        }
     }
-    if (st.cursor_col < 0) st.cursor_col = 0;
+    if (st.cursor_col < 0) {
+        st.cursor_col = 0;
+    }
 }
 
 static std::string join_lines(const std::vector<std::string> &lines) {
     std::string result;
     for (size_t i = 0; i < lines.size(); ++i) {
-        if (i > 0) result += '\n';
+        if (i > 0) {
+            result += '\n';
+        }
         result += lines[i];
     }
     return result;
@@ -182,38 +194,58 @@ static const char *mode_string(vim_mode m) {
 
 static int find_word_forward(const std::string &line, int col) {
     int len = static_cast<int>(line.size());
-    if (col >= len) return col;
+    if (col >= len) {
+        return col;
+    }
     // Skip current word chars
-    while (col < len && std::isalnum(static_cast<unsigned char>(line[static_cast<size_t>(col)]))) ++col;
+    while (col < len && std::isalnum(static_cast<unsigned char>(line[static_cast<size_t>(col)]))) {
+        ++col;
+    }
     // Skip non-word chars
-    while (col < len && !std::isalnum(static_cast<unsigned char>(line[static_cast<size_t>(col)]))) ++col;
+    while (col < len && !std::isalnum(static_cast<unsigned char>(line[static_cast<size_t>(col)]))) {
+        ++col;
+    }
     return col;
 }
 
 static int find_word_backward(const std::string &line, int col) {
-    if (col <= 0) return 0;
+    if (col <= 0) {
+        return 0;
+    }
     --col;
     // Skip non-word chars
-    while (col > 0 && !std::isalnum(static_cast<unsigned char>(line[static_cast<size_t>(col)]))) --col;
+    while (col > 0 && !std::isalnum(static_cast<unsigned char>(line[static_cast<size_t>(col)]))) {
+        --col;
+    }
     // Skip word chars
-    while (col > 0 && std::isalnum(static_cast<unsigned char>(line[static_cast<size_t>(col - 1)]))) --col;
+    while (col > 0 && std::isalnum(static_cast<unsigned char>(line[static_cast<size_t>(col - 1)]))) {
+        --col;
+    }
     return col;
 }
 
 static int find_word_end(const std::string &line, int col) {
     int len = static_cast<int>(line.size());
-    if (col >= len - 1) return len > 0 ? len - 1 : 0;
+    if (col >= len - 1) {
+        return len > 0 ? len - 1 : 0;
+    }
     ++col;
     // Skip non-word chars
-    while (col < len && !std::isalnum(static_cast<unsigned char>(line[static_cast<size_t>(col)]))) ++col;
+    while (col < len && !std::isalnum(static_cast<unsigned char>(line[static_cast<size_t>(col)]))) {
+        ++col;
+    }
     // Move to end of word
-    while (col < len - 1 && std::isalnum(static_cast<unsigned char>(line[static_cast<size_t>(col + 1)]))) ++col;
+    while (col < len - 1 && std::isalnum(static_cast<unsigned char>(line[static_cast<size_t>(col + 1)]))) {
+        ++col;
+    }
     return col;
 }
 
 static void find_all_matches(editor_state &st) {
     st.search_matches.clear();
-    if (st.search_pattern.empty()) return;
+    if (st.search_pattern.empty()) {
+        return;
+    }
     for (int r = 0; r < static_cast<int>(st.lines.size()); ++r) {
         const auto &line = st.lines[static_cast<size_t>(r)];
         size_t pos = 0;
@@ -222,13 +254,17 @@ static void find_all_matches(editor_state &st) {
             int ce = cs + static_cast<int>(st.search_pattern.size());
             st.search_matches.push_back({r, cs, r, ce});
             pos += st.search_pattern.size();
-            if (st.search_pattern.empty()) break;
+            if (st.search_pattern.empty()) {
+                break;
+            }
         }
     }
 }
 
 static void jump_to_match(editor_state &st, int idx) {
-    if (st.search_matches.empty()) return;
+    if (st.search_matches.empty()) {
+        return;
+    }
     int n = static_cast<int>(st.search_matches.size());
     idx = ((idx % n) + n) % n;
     st.current_match = idx;
@@ -260,14 +296,18 @@ static void yank_selection(editor_state &st) {
     st.yank_buf.clear();
     st.yank_linewise = (st.mode == vim_mode::visual_line);
     if (st.yank_linewise) {
-        for (int r = sr; r <= er; ++r) st.yank_buf.push_back(st.lines[static_cast<size_t>(r)]);
+        for (int r = sr; r <= er; ++r) {
+            st.yank_buf.push_back(st.lines[static_cast<size_t>(r)]);
+        }
     } else {
         if (sr == er) {
             st.yank_buf.push_back(
                 st.lines[static_cast<size_t>(sr)].substr(static_cast<size_t>(sc), static_cast<size_t>(ec - sc)));
         } else {
             st.yank_buf.push_back(st.lines[static_cast<size_t>(sr)].substr(static_cast<size_t>(sc)));
-            for (int r = sr + 1; r < er; ++r) st.yank_buf.push_back(st.lines[static_cast<size_t>(r)]);
+            for (int r = sr + 1; r < er; ++r) {
+                st.yank_buf.push_back(st.lines[static_cast<size_t>(r)]);
+            }
             st.yank_buf.push_back(st.lines[static_cast<size_t>(er)].substr(0, static_cast<size_t>(ec)));
         }
     }
@@ -289,13 +329,17 @@ static void delete_selection(editor_state &st) {
     }
     if (st.mode == vim_mode::visual_line) {
         st.lines.erase(st.lines.begin() + sr, st.lines.begin() + er + 1);
-        if (st.lines.empty()) st.lines.emplace_back("");
+        if (st.lines.empty()) {
+            st.lines.emplace_back("");
+        }
         st.cursor_row = sr;
     } else {
         std::string before = st.lines[static_cast<size_t>(sr)].substr(0, static_cast<size_t>(sc));
         std::string after = st.lines[static_cast<size_t>(er)].substr(static_cast<size_t>(ec));
         st.lines[static_cast<size_t>(sr)] = before + after;
-        if (er > sr) st.lines.erase(st.lines.begin() + sr + 1, st.lines.begin() + er + 1);
+        if (er > sr) {
+            st.lines.erase(st.lines.begin() + sr + 1, st.lines.begin() + er + 1);
+        }
         st.cursor_row = sr;
         st.cursor_col = sc;
     }
@@ -476,7 +520,9 @@ static bool execute_command(editor_state &st, classic_app &app, const std::strin
     }
     if (all_digits) {
         int line = std::atoi(cmd.c_str()) - 1;
-        if (line < 0) line = 0;
+        if (line < 0) {
+            line = 0;
+        }
         st.cursor_row = line;
         st.cursor_col = 0;
         clamp_cursor(st);
@@ -513,7 +559,9 @@ static bool handle_normal(editor_state &st, classic_app &app, const key_event &k
             st.yank_buf = {st.lines[static_cast<size_t>(st.cursor_row)]};
             st.yank_linewise = true;
             st.lines.erase(st.lines.begin() + st.cursor_row);
-            if (st.lines.empty()) st.lines.emplace_back("");
+            if (st.lines.empty()) {
+                st.lines.emplace_back("");
+            }
             clamp_cursor(st);
             st.modified = true;
             st.status_msg = "1 line deleted";
@@ -536,21 +584,31 @@ static bool handle_normal(editor_state &st, classic_app &app, const key_event &k
 
     // Movement
     if (ke.codepoint == 'h' || ke.key == special_key::left) {
-        if (st.cursor_col > 0) --st.cursor_col;
+        if (st.cursor_col > 0) {
+            --st.cursor_col;
+        }
         return true;
     }
     if (ke.codepoint == 'l' || ke.key == special_key::right) {
-        if (st.cursor_col < line_len - 1) ++st.cursor_col;
-        if (st.cursor_col < 0) st.cursor_col = 0;
+        if (st.cursor_col < line_len - 1) {
+            ++st.cursor_col;
+        }
+        if (st.cursor_col < 0) {
+            st.cursor_col = 0;
+        }
         return true;
     }
     if (ke.codepoint == 'j' || ke.key == special_key::down) {
-        if (st.cursor_row < total - 1) ++st.cursor_row;
+        if (st.cursor_row < total - 1) {
+            ++st.cursor_row;
+        }
         clamp_cursor(st);
         return true;
     }
     if (ke.codepoint == 'k' || ke.key == special_key::up) {
-        if (st.cursor_row > 0) --st.cursor_row;
+        if (st.cursor_row > 0) {
+            --st.cursor_row;
+        }
         clamp_cursor(st);
         return true;
     }
@@ -630,7 +688,9 @@ static bool handle_normal(editor_state &st, classic_app &app, const key_event &k
     }
     if (ke.codepoint == 'a') {
         st.mode = vim_mode::insert;
-        if (line_len > 0) ++st.cursor_col;
+        if (line_len > 0) {
+            ++st.cursor_col;
+        }
         return true;
     }
     if (ke.codepoint == 'I') {
@@ -715,7 +775,9 @@ static bool handle_normal(editor_state &st, classic_app &app, const key_event &k
             } else {
                 auto &line = st.lines[static_cast<size_t>(st.cursor_row)];
                 int pos = st.cursor_col + 1;
-                if (pos > static_cast<int>(line.size())) pos = static_cast<int>(line.size());
+                if (pos > static_cast<int>(line.size())) {
+                    pos = static_cast<int>(line.size());
+                }
                 line.insert(static_cast<size_t>(pos), st.yank_buf[0]);
                 st.cursor_col = pos + static_cast<int>(st.yank_buf[0].size()) - 1;
             }
@@ -779,24 +841,32 @@ static bool handle_insert(editor_state &st, const key_event &ke) {
     if (ke.key == special_key::escape) {
         push_undo(st);
         st.mode = vim_mode::normal;
-        if (st.cursor_col > 0) --st.cursor_col;
+        if (st.cursor_col > 0) {
+            --st.cursor_col;
+        }
         clamp_cursor(st);
         return true;
     }
 
     // Arrow keys
     if (ke.key == special_key::up) {
-        if (st.cursor_row > 0) --st.cursor_row;
+        if (st.cursor_row > 0) {
+            --st.cursor_row;
+        }
         clamp_cursor(st);
         return true;
     }
     if (ke.key == special_key::down) {
-        if (st.cursor_row < static_cast<int>(st.lines.size()) - 1) ++st.cursor_row;
+        if (st.cursor_row < static_cast<int>(st.lines.size()) - 1) {
+            ++st.cursor_row;
+        }
         clamp_cursor(st);
         return true;
     }
     if (ke.key == special_key::left) {
-        if (st.cursor_col > 0) --st.cursor_col;
+        if (st.cursor_col > 0) {
+            --st.cursor_col;
+        }
         return true;
     }
     if (ke.key == special_key::right) {
@@ -857,7 +927,9 @@ static bool handle_insert(editor_state &st, const key_event &ke) {
     // Printable character
     if (ke.codepoint >= 32 && ke.codepoint < 127) {
         auto &line = st.lines[static_cast<size_t>(st.cursor_row)];
-        if (st.cursor_col > static_cast<int>(line.size())) st.cursor_col = static_cast<int>(line.size());
+        if (st.cursor_col > static_cast<int>(line.size())) {
+            st.cursor_col = static_cast<int>(line.size());
+        }
         line.insert(line.begin() + st.cursor_col, static_cast<char>(ke.codepoint));
         ++st.cursor_col;
         st.modified = true;
@@ -878,20 +950,28 @@ static bool handle_visual(editor_state &st, const key_event &ke) {
 
     // Movement (same as normal)
     if (ke.codepoint == 'h' || ke.key == special_key::left) {
-        if (st.cursor_col > 0) --st.cursor_col;
+        if (st.cursor_col > 0) {
+            --st.cursor_col;
+        }
         return true;
     }
     if (ke.codepoint == 'l' || ke.key == special_key::right) {
-        if (st.cursor_col < line_len - 1) ++st.cursor_col;
+        if (st.cursor_col < line_len - 1) {
+            ++st.cursor_col;
+        }
         return true;
     }
     if (ke.codepoint == 'j' || ke.key == special_key::down) {
-        if (st.cursor_row < total - 1) ++st.cursor_row;
+        if (st.cursor_row < total - 1) {
+            ++st.cursor_row;
+        }
         clamp_cursor(st);
         return true;
     }
     if (ke.codepoint == 'k' || ke.key == special_key::up) {
-        if (st.cursor_row > 0) --st.cursor_row;
+        if (st.cursor_row > 0) {
+            --st.cursor_row;
+        }
         clamp_cursor(st);
         return true;
     }
@@ -1215,8 +1295,12 @@ int main() {
             .eof_style(eof_sty)
             .border(border_style::none);
 
-        if (st.show_line_numbers || st.relative_numbers) ta.show_line_numbers();
-        if (st.relative_numbers) ta.relative_line_numbers();
+        if (st.show_line_numbers || st.relative_numbers) {
+            ta.show_line_numbers();
+        }
+        if (st.relative_numbers) {
+            ta.relative_line_numbers();
+        }
 
         // Selection
         if (st.mode == vim_mode::visual || st.mode == vim_mode::visual_line) {
@@ -1225,14 +1309,18 @@ int main() {
         }
 
         // Search matches
-        if (!st.search_matches.empty()) ta.matches(&st.search_matches).match_style(match_sty);
+        if (!st.search_matches.empty()) {
+            ta.matches(&st.search_matches).match_style(match_sty);
+        }
 
         content.add(std::move(ta));
     });
 
     app.set_status([&](status_bar_builder &sb) {
         // Tick status message
-        if (st.status_msg_ticks > 0) --st.status_msg_ticks;
+        if (st.status_msg_ticks > 0) {
+            --st.status_msg_ticks;
+        }
 
         // Left: mode or command/search prompt
         if (st.mode == vim_mode::command) {
@@ -1249,7 +1337,9 @@ int main() {
 
         // Center: filename
         std::string center = st.filename;
-        if (st.modified) center += " [+]";
+        if (st.modified) {
+            center += " [+]";
+        }
         sb.center(center);
 
         // Right: cursor position
@@ -1262,24 +1352,34 @@ int main() {
 
     // Popup window overlay (rendered as raw ANSI on top of the content area)
     app.set_overlay([&](std::string &buf, uint32_t tw, uint32_t th, int /*scroll_y*/, int /*viewport_h*/) {
-        if (!st.popup_open || st.popup_lines.empty()) return;
+        if (!st.popup_open || st.popup_lines.empty()) {
+            return;
+        }
 
         // Compute popup dimensions
         int content_w = 0;
         for (const auto &line : st.popup_lines) {
             int w = static_cast<int>(line.size());
-            if (w > content_w) content_w = w;
+            if (w > content_w) {
+                content_w = w;
+            }
         }
         int box_w = content_w + 4;                               // 2 border + 2 padding
         int box_h = static_cast<int>(st.popup_lines.size()) + 2; // 2 border rows
         int title_w = static_cast<int>(st.popup_title.size());
-        if (title_w + 4 > box_w) box_w = title_w + 4;
+        if (title_w + 4 > box_w) {
+            box_w = title_w + 4;
+        }
 
         // Center on screen
         int x0 = (static_cast<int>(tw) - box_w) / 2;
         int y0 = (static_cast<int>(th) - box_h) / 2;
-        if (x0 < 1) x0 = 1;
-        if (y0 < 1) y0 = 1;
+        if (x0 < 1) {
+            x0 = 1;
+        }
+        if (y0 < 1) {
+            y0 = 1;
+        }
 
         // Colors: bright border, dark background
         const char *border_style = "\x1b[38;2;100;149;237m\x1b[48;2;30;30;40m";  // cornflower blue on dark
@@ -1296,12 +1396,16 @@ int main() {
         // Title centered in top border
         int fill_before = (box_w - 2 - title_w) / 2;
         int fill_after = box_w - 2 - title_w - fill_before;
-        for (int i = 0; i < fill_before; ++i) buf += "\xe2\x95\x90"; // ═
+        for (int i = 0; i < fill_before; ++i) {
+            buf += "\xe2\x95\x90"; // ═
+        }
         buf += title_style;
         buf += st.popup_title;
         buf += border_style;
-        for (int i = 0; i < fill_after; ++i) buf += "\xe2\x95\x90"; // ═
-        buf += "\xe2\x95\x97";                                      // ╗
+        for (int i = 0; i < fill_after; ++i) {
+            buf += "\xe2\x95\x90"; // ═
+        }
+        buf += "\xe2\x95\x97"; // ╗
 
         // Content lines
         for (int r = 0; r < static_cast<int>(st.popup_lines.size()); ++r) {
@@ -1314,7 +1418,9 @@ int main() {
             const auto &line = st.popup_lines[static_cast<size_t>(r)];
             buf += line;
             int pad = content_w - static_cast<int>(line.size());
-            for (int i = 0; i < pad; ++i) buf += ' ';
+            for (int i = 0; i < pad; ++i) {
+                buf += ' ';
+            }
             buf += " ";
             buf += border_style;
             buf += "\xe2\x95\x91"; // ║
@@ -1324,9 +1430,11 @@ int main() {
         std::snprintf(pos, sizeof(pos), "\x1b[%d;%dH", y0 + box_h - 1, x0);
         buf += pos;
         buf += border_style;
-        buf += "\xe2\x95\x9a";                                     // ╚
-        for (int i = 0; i < box_w - 2; ++i) buf += "\xe2\x95\x90"; // ═
-        buf += "\xe2\x95\x9d";                                     // ╝
+        buf += "\xe2\x95\x9a"; // ╚
+        for (int i = 0; i < box_w - 2; ++i) {
+            buf += "\xe2\x95\x90"; // ═
+        }
+        buf += "\xe2\x95\x9d"; // ╝
         buf += reset;
 
         // Drop shadow (right edge)
@@ -1338,7 +1446,9 @@ int main() {
         // Drop shadow (bottom edge)
         std::snprintf(pos, sizeof(pos), "\x1b[%d;%dH", y0 + box_h, x0 + 1);
         buf += pos;
-        for (int i = 0; i < box_w; ++i) buf += "\x1b[38;2;40;40;40m\xe2\x96\x84\x1b[0m"; // ▄
+        for (int i = 0; i < box_w; ++i) {
+            buf += "\x1b[38;2;40;40;40m\xe2\x96\x84\x1b[0m"; // ▄
+        }
     });
 
     app.on_key([&](const key_event &ke) -> bool {

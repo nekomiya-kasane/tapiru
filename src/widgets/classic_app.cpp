@@ -190,7 +190,9 @@ struct classic_app::impl {
     }
 
     void open_menu(int idx) {
-        if (idx < 0 || idx >= num_menus) return;
+        if (idx < 0 || idx >= num_menus) {
+            return;
+        }
         active_menu = idx;
         menu_open = true;
         // Build menu_tree from the menu_bar_entry items
@@ -209,13 +211,17 @@ struct classic_app::impl {
     }
 
     void switch_menu(int dir) {
-        if (!menu_open) return;
+        if (!menu_open) {
+            return;
+        }
         int next = (active_menu + dir + num_menus) % num_menus;
         open_menu(next);
     }
 
     int hit_test_menu_bar(int x, int y) const {
-        if (y != 0) return -1;
+        if (y != 0) {
+            return -1;
+        }
         for (int i = 0; i < num_menus; ++i) {
             if (x >= menu_label_x[static_cast<size_t>(i)] &&
                 x < menu_label_x[static_cast<size_t>(i)] + menu_label_w[static_cast<size_t>(i)]) {
@@ -226,7 +232,9 @@ struct classic_app::impl {
     }
 
     int dropdown_x() const {
-        if (active_menu < 0) return 0;
+        if (active_menu < 0) {
+            return 0;
+        }
         return menu_label_x[static_cast<size_t>(active_menu)];
     }
 
@@ -235,12 +243,18 @@ struct classic_app::impl {
     static int compute_menu_content_w(const std::vector<menu_tree::node> &items) {
         int max_cw = 0;
         for (const auto &item : items) {
-            if (item.separator) continue;
+            if (item.separator) {
+                continue;
+            }
             int lw = static_cast<int>(item.label.size());
             int sw = item.shortcut.empty() ? 0 : static_cast<int>(item.shortcut.size());
             int rw = lw + (sw > 0 ? 2 + sw : 0);
-            if (item.has_submenu()) rw += 2;
-            if (rw > max_cw) max_cw = rw;
+            if (item.has_submenu()) {
+                rw += 2;
+            }
+            if (rw > max_cw) {
+                max_cw = rw;
+            }
         }
         return max_cw + 2;
     }
@@ -253,10 +267,14 @@ struct classic_app::impl {
     };
 
     menu_hit hit_test_all_panels(int mx, int my) const {
-        if (!menu_open || active_menu < 0) return {};
+        if (!menu_open || active_menu < 0) {
+            return {};
+        }
 
         const auto &roots = mtree.roots();
-        if (roots.empty()) return {};
+        if (roots.empty()) {
+            return {};
+        }
 
         const auto &path = mstate.open_path();
 
@@ -277,9 +295,13 @@ struct classic_app::impl {
         int sub_dx = dx + pw;
         for (int d = 0; d + 1 < static_cast<int>(path.size()); ++d) {
             int parent_idx = path[static_cast<size_t>(d)];
-            if (parent_idx < 0 || parent_idx >= static_cast<int>(current_items->size())) break;
+            if (parent_idx < 0 || parent_idx >= static_cast<int>(current_items->size())) {
+                break;
+            }
             const auto &parent = (*current_items)[static_cast<size_t>(parent_idx)];
-            if (!parent.has_submenu()) break;
+            if (!parent.has_submenu()) {
+                break;
+            }
 
             int sub_dy = dy + 1 + parent_idx;
             int sub_cw = compute_menu_content_w(parent.children);
@@ -314,7 +336,9 @@ struct classic_app::impl {
             buf += seq;
         };
         auto fill_hz = [&](int count) {
-            for (int i = 0; i < count; ++i) buf += k_hz;
+            for (int i = 0; i < count; ++i) {
+                buf += k_hz;
+            }
         };
 
         // Top border
@@ -360,10 +384,14 @@ struct classic_app::impl {
                 }
 
                 int gap = content_w - left_cols - right_cols;
-                if (gap < 1) gap = 1;
+                if (gap < 1) {
+                    gap = 1;
+                }
 
                 buf += left_part;
-                for (int g = 0; g < gap; ++g) buf += ' ';
+                for (int g = 0; g < gap; ++g) {
+                    buf += ' ';
+                }
 
                 if (!item.shortcut.empty() && !selected) {
                     ansi_fg_bg(buf, theme.dropdown_shortcut);
@@ -392,10 +420,14 @@ struct classic_app::impl {
     }
 
     void render_dropdown_ansi(console &con) const {
-        if (!menu_open || active_menu < 0) return;
+        if (!menu_open || active_menu < 0) {
+            return;
+        }
 
         const auto &roots = mtree.roots();
-        if (roots.empty()) return;
+        if (roots.empty()) {
+            return;
+        }
 
         std::string buf;
         buf.reserve(2048);
@@ -412,9 +444,13 @@ struct classic_app::impl {
 
         for (int d = 0; d + 1 < static_cast<int>(path.size()); ++d) {
             int parent_idx = path[static_cast<size_t>(d)];
-            if (parent_idx < 0 || parent_idx >= static_cast<int>(current_items->size())) break;
+            if (parent_idx < 0 || parent_idx >= static_cast<int>(current_items->size())) {
+                break;
+            }
             const auto &parent = (*current_items)[static_cast<size_t>(parent_idx)];
-            if (!parent.has_submenu()) break;
+            if (!parent.has_submenu()) {
+                break;
+            }
 
             sub_dy = dy + 1 + parent_idx;
 
@@ -431,14 +467,18 @@ struct classic_app::impl {
     // ── Selection rendering ───────────────────────────────────────────
 
     void render_selection_ansi(console &con, const std::vector<std::string> &doc_lines) const {
-        if (!has_selection()) return;
+        if (!has_selection()) {
+            return;
+        }
 
         int sl, sc, el, ec;
         sel_ordered(sl, sc, el, ec);
 
         int vis_start = scroll_y;
         int vis_end = scroll_y + viewport_h;
-        if (vis_end > static_cast<int>(doc_lines.size())) vis_end = static_cast<int>(doc_lines.size());
+        if (vis_end > static_cast<int>(doc_lines.size())) {
+            vis_end = static_cast<int>(doc_lines.size());
+        }
 
         std::string buf;
         buf.reserve(1024);
@@ -456,7 +496,9 @@ struct classic_app::impl {
                     in_tag = false;
                     continue;
                 }
-                if (!in_tag) out += s[i];
+                if (!in_tag) {
+                    out += s[i];
+                }
             }
             return out;
         };
@@ -464,7 +506,9 @@ struct classic_app::impl {
         static constexpr int k_gutter_cols = 7;
 
         for (int line = sl; line <= el; ++line) {
-            if (line < vis_start || line >= vis_end) continue;
+            if (line < vis_start || line >= vis_end) {
+                continue;
+            }
 
             int screen_row = (line - scroll_y) + 1;
 
@@ -487,12 +531,18 @@ struct classic_app::impl {
                 col_end = line_len;
             }
 
-            if (col_start > line_len) col_start = line_len;
-            if (col_end > line_len) col_end = line_len;
+            if (col_start > line_len) {
+                col_start = line_len;
+            }
+            if (col_end > line_len) {
+                col_end = line_len;
+            }
             if (col_start >= col_end && line != el) {
                 col_end = col_start + 1;
             }
-            if (col_start >= col_end) continue;
+            if (col_start >= col_end) {
+                continue;
+            }
 
             int sx = k_gutter_cols + col_start;
 
@@ -511,7 +561,9 @@ struct classic_app::impl {
             buf += k_reset;
         }
 
-        if (!buf.empty()) con.write(buf);
+        if (!buf.empty()) {
+            con.write(buf);
+        }
     }
 
     // ── Screen-to-document coordinate conversion ──────────────────────
@@ -519,11 +571,17 @@ struct classic_app::impl {
     static constexpr int k_gutter_cols = 7;
 
     bool screen_to_doc(int sx, int sy, int &doc_line, int &doc_col) const {
-        if (sy < 1 || sy > viewport_h) return false;
+        if (sy < 1 || sy > viewport_h) {
+            return false;
+        }
         doc_line = scroll_y + (sy - 1);
-        if (doc_line >= content_lines) return false;
+        if (doc_line >= content_lines) {
+            return false;
+        }
         doc_col = sx - k_gutter_cols;
-        if (doc_col < 0) doc_col = 0;
+        if (doc_col < 0) {
+            doc_col = 0;
+        }
         return true;
     }
 
@@ -531,9 +589,13 @@ struct classic_app::impl {
 
     static std::string find_label_by_index(const std::vector<menu_tree::node> &nodes, int idx) {
         for (const auto &n : nodes) {
-            if (n.global_index == idx) return n.label;
+            if (n.global_index == idx) {
+                return n.label;
+            }
             auto s = find_label_by_index(n.children, idx);
-            if (!s.empty()) return s;
+            if (!s.empty()) {
+                return s;
+            }
         }
         return "";
     }
@@ -617,8 +679,9 @@ struct classic_app::impl {
                     if (idx >= 0 && idx < static_cast<int>(items->size()) &&
                         (*items)[static_cast<size_t>(idx)].has_submenu()) {
                         items = &(*items)[static_cast<size_t>(idx)].children;
-                    } else
+                    } else {
                         break;
+                    }
                 }
                 if (hit.item_index >= 0 && hit.item_index < static_cast<int>(items->size()) &&
                     (*items)[static_cast<size_t>(hit.item_index)].has_submenu()) {
@@ -645,7 +708,9 @@ struct classic_app::impl {
                 sel_end_col = dc;
                 cursor_line = static_cast<int>(my);
                 cursor_col = static_cast<int>(mx) + 1;
-                if (dl != old_el || dc != old_ec) return redraw_hint::full;
+                if (dl != old_el || dc != old_ec) {
+                    return redraw_hint::full;
+                }
             }
         }
         return redraw_hint::none;
@@ -723,27 +788,39 @@ struct classic_app::impl {
 
     redraw_hint handle_key_normal(const key_event &ke) {
         // Let user handler try first
-        if (key_fn && key_fn(ke)) return redraw_hint::full;
+        if (key_fn && key_fn(ke)) {
+            return redraw_hint::full;
+        }
 
         int max_scroll = content_lines - viewport_h;
-        if (max_scroll < 0) max_scroll = 0;
+        if (max_scroll < 0) {
+            max_scroll = 0;
+        }
 
         if (ke.key == special_key::up) {
-            if (scroll_y > 0) --scroll_y;
+            if (scroll_y > 0) {
+                --scroll_y;
+            }
             return redraw_hint::full;
         }
         if (ke.key == special_key::down) {
-            if (scroll_y < max_scroll) ++scroll_y;
+            if (scroll_y < max_scroll) {
+                ++scroll_y;
+            }
             return redraw_hint::full;
         }
         if (ke.key == special_key::page_up) {
             scroll_y -= viewport_h;
-            if (scroll_y < 0) scroll_y = 0;
+            if (scroll_y < 0) {
+                scroll_y = 0;
+            }
             return redraw_hint::full;
         }
         if (ke.key == special_key::page_down) {
             scroll_y += viewport_h;
-            if (scroll_y > max_scroll) scroll_y = max_scroll;
+            if (scroll_y > max_scroll) {
+                scroll_y = max_scroll;
+            }
             return redraw_hint::full;
         }
         if (ke.key == special_key::home) {
@@ -776,7 +853,9 @@ struct classic_app::impl {
         if (auto *me = std::get_if<mouse_event>(&ev)) {
             switch (me->action) {
             case mouse_action::press:
-                if (me->button == mouse_button::left) return handle_mouse_press(me->x, me->y);
+                if (me->button == mouse_button::left) {
+                    return handle_mouse_press(me->x, me->y);
+                }
                 break;
             case mouse_action::move:
                 return handle_mouse_move(me->x, me->y);
@@ -789,12 +868,16 @@ struct classic_app::impl {
         }
 
         if (auto *ke = std::get_if<key_event>(&ev)) {
-            if (menu_open) return handle_key_menu_open(*ke);
+            if (menu_open) {
+                return handle_key_menu_open(*ke);
+            }
             return handle_key_normal(*ke);
         }
 
         if (auto *re = std::get_if<resize_event>(&ev)) {
-            if (re->width > 0) term_w = re->width;
+            if (re->width > 0) {
+                term_w = re->width;
+            }
             if (re->height > 0) {
                 term_h = re->height;
                 viewport_h = static_cast<int>(term_h) - 3;
@@ -877,7 +960,9 @@ struct classic_app::impl {
             if (overlay_fn_) {
                 std::string overlay_buf;
                 overlay_fn_(overlay_buf, term_w, term_h, scroll_y, viewport_h);
-                if (!overlay_buf.empty()) con.write(overlay_buf);
+                if (!overlay_buf.empty()) {
+                    con.write(overlay_buf);
+                }
             }
         }
         render_dropdown_ansi(con);
@@ -952,9 +1037,15 @@ void classic_app::selection_range(int &sl, int &sc, int &el, int &ec) const {
 void classic_app::scroll_to(int line) {
     impl_->scroll_y = line;
     int max_scroll = impl_->content_lines - impl_->viewport_h;
-    if (max_scroll < 0) max_scroll = 0;
-    if (impl_->scroll_y < 0) impl_->scroll_y = 0;
-    if (impl_->scroll_y > max_scroll) impl_->scroll_y = max_scroll;
+    if (max_scroll < 0) {
+        max_scroll = 0;
+    }
+    if (impl_->scroll_y < 0) {
+        impl_->scroll_y = 0;
+    }
+    if (impl_->scroll_y > max_scroll) {
+        impl_->scroll_y = max_scroll;
+    }
 }
 
 void classic_app::set_status_message(const std::string &msg) {

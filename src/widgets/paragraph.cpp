@@ -78,14 +78,20 @@ std::vector<std::string> wrap_lines(const std::vector<std::string> &words, uint3
 // Justify a line to exactly target_width by inserting extra spaces between words
 std::string justify_line(const std::string &line, uint32_t target_width) {
     auto words = split_words(line);
-    if (words.size() <= 1) return line;
+    if (words.size() <= 1) {
+        return line;
+    }
 
     uint32_t total_word_len = 0;
-    for (const auto &w : words) total_word_len += static_cast<uint32_t>(w.size());
+    for (const auto &w : words) {
+        total_word_len += static_cast<uint32_t>(w.size());
+    }
 
     uint32_t total_spaces = target_width > total_word_len ? target_width - total_word_len : 0;
     uint32_t gaps = static_cast<uint32_t>(words.size()) - 1;
-    if (gaps == 0) return line;
+    if (gaps == 0) {
+        return line;
+    }
 
     uint32_t base_spaces = total_spaces / gaps;
     uint32_t extra = total_spaces % gaps;

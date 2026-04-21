@@ -271,10 +271,11 @@ static void show_performance(console &con) {
         std::snprintf(lat, sizeof(lat), "%.1f %s", e.us, e.unit);
         if (e.us > 10.0) {
             double lines_per_sec = 100.0 / (e.us / 1000000.0);
-            if (lines_per_sec >= 1000000.0)
+            if (lines_per_sec >= 1000000.0) {
                 std::snprintf(thr, sizeof(thr), "%.1fM lines/s", lines_per_sec / 1000000.0);
-            else
+            } else {
                 std::snprintf(thr, sizeof(thr), "%.0fK lines/s", lines_per_sec / 1000.0);
+            }
         } else {
             double ops_per_sec = 1000000.0 / e.us;
             std::snprintf(thr, sizeof(thr), "%.1fM ops/s", ops_per_sec / 1000000.0);

@@ -45,7 +45,9 @@ std::vector<text_fragment> build_line_fragments(const std::string &line, const s
     int extent = std::max(len, 1);
     // Extend extent to cover any range that goes past line end (e.g. cursor on empty line)
     for (const auto &r : ranges) {
-        if (r.col_end > extent) extent = r.col_end;
+        if (r.col_end > extent) {
+            extent = r.col_end;
+        }
     }
 
     // Build per-column style array
@@ -81,10 +83,11 @@ std::vector<text_fragment> build_line_fragments(const std::string &line, const s
         if (!same) {
             std::string text;
             for (int k = frag_start; k < c; ++k) {
-                if (k < len)
+                if (k < len) {
                     text += line[static_cast<size_t>(k)];
-                else
+                } else {
                     text += ' ';
+                }
             }
             frags.push_back({std::move(text), col_styles[static_cast<size_t>(frag_start)]});
             frag_start = c;
@@ -104,7 +107,9 @@ bool selection_cols_for_line(const text_range &sel, int line_idx, int line_len, 
         std::swap(sc, ec);
     }
 
-    if (line_idx < sr || line_idx > er) return false;
+    if (line_idx < sr || line_idx > er) {
+        return false;
+    }
 
     if (sr == er) {
         col_start = sc;
@@ -136,10 +141,14 @@ node_id textarea_builder::flatten_into(detail::scene &s) const {
             lines.push_back(std::move(line));
         }
     }
-    if (lines.empty()) lines.emplace_back("");
+    if (lines.empty()) {
+        lines.emplace_back("");
+    }
 
     int scroll = scroll_row_ ? *scroll_row_ : 0;
-    if (scroll < 0) scroll = 0;
+    if (scroll < 0) {
+        scroll = 0;
+    }
     int cur_row = cursor_row_ ? *cursor_row_ : 0;
     int cur_col = cursor_col_ ? *cursor_col_ : 0;
 
@@ -177,7 +186,9 @@ node_id textarea_builder::flatten_into(detail::scene &s) const {
                     display_num = line_idx + 1;
                 }
                 std::string num = std::to_string(display_num);
-                while (num.size() < gutter_w - 1) num = " " + num;
+                while (num.size() < gutter_w - 1) {
+                    num = " " + num;
+                }
                 num += " ";
                 gutter_text = std::move(num);
             } else {
@@ -216,7 +227,9 @@ node_id textarea_builder::flatten_into(detail::scene &s) const {
             // Block cursor (priority 3 — highest, always visible)
             if (show_cursor_ && is_cursor_line) {
                 int cc = cur_col;
-                if (cc >= line_len) cc = line_len; // cursor at EOL
+                if (cc >= line_len) {
+                    cc = line_len; // cursor at EOL
+                }
                 ranges.push_back({cc, cc + 1, cursor_char_sty_, 3});
             }
 
@@ -272,11 +285,15 @@ node_id textarea_builder::flatten_into(detail::scene &s) const {
         pd.content = sb_id;
         auto panel_pi = s.add_panel(std::move(pd));
         auto panel_id = s.add_node(detail::widget_type::panel, panel_pi, detail::no_node, key_);
-        if (z_order_ != 0) s.set_z_order(panel_id, z_order_);
+        if (z_order_ != 0) {
+            s.set_z_order(panel_id, z_order_);
+        }
         return panel_id;
     }
 
-    if (z_order_ != 0) s.set_z_order(sb_id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(sb_id, z_order_);
+    }
     return sb_id;
 }
 

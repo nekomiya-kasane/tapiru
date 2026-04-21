@@ -39,13 +39,17 @@ node_id dropdown_builder::flatten_into(detail::scene &s) const {
             auto panel = panel_builder(std::move(tb));
             panel.border(border_);
             auto id = panel.flatten_into(s);
-            if (z_order_ != 0) s.set_z_order(id, z_order_);
+            if (z_order_ != 0) {
+                s.set_z_order(id, z_order_);
+            }
             return id;
         }
         auto tb = text_builder(button_text);
         tb.style_override(button_sty_);
         auto id = tb.flatten_into(s);
-        if (z_order_ != 0) s.set_z_order(id, z_order_);
+        if (z_order_ != 0) {
+            s.set_z_order(id, z_order_);
+        }
         return id;
     }
 
@@ -57,7 +61,9 @@ node_id dropdown_builder::flatten_into(detail::scene &s) const {
     menu.border(border_);
     menu.highlight_style(highlight_sty_);
     menu.item_style(item_sty_);
-    if (selected_) menu.cursor(selected_);
+    if (selected_) {
+        menu.cursor(selected_);
+    }
     menu.z_order(z_order_ + 1);
 
     // Build as rows: [button] [menu]
@@ -75,7 +81,9 @@ node_id dropdown_builder::flatten_into(detail::scene &s) const {
     rows.add(std::move(menu));
 
     auto id = rows.flatten_into(s);
-    if (z_order_ != 0) s.set_z_order(id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(id, z_order_);
+    }
     return id;
 }
 

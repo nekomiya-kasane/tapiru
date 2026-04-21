@@ -99,7 +99,9 @@ class virtual_screen {
     /** @brief Check if any row contains the given substring. */
     [[nodiscard]] bool contains(std::string_view text) const {
         for (auto &row : rows_) {
-            if (row.find(text) != std::string::npos) return true;
+            if (row.find(text) != std::string::npos) {
+                return true;
+            }
         }
         return false;
     }
@@ -107,14 +109,18 @@ class virtual_screen {
     /** @brief Find the first row containing the given substring. Returns -1 if not found. */
     [[nodiscard]] int find_row(std::string_view text) const {
         for (size_t i = 0; i < rows_.size(); ++i) {
-            if (rows_[i].find(text) != std::string::npos) return static_cast<int>(i);
+            if (rows_[i].find(text) != std::string::npos) {
+                return static_cast<int>(i);
+            }
         }
         return -1;
     }
 
     /** @brief Find the column position of text in a given row. Returns -1 if not found. */
     [[nodiscard]] int find_col(uint32_t row, std::string_view text) const {
-        if (row >= rows_.size()) return -1;
+        if (row >= rows_.size()) {
+            return -1;
+        }
         auto pos = rows_[row].find(text);
         return pos != std::string::npos ? static_cast<int>(pos) : -1;
     }

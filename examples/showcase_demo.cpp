@@ -725,14 +725,16 @@ static void demo_color_downgrade(console &con) {
 
         char orig[24], s256[24], s16[24], s0[24];
         std::snprintf(orig, sizeof(orig), "(%u,%u,%u)", e.r, e.g, e.b);
-        if (d256.kind == color_kind::indexed_256)
+        if (d256.kind == color_kind::indexed_256) {
             std::snprintf(s256, sizeof(s256), "idx %u", d256.r);
-        else
+        } else {
             std::snprintf(s256, sizeof(s256), "(%u,%u,%u)", d256.r, d256.g, d256.b);
-        if (d16.kind == color_kind::indexed_16)
+        }
+        if (d16.kind == color_kind::indexed_16) {
             std::snprintf(s16, sizeof(s16), "idx %u", d16.r);
-        else
+        } else {
             std::snprintf(s16, sizeof(s16), "-");
+        }
         std::snprintf(s0, sizeof(s0), "%s", d0.is_default() ? "stripped" : "?");
 
         tb.add_row({e.name, orig, s256, s16, s0});
@@ -831,10 +833,11 @@ static void demo_low_level_ansi(console &con) {
         auto escape_esc = [](const std::string &s) -> std::string {
             std::string out;
             for (char c : s) {
-                if (c == '\033')
+                if (c == '\033') {
                     out += "\\033";
-                else
+                } else {
                     out += c;
+                }
             }
             return out;
         };
@@ -929,9 +932,15 @@ static void demo_finale(console &con) {
 #ifdef _WIN32
 static int crt_report_hook(int reportType, char *message, int *returnValue) {
     const char *type_str = "UNKNOWN";
-    if (reportType == _CRT_WARN) type_str = "WARNING";
-    if (reportType == _CRT_ERROR) type_str = "ERROR";
-    if (reportType == _CRT_ASSERT) type_str = "ASSERT";
+    if (reportType == _CRT_WARN) {
+        type_str = "WARNING";
+    }
+    if (reportType == _CRT_ERROR) {
+        type_str = "ERROR";
+    }
+    if (reportType == _CRT_ASSERT) {
+        type_str = "ASSERT";
+    }
     std::fprintf(stderr, "\n*** CRT %s: %s\n", type_str, message ? message : "(null)");
     std::fflush(stderr);
     *returnValue = 0; // don't trigger debugger break
@@ -953,16 +962,17 @@ static LONG WINAPI vectored_handler(EXCEPTION_POINTERS *ep) {
     DWORD code = ep->ExceptionRecord->ExceptionCode;
     void *addr = ep->ExceptionRecord->ExceptionAddress;
     const char *desc = "unknown";
-    if (code == EXCEPTION_ACCESS_VIOLATION)
+    if (code == EXCEPTION_ACCESS_VIOLATION) {
         desc = "ACCESS_VIOLATION";
-    else if (code == EXCEPTION_STACK_OVERFLOW)
+    } else if (code == EXCEPTION_STACK_OVERFLOW) {
         desc = "STACK_OVERFLOW";
-    else if (code == EXCEPTION_INT_DIVIDE_BY_ZERO)
+    } else if (code == EXCEPTION_INT_DIVIDE_BY_ZERO) {
         desc = "INT_DIVIDE_BY_ZERO";
-    else if (code == EXCEPTION_BREAKPOINT)
+    } else if (code == EXCEPTION_BREAKPOINT) {
         desc = "BREAKPOINT";
-    else
+    } else {
         return EXCEPTION_CONTINUE_SEARCH; // not ours
+    }
 
     std::fprintf(stderr, "\n*** SEH EXCEPTION 0x%08lX (%s) at %p\n", code, desc, addr);
     std::fflush(stderr);
@@ -972,9 +982,15 @@ static LONG WINAPI vectored_handler(EXCEPTION_POINTERS *ep) {
 static void invalid_param_handler(const wchar_t *expression, const wchar_t *function, const wchar_t *file,
                                   unsigned int line, uintptr_t) {
     std::fprintf(stderr, "\n*** CRT INVALID PARAMETER:\n");
-    if (expression) std::fwprintf(stderr, L"  Expression: %s\n", expression);
-    if (function) std::fwprintf(stderr, L"  Function:   %s\n", function);
-    if (file) std::fwprintf(stderr, L"  File:       %s (line %u)\n", file, line);
+    if (expression) {
+        std::fwprintf(stderr, L"  Expression: %s\n", expression);
+    }
+    if (function) {
+        std::fwprintf(stderr, L"  Function:   %s\n", function);
+    }
+    if (file) {
+        std::fwprintf(stderr, L"  File:       %s (line %u)\n", file, line);
+    }
     std::fflush(stderr);
     std::_Exit(3);
 }

@@ -51,12 +51,16 @@ node_id toast_builder::flatten_into(detail::scene &s) const {
         auto panel = panel_builder(std::move(tb));
         panel.border(border_);
         auto id = panel.flatten_into(s);
-        if (z_order_ != 0) s.set_z_order(id, z_order_);
+        if (z_order_ != 0) {
+            s.set_z_order(id, z_order_);
+        }
         return id;
     }
 
     auto id = tb.flatten_into(s);
-    if (z_order_ != 0) s.set_z_order(id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(id, z_order_);
+    }
     return id;
 }
 

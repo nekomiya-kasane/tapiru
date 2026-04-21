@@ -34,7 +34,9 @@ braille_grid::braille_grid(uint32_t char_width, uint32_t char_height)
     : char_w_(char_width), char_h_(char_height), dots_(static_cast<size_t>(char_width) * char_height, 0) {}
 
 void braille_grid::set(uint32_t dot_x, uint32_t dot_y) {
-    if (dot_x >= dot_width() || dot_y >= dot_height()) return;
+    if (dot_x >= dot_width() || dot_y >= dot_height()) {
+        return;
+    }
     uint32_t cx = dot_x / 2;
     uint32_t cy = dot_y / 4;
     uint32_t dx = dot_x % 2;
@@ -49,7 +51,9 @@ void braille_grid::clear() {
 std::string braille_grid::render() const {
     std::string result;
     for (uint32_t cy = 0; cy < char_h_; ++cy) {
-        if (cy > 0) result += '\n';
+        if (cy > 0) {
+            result += '\n';
+        }
         for (uint32_t cx = 0; cx < char_w_; ++cx) {
             // Braille base: U+2800
             char32_t cp = 0x2800 + dots_[cy * char_w_ + cx];
@@ -71,7 +75,9 @@ node_id line_chart_builder::flatten_into(detail::scene &s) const {
 
     float lo = has_min_ ? min_ : *std::min_element(data_.begin(), data_.end());
     float hi = has_max_ ? max_ : *std::max_element(data_.begin(), data_.end());
-    if (hi <= lo) hi = lo + 1.0f;
+    if (hi <= lo) {
+        hi = lo + 1.0f;
+    }
 
     braille_grid grid(width_, height_);
     uint32_t dw = grid.dot_width();
@@ -81,12 +87,18 @@ node_id line_chart_builder::flatten_into(detail::scene &s) const {
         // Map data index
         size_t idx =
             static_cast<size_t>(static_cast<float>(dx) / static_cast<float>(dw) * static_cast<float>(data_.size()));
-        if (idx >= data_.size()) idx = data_.size() - 1;
+        if (idx >= data_.size()) {
+            idx = data_.size() - 1;
+        }
 
         float val = data_[idx];
         float norm = (val - lo) / (hi - lo);
-        if (norm < 0.0f) norm = 0.0f;
-        if (norm > 1.0f) norm = 1.0f;
+        if (norm < 0.0f) {
+            norm = 0.0f;
+        }
+        if (norm > 1.0f) {
+            norm = 1.0f;
+        }
 
         // Y is inverted: 0=top, dh-1=bottom
         uint32_t dy = static_cast<uint32_t>((1.0f - norm) * static_cast<float>(dh - 1) + 0.5f);
@@ -121,18 +133,24 @@ node_id bar_chart_builder::flatten_into(detail::scene &s) const {
     };
 
     float hi = *std::max_element(data_.begin(), data_.end());
-    if (hi <= 0.0f) hi = 1.0f;
+    if (hi <= 0.0f) {
+        hi = 1.0f;
+    }
 
     // Determine column width: max of 1 (bar char) and longest label
     size_t col_w = 1;
     for (const auto &lbl : labels_) {
-        if (lbl.size() > col_w) col_w = lbl.size();
+        if (lbl.size() > col_w) {
+            col_w = lbl.size();
+        }
     }
 
     // Build rows bottom-up
     std::string result;
     for (uint32_t row = max_height_; row > 0; --row) {
-        if (row < max_height_) result += '\n';
+        if (row < max_height_) {
+            result += '\n';
+        }
         for (size_t i = 0; i < data_.size(); ++i) {
             float norm = data_[i] / hi;
             float bar_h = norm * static_cast<float>(max_height_);
@@ -142,15 +160,21 @@ node_id bar_chart_builder::flatten_into(detail::scene &s) const {
                 block_idx = 8; // full block
             } else if (level > 0.0f) {
                 block_idx = static_cast<int>(level * 8.0f + 0.5f);
-                if (block_idx < 1) block_idx = 1;
-                if (block_idx > 8) block_idx = 8;
+                if (block_idx < 1) {
+                    block_idx = 1;
+                }
+                if (block_idx > 8) {
+                    block_idx = 8;
+                }
             }
             result += blocks[block_idx];
             // Pad bar character to column width
             for (size_t p = 1; p < col_w; ++p) {
                 result += (block_idx > 0) ? blocks[block_idx] : " ";
             }
-            if (i + 1 < data_.size()) result += ' ';
+            if (i + 1 < data_.size()) {
+                result += ' ';
+            }
         }
     }
 
@@ -160,8 +184,12 @@ node_id bar_chart_builder::flatten_into(detail::scene &s) const {
         for (size_t i = 0; i < data_.size() && i < labels_.size(); ++i) {
             result += labels_[i];
             // Pad label to column width
-            for (size_t p = labels_[i].size(); p < col_w; ++p) result += ' ';
-            if (i + 1 < data_.size()) result += ' ';
+            for (size_t p = labels_[i].size(); p < col_w; ++p) {
+                result += ' ';
+            }
+            if (i + 1 < data_.size()) {
+                result += ' ';
+            }
         }
     }
 
@@ -183,13 +211,25 @@ node_id scatter_builder::flatten_into(detail::scene &s) const {
     float x_lo = points_[0].x, x_hi = points_[0].x;
     float y_lo = points_[0].y, y_hi = points_[0].y;
     for (const auto &p : points_) {
-        if (p.x < x_lo) x_lo = p.x;
-        if (p.x > x_hi) x_hi = p.x;
-        if (p.y < y_lo) y_lo = p.y;
-        if (p.y > y_hi) y_hi = p.y;
+        if (p.x < x_lo) {
+            x_lo = p.x;
+        }
+        if (p.x > x_hi) {
+            x_hi = p.x;
+        }
+        if (p.y < y_lo) {
+            y_lo = p.y;
+        }
+        if (p.y > y_hi) {
+            y_hi = p.y;
+        }
     }
-    if (x_hi <= x_lo) x_hi = x_lo + 1.0f;
-    if (y_hi <= y_lo) y_hi = y_lo + 1.0f;
+    if (x_hi <= x_lo) {
+        x_hi = x_lo + 1.0f;
+    }
+    if (y_hi <= y_lo) {
+        y_hi = y_lo + 1.0f;
+    }
 
     braille_grid grid(width_, height_);
     uint32_t dw = grid.dot_width();

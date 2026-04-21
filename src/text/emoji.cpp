@@ -150,18 +150,23 @@ char32_t emoji_lookup(std::string_view shortcode) noexcept {
     if (shortcode.size() >= 2 && shortcode.front() == ':' && shortcode.back() == ':') {
         shortcode = shortcode.substr(1, shortcode.size() - 2);
     }
-    if (shortcode.empty()) return 0;
+    if (shortcode.empty()) {
+        return 0;
+    }
 
     // Binary search
     size_t lo = 0, hi = g_emoji_count;
     while (lo < hi) {
         size_t mid = lo + (hi - lo) / 2;
         int cmp = shortcode.compare(g_emoji_table[mid].shortcode);
-        if (cmp == 0) return g_emoji_table[mid].codepoint;
-        if (cmp < 0)
+        if (cmp == 0) {
+            return g_emoji_table[mid].codepoint;
+        }
+        if (cmp < 0) {
             hi = mid;
-        else
+        } else {
             lo = mid + 1;
+        }
     }
     return 0;
 }

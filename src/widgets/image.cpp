@@ -22,7 +22,9 @@ image_builder &image_builder::key(std::string_view k) {
 
 // Nearest-neighbor sample from source image
 static pixel_rgba sample(const std::vector<pixel_rgba> &px, uint32_t sw, uint32_t sh, uint32_t x, uint32_t y) {
-    if (x >= sw || y >= sh) return {};
+    if (x >= sw || y >= sh) {
+        return {};
+    }
     return px[static_cast<size_t>(y) * sw + x];
 }
 
@@ -38,9 +40,13 @@ node_id image_builder::flatten_into(detail::scene &s) const {
     // Terminal chars are ~2:1 aspect, and we pack 2 rows per char
     uint32_t th_pixels = static_cast<uint32_t>(static_cast<float>(tw) * aspect + 0.5f);
     // Round up to even for half-block pairing
-    if (th_pixels % 2 != 0) ++th_pixels;
+    if (th_pixels % 2 != 0) {
+        ++th_pixels;
+    }
     uint32_t th_chars = th_pixels / 2;
-    if (th_chars == 0) th_chars = 1;
+    if (th_chars == 0) {
+        th_chars = 1;
+    }
 
     // Build text_data directly with per-cell styled fragments.
     // Each cell is a ▀ (U+2580) with fg=top pixel, bg=bottom pixel.

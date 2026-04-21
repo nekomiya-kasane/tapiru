@@ -98,14 +98,18 @@ uint32_t render_fragments_line(const std::vector<text_fragment> &frags, canvas &
         while (rem > 0 && col < max_w) {
             char32_t cp;
             int bytes = utf8_decode(p, rem, cp);
-            if (bytes == 0) break;
+            if (bytes == 0) {
+                break;
+            }
             int cw = char_width(cp);
             if (cw <= 0) {
                 p += bytes;
                 rem -= bytes;
                 continue;
             }
-            if (col + static_cast<uint32_t>(cw) > max_w) break;
+            if (col + static_cast<uint32_t>(cw) > max_w) {
+                break;
+            }
             canvas_put(c, x + col, y, cp, sid, static_cast<uint8_t>(cw));
             col += static_cast<uint32_t>(cw);
             p += bytes;
@@ -140,12 +144,14 @@ void render_shadow(canvas &c, const style_table &styles, rect area, const shadow
 
     for (int sy = y0; sy < y1; ++sy) {
         for (int sx = x0; sx < x1; ++sx) {
-            if (sx < 0 || sy < 0 || static_cast<uint32_t>(sx) >= c.width() || static_cast<uint32_t>(sy) >= c.height())
+            if (sx < 0 || sy < 0 || static_cast<uint32_t>(sx) >= c.width() || static_cast<uint32_t>(sy) >= c.height()) {
                 continue;
+            }
 
             if (static_cast<uint32_t>(sx) >= area.x && static_cast<uint32_t>(sx) < area.x + area.w &&
-                static_cast<uint32_t>(sy) >= area.y && static_cast<uint32_t>(sy) < area.y + area.h)
+                static_cast<uint32_t>(sy) >= area.y && static_cast<uint32_t>(sy) < area.y + area.h) {
                 continue;
+            }
 
             int shadow_x0 = static_cast<int>(area.x) + ox;
             int shadow_y0 = static_cast<int>(area.y) + oy;
@@ -153,14 +159,16 @@ void render_shadow(canvas &c, const style_table &styles, rect area, const shadow
             int shadow_y1 = shadow_y0 + static_cast<int>(area.h);
 
             int dx = 0, dy = 0;
-            if (sx < shadow_x0)
+            if (sx < shadow_x0) {
                 dx = shadow_x0 - sx;
-            else if (sx >= shadow_x1)
+            } else if (sx >= shadow_x1) {
                 dx = sx - shadow_x1 + 1;
-            if (sy < shadow_y0)
+            }
+            if (sy < shadow_y0) {
                 dy = shadow_y0 - sy;
-            else if (sy >= shadow_y1)
+            } else if (sy >= shadow_y1) {
                 dy = sy - shadow_y1 + 1;
+            }
 
             float dist = 0.0f;
             if (bx > 0 || by > 0) {
@@ -169,10 +177,14 @@ void render_shadow(canvas &c, const style_table &styles, rect area, const shadow
                 dist = (nx > ny) ? nx : ny;
             }
 
-            if (dist >= 1.0f) continue;
+            if (dist >= 1.0f) {
+                continue;
+            }
 
             uint8_t alpha = static_cast<uint8_t>(static_cast<float>(sh.opacity) * (1.0f - dist));
-            if (alpha == 0) continue;
+            if (alpha == 0) {
+                continue;
+            }
 
             c.set_blended(static_cast<uint32_t>(sx), static_cast<uint32_t>(sy), cell{U' ', sh_sid, 1, alpha},
                           const_cast<style_table &>(styles));
@@ -202,7 +214,9 @@ measurement measure_text(const scene &s, node_id id, box_constraints bc) {
 }
 
 void render_text(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
     const auto &s = ctx.sc;
     auto &c = ctx.cv;
@@ -243,16 +257,22 @@ measurement measure_panel(const scene &s, node_id id, box_constraints bc) {
     measurement child_m{0, 0};
     if (pd.content != no_node) {
         box_constraints child_bc = bc;
-        if (child_bc.max_w > border_w)
+        if (child_bc.max_w > border_w) {
             child_bc.max_w -= border_w;
-        else
+        } else {
             child_bc.max_w = 0;
-        if (child_bc.max_h > border_h)
+        }
+        if (child_bc.max_h > border_h) {
             child_bc.max_h -= border_h;
-        else
+        } else {
             child_bc.max_h = 0;
-        if (child_bc.min_w > child_bc.max_w) child_bc.min_w = child_bc.max_w;
-        if (child_bc.min_h > child_bc.max_h) child_bc.min_h = child_bc.max_h;
+        }
+        if (child_bc.min_w > child_bc.max_w) {
+            child_bc.min_w = child_bc.max_w;
+        }
+        if (child_bc.min_h > child_bc.max_h) {
+            child_bc.min_h = child_bc.max_h;
+        }
         child_m = dispatch_measure(s, pd.content, child_bc);
     }
 
@@ -260,7 +280,9 @@ measurement measure_panel(const scene &s, node_id id, box_constraints bc) {
 }
 
 void render_panel(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
     const auto &s = ctx.sc;
     auto &c = ctx.cv;
@@ -291,13 +313,15 @@ void render_panel(render_context &ctx, node_id id, rect area) {
         for (int sy = y0; sy < y1; ++sy) {
             for (int sx = x0; sx < x1; ++sx) {
                 if (sx < 0 || sy < 0 || static_cast<uint32_t>(sx) >= c.width() ||
-                    static_cast<uint32_t>(sy) >= c.height())
+                    static_cast<uint32_t>(sy) >= c.height()) {
                     continue;
+                }
 
                 // Skip cells that are inside the panel rect (panel will overwrite)
                 if (static_cast<uint32_t>(sx) >= area.x && static_cast<uint32_t>(sx) < area.x + area.w &&
-                    static_cast<uint32_t>(sy) >= area.y && static_cast<uint32_t>(sy) < area.y + area.h)
+                    static_cast<uint32_t>(sy) >= area.y && static_cast<uint32_t>(sy) < area.y + area.h) {
                     continue;
+                }
 
                 // Distance from shadow rect edge (in cells)
                 int shadow_x0 = static_cast<int>(area.x) + ox;
@@ -306,14 +330,16 @@ void render_panel(render_context &ctx, node_id id, rect area) {
                 int shadow_y1 = shadow_y0 + static_cast<int>(area.h);
 
                 int dx = 0, dy = 0;
-                if (sx < shadow_x0)
+                if (sx < shadow_x0) {
                     dx = shadow_x0 - sx;
-                else if (sx >= shadow_x1)
+                } else if (sx >= shadow_x1) {
                     dx = sx - shadow_x1 + 1;
-                if (sy < shadow_y0)
+                }
+                if (sy < shadow_y0) {
                     dy = shadow_y0 - sy;
-                else if (sy >= shadow_y1)
+                } else if (sy >= shadow_y1) {
                     dy = sy - shadow_y1 + 1;
+                }
 
                 // Normalize dx for aspect ratio (bx is already doubled)
                 float dist = 0.0f;
@@ -323,10 +349,14 @@ void render_panel(render_context &ctx, node_id id, rect area) {
                     dist = (nx > ny) ? nx : ny;
                 }
 
-                if (dist >= 1.0f) continue;
+                if (dist >= 1.0f) {
+                    continue;
+                }
 
                 uint8_t alpha = static_cast<uint8_t>(static_cast<float>(sh.opacity) * (1.0f - dist));
-                if (alpha == 0) continue;
+                if (alpha == 0) {
+                    continue;
+                }
 
                 c.set_blended(static_cast<uint32_t>(sx), static_cast<uint32_t>(sy), cell{U' ', sh_sid, 1, alpha},
                               const_cast<style_table &>(styles));
@@ -362,7 +392,9 @@ void render_panel(render_context &ctx, node_id id, rect area) {
             // " Title " centered on top border
             uint32_t title_w = static_cast<uint32_t>(string_width(pd.title));
             uint32_t max_title = area.w - 4;
-            if (title_w > max_title) title_w = max_title;
+            if (title_w > max_title) {
+                title_w = max_title;
+            }
             uint32_t tx = area.x + 2;
 
             // Space before title
@@ -374,14 +406,18 @@ void render_panel(render_context &ctx, node_id id, rect area) {
             while (rem > 0 && col < title_w) {
                 char32_t cp;
                 int bytes = utf8_decode(p, rem, cp);
-                if (bytes == 0) break;
+                if (bytes == 0) {
+                    break;
+                }
                 int cw = char_width(cp);
                 if (cw <= 0) {
                     p += bytes;
                     rem -= bytes;
                     continue;
                 }
-                if (col + static_cast<uint32_t>(cw) > title_w) break;
+                if (col + static_cast<uint32_t>(cw) > title_w) {
+                    break;
+                }
                 canvas_put(c, tx + col, area.y, cp, title_sid, static_cast<uint8_t>(cw), a);
                 col += static_cast<uint32_t>(cw);
                 p += bytes;
@@ -429,7 +465,9 @@ measurement measure_rule(const scene &s, node_id id, box_constraints bc) {
 }
 
 void render_rule(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
     const auto &s = ctx.sc;
     auto &c = ctx.cv;
@@ -454,7 +492,9 @@ void render_rule(render_context &ctx, node_id id, rect area) {
     if (!rd.title.empty() && area.w > 4) {
         uint32_t title_w = static_cast<uint32_t>(string_width(rd.title));
         uint32_t max_title = area.w - 4;
-        if (title_w > max_title) title_w = max_title;
+        if (title_w > max_title) {
+            title_w = max_title;
+        }
 
         uint32_t tx;
         switch (rd.align) {
@@ -477,14 +517,18 @@ void render_rule(render_context &ctx, node_id id, rect area) {
         while (rem > 0 && col < title_w) {
             char32_t cp;
             int bytes = utf8_decode(p, rem, cp);
-            if (bytes == 0) break;
+            if (bytes == 0) {
+                break;
+            }
             int cw = char_width(cp);
             if (cw <= 0) {
                 p += bytes;
                 rem -= bytes;
                 continue;
             }
-            if (col + static_cast<uint32_t>(cw) > title_w) break;
+            if (col + static_cast<uint32_t>(cw) > title_w) {
+                break;
+            }
             canvas_put(c, tx + col, area.y, cp, sid, static_cast<uint8_t>(cw));
             col += static_cast<uint32_t>(cw);
             p += bytes;
@@ -506,16 +550,22 @@ measurement measure_padding(const scene &s, node_id id, box_constraints bc) {
     measurement child_m{0, 0};
     if (pd.content != no_node) {
         box_constraints child_bc = bc;
-        if (child_bc.max_w > pad_w)
+        if (child_bc.max_w > pad_w) {
             child_bc.max_w -= pad_w;
-        else
+        } else {
             child_bc.max_w = 0;
-        if (child_bc.max_h > pad_h)
+        }
+        if (child_bc.max_h > pad_h) {
             child_bc.max_h -= pad_h;
-        else
+        } else {
             child_bc.max_h = 0;
-        if (child_bc.min_w > child_bc.max_w) child_bc.min_w = child_bc.max_w;
-        if (child_bc.min_h > child_bc.max_h) child_bc.min_h = child_bc.max_h;
+        }
+        if (child_bc.min_w > child_bc.max_w) {
+            child_bc.min_w = child_bc.max_w;
+        }
+        if (child_bc.min_h > child_bc.max_h) {
+            child_bc.min_h = child_bc.max_h;
+        }
         child_m = dispatch_measure(s, pd.content, child_bc);
     }
 
@@ -523,7 +573,9 @@ measurement measure_padding(const scene &s, node_id id, box_constraints bc) {
 }
 
 void render_padding(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
     const auto &pd = ctx.sc.get_padding(ctx.sc.pool_of(id));
 
@@ -538,7 +590,9 @@ void render_padding(render_context &ctx, node_id id, rect area) {
 measurement measure_columns(const scene &s, node_id id, box_constraints bc) {
     const auto &cd = s.get_columns(s.pool_of(id));
     uint32_t n = static_cast<uint32_t>(cd.children.size());
-    if (n == 0) return bc.constrain({0, 0});
+    if (n == 0) {
+        return bc.constrain({0, 0});
+    }
 
     uint32_t total_gap = (n - 1) * cd.gap;
     uint32_t avail = bc.max_w > total_gap ? bc.max_w - total_gap : 0;
@@ -585,12 +639,16 @@ measurement measure_columns(const scene &s, node_id id, box_constraints bc) {
 }
 
 void render_columns(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
     const auto &s = ctx.sc;
     const auto &cd = s.get_columns(s.pool_of(id));
     uint32_t n = static_cast<uint32_t>(cd.children.size());
-    if (n == 0) return;
+    if (n == 0) {
+        return;
+    }
 
     uint32_t total_gap = (n - 1) * cd.gap;
     uint32_t avail = area.w > total_gap ? area.w - total_gap : 0;
@@ -658,22 +716,32 @@ measurement measure_table(const scene &s, node_id id, box_constraints bc) {
 
     // Total width: borders + separators + content
     uint32_t total_w = 0;
-    for (auto w : col_widths) total_w += w;
+    for (auto w : col_widths) {
+        total_w += w;
+    }
     if (has_border) {
         total_w += ncols + 1; // vertical borders between and around columns
     }
 
     // Total height: header + separator + rows + borders
     uint32_t total_h = nrows;
-    if (td.show_header) total_h += 1;               // header row
-    if (td.show_header && has_border) total_h += 1; // header separator
-    if (has_border) total_h += 2;                   // top + bottom border
+    if (td.show_header) {
+        total_h += 1; // header row
+    }
+    if (td.show_header && has_border) {
+        total_h += 1; // header separator
+    }
+    if (has_border) {
+        total_h += 2; // top + bottom border
+    }
 
     return bc.constrain({total_w, total_h});
 }
 
 void render_table(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
     const auto &s = ctx.sc;
     auto &c = ctx.cv;
@@ -683,7 +751,9 @@ void render_table(render_context &ctx, node_id id, rect area) {
     uint32_t nrows = ncols > 0 ? static_cast<uint32_t>(td.cells.size()) / ncols : 0;
     bool has_border = td.border != border_style::none;
 
-    if (ncols == 0) return;
+    if (ncols == 0) {
+        return;
+    }
 
     // Shadow pass
     if (td.shadow) {
@@ -714,7 +784,9 @@ void render_table(render_context &ctx, node_id id, rect area) {
 
     // Helper: draw a horizontal separator line
     auto draw_hsep = [&](uint32_t y, char32_t left, char32_t mid, char32_t right, char32_t fill) {
-        if (!has_border) return;
+        if (!has_border) {
+            return;
+        }
         uint32_t x = area.x;
         canvas_put(c, x++, y, left, bsid, 1);
         for (uint32_t col = 0; col < ncols; ++col) {
@@ -811,7 +883,9 @@ measurement measure_overlay(const scene &s, node_id id, box_constraints bc) {
 }
 
 void render_overlay(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
     const auto &od = ctx.sc.get_overlay(ctx.sc.pool_of(id));
 
@@ -830,7 +904,9 @@ void render_overlay(render_context &ctx, node_id id, rect area) {
 measurement measure_rows(const scene &s, node_id id, box_constraints bc) {
     const auto &rd = s.get_rows(s.pool_of(id));
     uint32_t n = static_cast<uint32_t>(rd.children.size());
-    if (n == 0) return bc.constrain({0, 0});
+    if (n == 0) {
+        return bc.constrain({0, 0});
+    }
 
     uint32_t total_gap = (n - 1) * rd.gap;
     bool bounded = bc.max_h < unbounded;
@@ -879,12 +955,16 @@ measurement measure_rows(const scene &s, node_id id, box_constraints bc) {
 }
 
 void render_rows(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
     const auto &s = ctx.sc;
     const auto &rd = s.get_rows(s.pool_of(id));
     uint32_t n = static_cast<uint32_t>(rd.children.size());
-    if (n == 0) return;
+    if (n == 0) {
+        return;
+    }
 
     uint32_t total_gap = (n - 1) * rd.gap;
     bool bounded = area.h < unbounded;
@@ -935,7 +1015,9 @@ measurement measure_spacer(const scene &s, node_id id, box_constraints bc) {
 }
 
 void render_spacer(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
     // Spacer renders nothing — it just occupies space
 }
@@ -968,8 +1050,12 @@ measurement measure_sized_box(const scene &s, node_id id, box_constraints bc) {
     inner_max_h = std::clamp(inner_max_h, bc.min_h, bc.max_h);
 
     // Ensure min <= max after clamping
-    if (inner_min_w > inner_max_w) inner_min_w = inner_max_w;
-    if (inner_min_h > inner_max_h) inner_min_h = inner_max_h;
+    if (inner_min_w > inner_max_w) {
+        inner_min_w = inner_max_w;
+    }
+    if (inner_min_h > inner_max_h) {
+        inner_min_h = inner_max_h;
+    }
 
     box_constraints inner_bc{inner_min_w, inner_max_w, inner_min_h, inner_max_h};
 
@@ -986,7 +1072,9 @@ measurement measure_sized_box(const scene &s, node_id id, box_constraints bc) {
 }
 
 void render_sized_box(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
 
     const auto &sb = ctx.sc.get_sized_box(ctx.sc.pool_of(id));
@@ -1013,11 +1101,15 @@ measurement measure_center(const scene &s, node_id id, box_constraints bc) {
 }
 
 void render_center(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
 
     const auto &cd = ctx.sc.get_center(ctx.sc.pool_of(id));
-    if (cd.content == no_node) return;
+    if (cd.content == no_node) {
+        return;
+    }
 
     // Measure child to get its natural size
     box_constraints loose{0, area.w, 0, area.h};
@@ -1028,8 +1120,12 @@ void render_center(render_context &ctx, node_id id, rect area) {
 
     uint32_t cx = area.x;
     uint32_t cy = area.y;
-    if (cd.horizontal && cw < area.w) cx = area.x + (area.w - cw) / 2;
-    if (cd.vertical && ch < area.h) cy = area.y + (area.h - ch) / 2;
+    if (cd.horizontal && cw < area.w) {
+        cx = area.x + (area.w - cw) / 2;
+    }
+    if (cd.vertical && ch < area.h) {
+        cy = area.y + (area.h - ch) / 2;
+    }
 
     dispatch_render(ctx, cd.content, {cx, cy, cw, ch});
 }
@@ -1053,7 +1149,9 @@ measurement measure_scroll_view(const scene &s, node_id id, box_constraints bc) 
 }
 
 void render_scroll_view(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
 
     const auto &sv = ctx.sc.get_scroll_view(ctx.sc.pool_of(id));
@@ -1083,18 +1181,26 @@ void render_scroll_view(render_context &ctx, node_id id, rect area) {
 
     // Inner viewport area
     rect inner = has_border ? area.inset(1, 1, 1, 1) : area;
-    if (inner.empty()) return;
+    if (inner.empty()) {
+        return;
+    }
 
     // Reserve space for scrollbar
     uint32_t content_w = inner.w > scrollbar_w ? inner.w - scrollbar_w : inner.w;
     uint32_t content_h = inner.h;
 
-    if (sv.content == no_node || content_w == 0 || content_h == 0) return;
+    if (sv.content == no_node || content_w == 0 || content_h == 0) {
+        return;
+    }
 
     int scroll_x = sv.scroll_x ? *sv.scroll_x : 0;
     int scroll_y = sv.scroll_y ? *sv.scroll_y : 0;
-    if (scroll_x < 0) scroll_x = 0;
-    if (scroll_y < 0) scroll_y = 0;
+    if (scroll_x < 0) {
+        scroll_x = 0;
+    }
+    if (scroll_y < 0) {
+        scroll_y = 0;
+    }
 
     // Measure child with unbounded height to get full content size
     box_constraints child_bc{content_w, content_w, 0, unbounded};
@@ -1105,8 +1211,9 @@ void render_scroll_view(render_context &ctx, node_id id, rect area) {
 
     // Clamp scroll offsets
     if (total_content_h > content_h) {
-        if (static_cast<uint32_t>(scroll_y) > total_content_h - content_h)
+        if (static_cast<uint32_t>(scroll_y) > total_content_h - content_h) {
             scroll_y = static_cast<int>(total_content_h - content_h);
+        }
     } else {
         scroll_y = 0;
     }
@@ -1125,10 +1232,14 @@ void render_scroll_view(render_context &ctx, node_id id, rect area) {
     // Blit visible window from tmp_canvas to main canvas
     for (uint32_t vy = 0; vy < content_h; ++vy) {
         uint32_t src_y = static_cast<uint32_t>(scroll_y) + vy;
-        if (src_y >= tmp_h) break;
+        if (src_y >= tmp_h) {
+            break;
+        }
         for (uint32_t vx = 0; vx < content_w; ++vx) {
             uint32_t src_x = static_cast<uint32_t>(scroll_x) + vx;
-            if (src_x >= tmp_w) break;
+            if (src_x >= tmp_w) {
+                break;
+            }
             const auto &src_cell = tmp_canvas.get(src_x, src_y);
             if (src_cell.codepoint != U' ' || src_cell.sid != default_style_id) {
                 // Re-intern the style from tmp_styles into main styles
@@ -1196,7 +1307,9 @@ measurement measure_menu(const scene &s, node_id id, box_constraints bc) {
 }
 
 void render_menu(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
     const auto &s = ctx.sc;
     auto &c = ctx.cv;
@@ -1234,14 +1347,18 @@ void render_menu(render_context &ctx, node_id id, rect area) {
 
     // Content area
     rect inner = has_border ? area.inset(1, 1, 1, 1) : area;
-    if (inner.empty()) return;
+    if (inner.empty()) {
+        return;
+    }
 
     int cursor_val = md.cursor ? *md.cursor : -1;
     uint32_t row_y = inner.y;
     int item_idx = 0;
 
     for (const auto &item : md.items) {
-        if (row_y >= inner.y + inner.h) break;
+        if (row_y >= inner.y + inner.h) {
+            break;
+        }
 
         if (item.separator) {
             // Draw horizontal separator
@@ -1298,7 +1415,9 @@ measurement measure_canvas_widget(const scene &s, node_id id, box_constraints bc
 }
 
 void render_canvas_widget(render_context &ctx, node_id id, rect area) {
-    if (area.empty()) return;
+    if (area.empty()) {
+        return;
+    }
     ctx.sc.area(id) = area;
     const auto &cw = ctx.sc.get_canvas_widget(ctx.sc.pool_of(id));
     auto &c = ctx.cv;
@@ -1322,10 +1441,14 @@ void render_canvas_widget(render_context &ctx, node_id id, rect area) {
     std::vector<braille_cell> grid(static_cast<size_t>(cell_w) * cell_h);
 
     auto set_pixel = [&](int px, int py, const color &col) {
-        if (px < 0 || py < 0) return;
+        if (px < 0 || py < 0) {
+            return;
+        }
         int cx = px / 2;
         int cy = py / 4;
-        if (cx < 0 || static_cast<uint32_t>(cx) >= cell_w || cy < 0 || static_cast<uint32_t>(cy) >= cell_h) return;
+        if (cx < 0 || static_cast<uint32_t>(cx) >= cell_w || cy < 0 || static_cast<uint32_t>(cy) >= cell_h) {
+            return;
+        }
         int lx = px % 2;
         int ly = py % 4;
         // Braille bit mapping
@@ -1347,7 +1470,9 @@ void render_canvas_widget(render_context &ctx, node_id id, rect area) {
         int err = dx - dy;
         while (true) {
             set_pixel(x1, y1, col);
-            if (x1 == x2 && y1 == y2) break;
+            if (x1 == x2 && y1 == y2) {
+                break;
+            }
             int e2 = 2 * err;
             if (e2 > -dy) {
                 err -= dy;
@@ -1414,7 +1539,9 @@ void render_canvas_widget(render_context &ctx, node_id id, rect area) {
     for (uint32_t cy = 0; cy < cell_h; ++cy) {
         for (uint32_t cx = 0; cx < cell_w; ++cx) {
             const auto &bc = grid[static_cast<size_t>(cy) * cell_w + cx];
-            if (bc.bits == 0) continue;
+            if (bc.bits == 0) {
+                continue;
+            }
             char32_t braille = U'\x2800' + bc.bits;
             style sty;
             sty.fg = bc.fg;
@@ -1429,7 +1556,9 @@ void render_canvas_widget(render_context &ctx, node_id id, rect area) {
 
     // Block-mode lines: use half-block characters (▀▄█)
     for (const auto &ln : cw.lines) {
-        if (!ln.block_mode) continue;
+        if (!ln.block_mode) {
+            continue;
+        }
         // For block mode, each cell = 1×2 pixels
         int dx_abs = std::abs(ln.x2 - ln.x1);
         int dy_abs = std::abs(ln.y2 - ln.y1);
@@ -1452,7 +1581,9 @@ void render_canvas_widget(render_context &ctx, node_id id, rect area) {
                     canvas_put(c, dx2, dy2, ch, sid, 1);
                 }
             }
-            if (x == ln.x2 && y == ln.y2) break;
+            if (x == ln.x2 && y == ln.y2) {
+                break;
+            }
             int e2 = 2 * err;
             if (e2 > -dy_abs) {
                 err -= dy_abs;

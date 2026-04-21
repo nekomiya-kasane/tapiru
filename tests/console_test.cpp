@@ -30,8 +30,12 @@ class virtual_terminal {
             if (buffer_[i] == '\033' && i + 1 < buffer_.size() && buffer_[i + 1] == '[') {
                 // Skip until 'm' or end
                 i += 2;
-                while (i < buffer_.size() && buffer_[i] != 'm') ++i;
-                if (i < buffer_.size()) ++i; // skip 'm'
+                while (i < buffer_.size() && buffer_[i] != 'm') {
+                    ++i;
+                }
+                if (i < buffer_.size()) {
+                    ++i; // skip 'm'
+                }
             } else {
                 result += buffer_[i];
                 ++i;

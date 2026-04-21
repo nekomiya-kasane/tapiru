@@ -63,7 +63,9 @@ template <size_t MaxOps = 64> struct static_render_plan {
 // ── Execute ─────────────────────────────────────────────────────────────
 
 template <size_t MaxOps> inline void execute(const static_render_plan<MaxOps> &plan, markup_render_context &ctx) {
-    for (size_t i = 0; i < plan.count; ++i) plan.ops[i](ctx);
+    for (size_t i = 0; i < plan.count; ++i) {
+        plan.ops[i](ctx);
+    }
 }
 
 // ── UTF-8 encoding helper ───────────────────────────────────────────────
@@ -93,7 +95,9 @@ inline void append_border_char(std::string &out, char32_t ch) {
 }
 
 inline void repeat_char(std::string &out, char32_t ch, uint32_t count) {
-    for (uint32_t i = 0; i < count; ++i) append_utf8(out, ch);
+    for (uint32_t i = 0; i < count; ++i) {
+        append_utf8(out, ch);
+    }
 }
 
 } // namespace detail
@@ -105,7 +109,9 @@ inline void repeat_char(std::string &out, char32_t ch, uint32_t count) {
 // ── op_text: emit styled text from source literal ───────────────────────
 
 template <size_t Offset, size_t Length, style Sty> inline void op_text(markup_render_context &ctx) {
-    if (ctx.color_on && ctx.emitter) ctx.emitter->transition(Sty, *ctx.out);
+    if (ctx.color_on && ctx.emitter) {
+        ctx.emitter->transition(Sty, *ctx.out);
+    }
     ctx.out->append(ctx.src + Offset, Length);
 }
 
@@ -130,11 +136,15 @@ template <char32_t Codepoint> inline void op_emoji(markup_render_context &ctx) {
 // ── op_style_push/pop: transition to/from a style ───────────────────────
 
 template <style Sty> inline void op_style_push(markup_render_context &ctx) {
-    if (ctx.color_on && ctx.emitter) ctx.emitter->transition(Sty, *ctx.out);
+    if (ctx.color_on && ctx.emitter) {
+        ctx.emitter->transition(Sty, *ctx.out);
+    }
 }
 
 template <style Sty> inline void op_style_pop(markup_render_context &ctx) {
-    if (ctx.color_on && ctx.emitter) ctx.emitter->transition(Sty, *ctx.out);
+    if (ctx.color_on && ctx.emitter) {
+        ctx.emitter->transition(Sty, *ctx.out);
+    }
 }
 
 // ── op_link_open/close: OSC 8 hyperlink ─────────────────────────────────
@@ -163,7 +173,9 @@ template <border_style BS, size_t TitleOffset = 0, size_t TitleLength = 0>
 inline void op_box_open(markup_render_context &ctx) {
     constexpr auto chars = get_border_chars(BS);
     uint32_t w = ctx.content_width > 0 ? ctx.content_width : ctx.width;
-    if (w < 4) w = 4;
+    if (w < 4) {
+        w = 4;
+    }
 
     // Top border: ╭─── Title ───╮
     detail::append_border_char(*ctx.out, chars.top_left);
@@ -173,9 +185,13 @@ inline void op_box_open(markup_render_context &ctx) {
         ctx.out->append(ctx.src + TitleOffset, TitleLength);
         *ctx.out += ' ';
         uint32_t used = 4 + static_cast<uint32_t>(TitleLength);
-        if (w > used) detail::repeat_char(*ctx.out, chars.horizontal, w - used);
+        if (w > used) {
+            detail::repeat_char(*ctx.out, chars.horizontal, w - used);
+        }
     } else {
-        if (w > 2) detail::repeat_char(*ctx.out, chars.horizontal, w - 2);
+        if (w > 2) {
+            detail::repeat_char(*ctx.out, chars.horizontal, w - 2);
+        }
     }
     detail::append_border_char(*ctx.out, chars.top_right);
     *ctx.out += '\n';
@@ -204,7 +220,9 @@ template <border_style BS> inline void op_box_close(markup_render_context &ctx) 
 
     // Bottom border: ╰────────────╯
     detail::append_border_char(*ctx.out, chars.bottom_left);
-    if (w > 2) detail::repeat_char(*ctx.out, chars.horizontal, w - 2);
+    if (w > 2) {
+        detail::repeat_char(*ctx.out, chars.horizontal, w - 2);
+    }
     detail::append_border_char(*ctx.out, chars.bottom_right);
 
     // Reset state
@@ -228,7 +246,9 @@ template <size_t TitleOffset = 0, size_t TitleLength = 0> inline void op_rule(ma
         *ctx.out += ' ';
         ctx.out->append(ctx.src + TitleOffset, TitleLength);
         *ctx.out += ' ';
-        if (w > decor) detail::repeat_char(*ctx.out, rule_char, w - decor);
+        if (w > decor) {
+            detail::repeat_char(*ctx.out, rule_char, w - decor);
+        }
     } else {
         detail::repeat_char(*ctx.out, rule_char, w);
     }
@@ -238,7 +258,9 @@ template <size_t TitleOffset = 0, size_t TitleLength = 0> inline void op_rule(ma
 
 template <uint8_t N = 4> inline void op_indent_open(markup_render_context &ctx) {
     ctx.line_prefix.append(N, ' ');
-    if (ctx.content_width > N) ctx.content_width -= N;
+    if (ctx.content_width > N) {
+        ctx.content_width -= N;
+    }
     *ctx.out += std::string(N, ' ');
 }
 
@@ -268,7 +290,9 @@ inline void op_quote_open(markup_render_context &ctx) {
     }
     detail::append_utf8(*ctx.out, U'\x2502'); // │
     *ctx.out += ' ';
-    if (ctx.color_on && ctx.emitter) ctx.emitter->reset(*ctx.out);
+    if (ctx.color_on && ctx.emitter) {
+        ctx.emitter->reset(*ctx.out);
+    }
     ctx.line_prefix.clear();
     detail::append_utf8(ctx.line_prefix, U'\x2502');
     ctx.line_prefix += ' ';
@@ -290,7 +314,9 @@ inline void op_code_open(markup_render_context &ctx) {
 }
 
 inline void op_code_close(markup_render_context &ctx) {
-    if (ctx.color_on && ctx.emitter) ctx.emitter->reset(*ctx.out);
+    if (ctx.color_on && ctx.emitter) {
+        ctx.emitter->reset(*ctx.out);
+    }
     ctx.line_prefix.clear();
 }
 
@@ -334,17 +360,20 @@ template <uint8_t N> inline void op_pad_close(markup_render_context &ctx) {
 template <uint8_t Percent> inline void op_progress(markup_render_context &ctx) {
     constexpr uint8_t pct = Percent > 100 ? 100 : Percent;
     uint32_t bar_width = ctx.content_width > 0 ? ctx.content_width : ctx.width;
-    if (bar_width > 6) bar_width -= 6; // room for " XXX%"
+    if (bar_width > 6) {
+        bar_width -= 6; // room for " XXX%"
+    }
     uint32_t filled = bar_width * pct / 100;
     uint32_t empty = bar_width - filled;
 
     detail::repeat_char(*ctx.out, U'\x2588', filled); // █
     detail::repeat_char(*ctx.out, U'\x2591', empty);  // ░
     *ctx.out += ' ';
-    if constexpr (pct < 10)
+    if constexpr (pct < 10) {
         *ctx.out += "  ";
-    else if constexpr (pct < 100)
+    } else if constexpr (pct < 100) {
         *ctx.out += ' ';
+    }
     *ctx.out += std::to_string(pct);
     *ctx.out += '%';
 }
@@ -355,7 +384,9 @@ template <uint8_t Num, uint8_t Den> inline void op_bar(markup_render_context &ct
     static_assert(Den > 0, "Denominator must be > 0");
     constexpr uint8_t num = Num > Den ? Den : Num;
     uint32_t bar_width = ctx.content_width > 0 ? ctx.content_width : ctx.width;
-    if (bar_width > 6) bar_width -= 6;
+    if (bar_width > 6) {
+        bar_width -= 6;
+    }
     uint32_t filled = bar_width * num / Den;
     uint32_t empty = bar_width - filled;
 
@@ -392,13 +423,17 @@ inline void dispatch_fragment(const ct_rich_fragment &frag, markup_render_contex
     switch (frag.block.kind) {
     case block_kind::none:
         // Inline text
-        if (ctx.color_on && ctx.emitter) ctx.emitter->transition(frag.sty, *ctx.out);
+        if (ctx.color_on && ctx.emitter) {
+            ctx.emitter->transition(frag.sty, *ctx.out);
+        }
         ctx.out->append(ctx.src + frag.offset, frag.length);
         break;
 
     case block_kind::line_break:
         *ctx.out += '\n';
-        if (!ctx.line_prefix.empty()) *ctx.out += ctx.line_prefix;
+        if (!ctx.line_prefix.empty()) {
+            *ctx.out += ctx.line_prefix;
+        }
         break;
 
     case block_kind::spacing:
@@ -411,16 +446,22 @@ inline void dispatch_fragment(const ct_rich_fragment &frag, markup_render_contex
         shortcode.append(ctx.src + frag.block.name_offset, frag.block.name_length);
         shortcode += ':';
         char32_t cp = emoji_lookup(shortcode);
-        if (cp != 0) detail::append_utf8(*ctx.out, cp);
+        if (cp != 0) {
+            detail::append_utf8(*ctx.out, cp);
+        }
         break;
     }
 
     case block_kind::heading:
-        if (ctx.color_on && ctx.emitter) ctx.emitter->transition(frag.block.content_sty, *ctx.out);
+        if (ctx.color_on && ctx.emitter) {
+            ctx.emitter->transition(frag.block.content_sty, *ctx.out);
+        }
         break;
 
     case block_kind::heading_close:
-        if (ctx.color_on && ctx.emitter) ctx.emitter->reset(*ctx.out);
+        if (ctx.color_on && ctx.emitter) {
+            ctx.emitter->reset(*ctx.out);
+        }
         break;
 
     case block_kind::link_open:
@@ -432,14 +473,18 @@ inline void dispatch_fragment(const ct_rich_fragment &frag, markup_render_contex
         break;
 
     case block_kind::link_close:
-        if (ctx.color_on) *ctx.out += "\033]8;;\033\\";
+        if (ctx.color_on) {
+            *ctx.out += "\033]8;;\033\\";
+        }
         break;
 
     case block_kind::box_open: {
         auto bs = static_cast<border_style>(frag.block.border);
         auto chars = get_border_chars(bs);
         uint32_t w = ctx.content_width > 0 ? ctx.content_width : ctx.width;
-        if (w < 4) w = 4;
+        if (w < 4) {
+            w = 4;
+        }
 
         detail::append_border_char(*ctx.out, chars.top_left);
         if (frag.block.title_length > 0) {
@@ -448,9 +493,13 @@ inline void dispatch_fragment(const ct_rich_fragment &frag, markup_render_contex
             ctx.out->append(ctx.src + frag.block.title_offset, frag.block.title_length);
             *ctx.out += ' ';
             uint32_t used = 4 + frag.block.title_length;
-            if (w > used) detail::repeat_char(*ctx.out, chars.horizontal, w - used);
+            if (w > used) {
+                detail::repeat_char(*ctx.out, chars.horizontal, w - used);
+            }
         } else {
-            if (w > 2) detail::repeat_char(*ctx.out, chars.horizontal, w - 2);
+            if (w > 2) {
+                detail::repeat_char(*ctx.out, chars.horizontal, w - 2);
+            }
         }
         detail::append_border_char(*ctx.out, chars.top_right);
         *ctx.out += '\n';
@@ -485,7 +534,9 @@ inline void dispatch_fragment(const ct_rich_fragment &frag, markup_render_contex
         *ctx.out += ctx.line_suffix;
         *ctx.out += '\n';
         detail::append_border_char(*ctx.out, chars.bottom_left);
-        if (w > 2) detail::repeat_char(*ctx.out, chars.horizontal, w - 2);
+        if (w > 2) {
+            detail::repeat_char(*ctx.out, chars.horizontal, w - 2);
+        }
         detail::append_border_char(*ctx.out, chars.bottom_right);
 
         ctx.line_prefix.clear();
@@ -503,7 +554,9 @@ inline void dispatch_fragment(const ct_rich_fragment &frag, markup_render_contex
             ctx.out->append(ctx.src + frag.block.title_offset, frag.block.title_length);
             *ctx.out += ' ';
             uint32_t decor = frag.block.title_length + 4;
-            if (w > decor) detail::repeat_char(*ctx.out, rule_char, w - decor);
+            if (w > decor) {
+                detail::repeat_char(*ctx.out, rule_char, w - decor);
+            }
         } else {
             detail::repeat_char(*ctx.out, rule_char, w);
         }
@@ -513,7 +566,9 @@ inline void dispatch_fragment(const ct_rich_fragment &frag, markup_render_contex
     case block_kind::indent_open:
         ctx.out->append(frag.block.level, ' ');
         ctx.line_prefix.append(frag.block.level, ' ');
-        if (ctx.content_width > frag.block.level) ctx.content_width -= frag.block.level;
+        if (ctx.content_width > frag.block.level) {
+            ctx.content_width -= frag.block.level;
+        }
         break;
 
     case block_kind::indent_close:
@@ -533,7 +588,9 @@ inline void dispatch_fragment(const ct_rich_fragment &frag, markup_render_contex
         }
         detail::append_utf8(*ctx.out, U'\x2502');
         *ctx.out += ' ';
-        if (ctx.color_on && ctx.emitter) ctx.emitter->reset(*ctx.out);
+        if (ctx.color_on && ctx.emitter) {
+            ctx.emitter->reset(*ctx.out);
+        }
         ctx.line_prefix.clear();
         detail::append_utf8(ctx.line_prefix, U'\x2502');
         ctx.line_prefix += ' ';
@@ -553,7 +610,9 @@ inline void dispatch_fragment(const ct_rich_fragment &frag, markup_render_contex
         break;
 
     case block_kind::code_close:
-        if (ctx.color_on && ctx.emitter) ctx.emitter->reset(*ctx.out);
+        if (ctx.color_on && ctx.emitter) {
+            ctx.emitter->reset(*ctx.out);
+        }
         ctx.line_prefix.clear();
         break;
 
@@ -589,7 +648,9 @@ inline void dispatch_fragment(const ct_rich_fragment &frag, markup_render_contex
     case block_kind::progress_bar: {
         uint8_t pct = frag.block.numerator > 100 ? 100 : frag.block.numerator;
         uint32_t bar_w = ctx.content_width > 0 ? ctx.content_width : ctx.width;
-        if (bar_w > 6) bar_w -= 6;
+        if (bar_w > 6) {
+            bar_w -= 6;
+        }
         uint32_t filled = bar_w * pct / 100;
         uint32_t empty_part = bar_w - filled;
         detail::repeat_char(*ctx.out, U'\x2588', filled);
@@ -604,7 +665,9 @@ inline void dispatch_fragment(const ct_rich_fragment &frag, markup_render_contex
         uint8_t den = frag.block.denominator > 0 ? frag.block.denominator : 1;
         uint8_t num = frag.block.numerator > den ? den : frag.block.numerator;
         uint32_t bar_w = ctx.content_width > 0 ? ctx.content_width : ctx.width;
-        if (bar_w > 6) bar_w -= 6;
+        if (bar_w > 6) {
+            bar_w -= 6;
+        }
         uint32_t filled = bar_w * num / den;
         uint32_t empty_part = bar_w - filled;
         detail::repeat_char(*ctx.out, U'\x2588', filled);
@@ -629,7 +692,9 @@ inline void dispatch_fragment(const ct_rich_fragment &frag, markup_render_contex
  */
 template <size_t MaxFragments>
 inline void execute_rich(const static_rich_markup<MaxFragments> &plan, markup_render_context &ctx) {
-    for (size_t i = 0; i < plan.count; ++i) dispatch_fragment(plan.fragments[i], ctx);
+    for (size_t i = 0; i < plan.count; ++i) {
+        dispatch_fragment(plan.fragments[i], ctx);
+    }
 }
 
 } // namespace tapiru

@@ -52,14 +52,18 @@ void menu_tree::add_separator() {
 const std::vector<menu_tree::node> &menu_tree::children_at(const std::vector<int> &path) const {
     const std::vector<node> *current = &roots_;
     for (int idx : path) {
-        if (idx < 0 || idx >= static_cast<int>(current->size())) return roots_;
+        if (idx < 0 || idx >= static_cast<int>(current->size())) {
+            return roots_;
+        }
         current = &(*current)[static_cast<size_t>(idx)].children;
     }
     return *current;
 }
 
 int menu_tree::next_selectable(const std::vector<node> &items, int from, int dir) const {
-    if (items.empty()) return -1;
+    if (items.empty()) {
+        return -1;
+    }
     int n = static_cast<int>(items.size());
     int pos = from;
     for (int i = 0; i < n; ++i) {
@@ -82,7 +86,9 @@ int menu_state::cursor() const {
 }
 
 int menu_state::cursor_at(int d) const {
-    if (d < 0 || d >= static_cast<int>(path_.size())) return -1;
+    if (d < 0 || d >= static_cast<int>(path_.size())) {
+        return -1;
+    }
     return path_[static_cast<size_t>(d)];
 }
 
@@ -107,7 +113,9 @@ bool menu_state::is_keyboard_mode() const {
 }
 
 const std::vector<menu_tree::node> &menu_state::items_at_depth(const menu_tree &tree, int d) const {
-    if (d == 0) return tree.roots();
+    if (d == 0) {
+        return tree.roots();
+    }
     // Build path to depth d-1
     std::vector<int> sub_path(path_.begin(), path_.begin() + d);
     return tree.children_at(sub_path);
@@ -147,9 +155,13 @@ void menu_state::open_submenu(const menu_tree &tree) {
     keyboard_mode_ = true;
     auto &items = items_at_depth(tree, depth());
     int cur = cursor();
-    if (cur < 0 || cur >= static_cast<int>(items.size())) return;
+    if (cur < 0 || cur >= static_cast<int>(items.size())) {
+        return;
+    }
     const auto &item = items[static_cast<size_t>(cur)];
-    if (!item.has_submenu() || item.disabled) return;
+    if (!item.has_submenu() || item.disabled) {
+        return;
+    }
 
     // Find first selectable in submenu
     int first = tree.next_selectable(item.children, static_cast<int>(item.children.size()) - 1, 1);
@@ -166,10 +178,14 @@ void menu_state::close_submenu() {
 void menu_state::select(const menu_tree &tree) {
     auto &items = items_at_depth(tree, depth());
     int cur = cursor();
-    if (cur < 0 || cur >= static_cast<int>(items.size())) return;
+    if (cur < 0 || cur >= static_cast<int>(items.size())) {
+        return;
+    }
     const auto &item = items[static_cast<size_t>(cur)];
 
-    if (item.disabled || item.separator) return;
+    if (item.disabled || item.separator) {
+        return;
+    }
 
     if (item.has_submenu()) {
         open_submenu(tree);
@@ -190,13 +206,19 @@ void menu_state::type_char(char32_t ch, const menu_tree &tree) {
     for (int i = 1; i <= n; ++i) {
         int idx = (cur + i) % n;
         const auto &item = items[static_cast<size_t>(idx)];
-        if (item.separator || item.disabled) continue;
+        if (item.separator || item.disabled) {
+            continue;
+        }
         if (!item.label.empty()) {
             char32_t first = static_cast<char32_t>(static_cast<unsigned char>(item.label[0]));
             // Case-insensitive compare for ASCII
-            if (first >= 'A' && first <= 'Z') first += 32;
+            if (first >= 'A' && first <= 'Z') {
+                first += 32;
+            }
             char32_t target = ch;
-            if (target >= 'A' && target <= 'Z') target += 32;
+            if (target >= 'A' && target <= 'Z') {
+                target += 32;
+            }
             if (first == target) {
                 path_.back() = idx;
                 return;
@@ -220,9 +242,13 @@ void menu_state::hover(int hover_depth, int item_index, int mouse_x, int mouse_y
     }
 
     auto &items = items_at_depth(tree, hover_depth);
-    if (item_index < 0 || item_index >= static_cast<int>(items.size())) return;
+    if (item_index < 0 || item_index >= static_cast<int>(items.size())) {
+        return;
+    }
     const auto &item = items[static_cast<size_t>(item_index)];
-    if (item.separator) return;
+    if (item.separator) {
+        return;
+    }
 
     path_[static_cast<size_t>(hover_depth)] = item_index;
 
@@ -255,10 +281,14 @@ void menu_state::click(int click_depth, int item_index, const menu_tree &tree) {
     }
 
     auto &items = items_at_depth(tree, click_depth);
-    if (item_index < 0 || item_index >= static_cast<int>(items.size())) return;
+    if (item_index < 0 || item_index >= static_cast<int>(items.size())) {
+        return;
+    }
     const auto &item = items[static_cast<size_t>(item_index)];
 
-    if (item.separator || item.disabled) return;
+    if (item.separator || item.disabled) {
+        return;
+    }
 
     path_[static_cast<size_t>(click_depth)] = item_index;
 
@@ -341,8 +371,12 @@ void menu_state::set_submenu_rect(int /*depth*/, rect r) {
 }
 
 bool menu_state::is_in_safe_triangle(int mouse_x, int mouse_y) const {
-    if (!is_submenu_open()) return false;
-    if (submenu_rect_.empty()) return false;
+    if (!is_submenu_open()) {
+        return false;
+    }
+    if (submenu_rect_.empty()) {
+        return false;
+    }
 
     // Triangle: P1 = (safe_px_, safe_py_), P2 = submenu top-left, P3 = submenu bottom-left
     int p1x = safe_px_, p1y = safe_py_;
@@ -412,7 +446,9 @@ node_id menu_builder::flatten_into(detail::scene &s) const {
 
     auto pi = s.add_menu(std::move(md));
     auto id = s.add_node(detail::widget_type::menu, pi, detail::no_node, key_);
-    if (z_order_ != 0) s.set_z_order(id, z_order_);
+    if (z_order_ != 0) {
+        s.set_z_order(id, z_order_);
+    }
     return id;
 }
 

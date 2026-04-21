@@ -21,16 +21,22 @@ class button_component final : public component_base {
 
     element render() override {
         auto bb = button_builder(opt_.label);
-        if (opt_.on_click) bb.on_click(opt_.on_click);
+        if (opt_.on_click) {
+            bb.on_click(opt_.on_click);
+        }
         bb.focused(focused());
-        if (!opt_.sty.is_default()) bb.style_override(opt_.sty);
+        if (!opt_.sty.is_default()) {
+            bb.style_override(opt_.sty);
+        }
         return element(std::move(bb));
     }
 
     bool on_event(const input_event &ev) override {
         if (auto *ke = std::get_if<key_event>(&ev)) {
             if (ke->key == special_key::enter && focused()) {
-                if (opt_.on_click) opt_.on_click();
+                if (opt_.on_click) {
+                    opt_.on_click();
+                }
                 return true;
             }
         }
@@ -52,14 +58,18 @@ class checkbox_component final : public component_base {
     element render() override {
         auto cb = checkbox_builder(opt_.label, opt_.value);
         cb.focused(focused());
-        if (!opt_.sty.is_default()) cb.style_override(opt_.sty);
+        if (!opt_.sty.is_default()) {
+            cb.style_override(opt_.sty);
+        }
         return element(std::move(cb));
     }
 
     bool on_event(const input_event &ev) override {
         if (auto *ke = std::get_if<key_event>(&ev)) {
             if ((ke->key == special_key::enter || ke->codepoint == U' ') && focused()) {
-                if (opt_.value) *opt_.value = !*opt_.value;
+                if (opt_.value) {
+                    *opt_.value = !*opt_.value;
+                }
                 return true;
             }
         }
@@ -82,15 +92,21 @@ class radio_group_component final : public component_base {
         int sel = opt_.selected ? *opt_.selected : 0;
         auto rb = radio_group_builder(opt_.options, opt_.selected);
         rb.focused_index(focused() ? sel : -1);
-        if (!opt_.sty.is_default()) rb.style_override(opt_.sty);
+        if (!opt_.sty.is_default()) {
+            rb.style_override(opt_.sty);
+        }
         return element(std::move(rb));
     }
 
     bool on_event(const input_event &ev) override {
-        if (!opt_.selected) return false;
+        if (!opt_.selected) {
+            return false;
+        }
         if (auto *ke = std::get_if<key_event>(&ev)) {
             int n = static_cast<int>(opt_.options.size());
-            if (n == 0) return false;
+            if (n == 0) {
+                return false;
+            }
             if (ke->key == special_key::up || ke->key == special_key::left) {
                 *opt_.selected = (*opt_.selected - 1 + n) % n;
                 return true;
@@ -117,17 +133,27 @@ class selectable_list_component final : public component_base {
 
     element render() override {
         auto lb = selectable_list_builder(opt_.items, opt_.cursor);
-        if (opt_.visible_count > 0) lb.visible_count(opt_.visible_count);
-        if (!opt_.sty.is_default()) lb.style_override(opt_.sty);
-        if (!opt_.highlight_sty.is_default()) lb.highlight_style(opt_.highlight_sty);
+        if (opt_.visible_count > 0) {
+            lb.visible_count(opt_.visible_count);
+        }
+        if (!opt_.sty.is_default()) {
+            lb.style_override(opt_.sty);
+        }
+        if (!opt_.highlight_sty.is_default()) {
+            lb.highlight_style(opt_.highlight_sty);
+        }
         return element(std::move(lb));
     }
 
     bool on_event(const input_event &ev) override {
-        if (!opt_.cursor) return false;
+        if (!opt_.cursor) {
+            return false;
+        }
         if (auto *ke = std::get_if<key_event>(&ev)) {
             int n = static_cast<int>(opt_.items.size());
-            if (n == 0) return false;
+            if (n == 0) {
+                return false;
+            }
             if (ke->key == special_key::up) {
                 *opt_.cursor = std::max(0, *opt_.cursor - 1);
                 return true;
@@ -137,7 +163,9 @@ class selectable_list_component final : public component_base {
                 return true;
             }
             if (ke->key == special_key::enter) {
-                if (opt_.on_select) opt_.on_select(*opt_.cursor);
+                if (opt_.on_select) {
+                    opt_.on_select(*opt_.cursor);
+                }
                 return true;
             }
         }
@@ -158,27 +186,37 @@ class text_input_component final : public component_base {
 
     element render() override {
         auto tb = text_input_builder(opt_.buffer);
-        if (!opt_.placeholder.empty()) tb.placeholder(opt_.placeholder);
+        if (!opt_.placeholder.empty()) {
+            tb.placeholder(opt_.placeholder);
+        }
         tb.width(opt_.width);
         tb.focused(focused());
         tb.cursor_pos(cursor_pos_);
-        if (!opt_.sty.is_default()) tb.style_override(opt_.sty);
+        if (!opt_.sty.is_default()) {
+            tb.style_override(opt_.sty);
+        }
         return element(std::move(tb));
     }
 
     bool on_event(const input_event &ev) override {
-        if (!opt_.buffer || !focused()) return false;
+        if (!opt_.buffer || !focused()) {
+            return false;
+        }
         if (auto *ke = std::get_if<key_event>(&ev)) {
             auto &buf = *opt_.buffer;
             if (ke->key == special_key::backspace && cursor_pos_ > 0) {
                 buf.erase(cursor_pos_ - 1, 1);
                 cursor_pos_--;
-                if (opt_.on_change) opt_.on_change(buf);
+                if (opt_.on_change) {
+                    opt_.on_change(buf);
+                }
                 return true;
             }
             if (ke->key == special_key::delete_ && cursor_pos_ < buf.size()) {
                 buf.erase(cursor_pos_, 1);
-                if (opt_.on_change) opt_.on_change(buf);
+                if (opt_.on_change) {
+                    opt_.on_change(buf);
+                }
                 return true;
             }
             if (ke->key == special_key::left && cursor_pos_ > 0) {
@@ -223,7 +261,9 @@ class text_input_component final : public component_base {
                 }
                 buf.insert(cursor_pos_, utf8, static_cast<size_t>(len));
                 cursor_pos_ += static_cast<uint32_t>(len);
-                if (opt_.on_change) opt_.on_change(buf);
+                if (opt_.on_change) {
+                    opt_.on_change(buf);
+                }
                 return true;
             }
         }
@@ -247,21 +287,29 @@ class slider_component final : public component_base {
         auto sb = slider_builder(opt_.value, opt_.min_val, opt_.max_val);
         sb.width(opt_.width);
         sb.focused(focused());
-        if (!opt_.sty.is_default()) sb.style_override(opt_.sty);
+        if (!opt_.sty.is_default()) {
+            sb.style_override(opt_.sty);
+        }
         return element(std::move(sb));
     }
 
     bool on_event(const input_event &ev) override {
-        if (!opt_.value || !focused()) return false;
+        if (!opt_.value || !focused()) {
+            return false;
+        }
         if (auto *ke = std::get_if<key_event>(&ev)) {
             if (ke->key == special_key::right || ke->key == special_key::up) {
                 *opt_.value = std::min(opt_.max_val, *opt_.value + opt_.step);
-                if (opt_.on_change) opt_.on_change(*opt_.value);
+                if (opt_.on_change) {
+                    opt_.on_change(*opt_.value);
+                }
                 return true;
             }
             if (ke->key == special_key::left || ke->key == special_key::down) {
                 *opt_.value = std::max(opt_.min_val, *opt_.value - opt_.step);
-                if (opt_.on_change) opt_.on_change(*opt_.value);
+                if (opt_.on_change) {
+                    opt_.on_change(*opt_.value);
+                }
                 return true;
             }
         }

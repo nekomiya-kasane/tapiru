@@ -55,13 +55,17 @@ struct screen::impl {
     }
 
     uint32_t output_width() const {
-        if (cfg.width > 0) return cfg.width;
+        if (cfg.width > 0) {
+            return cfg.width;
+        }
         auto sz = terminal::get_size();
         return sz.width > 0 ? sz.width : 80;
     }
 
     uint32_t output_height() const {
-        if (cfg.height > 0) return cfg.height;
+        if (cfg.height > 0) {
+            return cfg.height;
+        }
         auto sz = terminal::get_size();
         return sz.height > 0 ? sz.height : 24;
     }
@@ -89,7 +93,9 @@ screen screen::terminal_output(screen_config cfg) {
 // ── Interactive API ─────────────────────────────────────────────────────
 
 void screen::loop(component root) {
-    if (!impl_ || !root) return;
+    if (!impl_ || !root) {
+        return;
+    }
 
     auto &d = *impl_;
     d.exit_requested.store(false);
@@ -98,11 +104,17 @@ void screen::loop(component root) {
 
     // Enter alternate screen for fullscreen mode
     if (d.mode == screen_mode::fullscreen) {
-        d.con.write("\x1b[?1049h");                             // enter alternate screen
-        if (!d.cfg.cursor) d.con.write("\x1b[?25l");            // hide cursor
-        if (d.cfg.mouse) d.con.write("\x1b[?1000h\x1b[?1006h"); // enable mouse
+        d.con.write("\x1b[?1049h"); // enter alternate screen
+        if (!d.cfg.cursor) {
+            d.con.write("\x1b[?25l"); // hide cursor
+        }
+        if (d.cfg.mouse) {
+            d.con.write("\x1b[?1000h\x1b[?1006h"); // enable mouse
+        }
     } else if (d.mode == screen_mode::fit_component) {
-        if (!d.cfg.cursor) d.con.write("\x1b[?25l");
+        if (!d.cfg.cursor) {
+            d.con.write("\x1b[?25l");
+        }
     }
 
     // Main loop
@@ -133,7 +145,9 @@ void screen::loop(component root) {
 
     // Cleanup
     if (d.mode == screen_mode::fullscreen) {
-        if (d.cfg.mouse) d.con.write("\x1b[?1006l\x1b[?1000l");
+        if (d.cfg.mouse) {
+            d.con.write("\x1b[?1006l\x1b[?1000l");
+        }
         d.con.write("\x1b[?25h");   // show cursor
         d.con.write("\x1b[?1049l"); // leave alternate screen
     } else if (d.mode == screen_mode::fit_component) {
@@ -142,11 +156,15 @@ void screen::loop(component root) {
 }
 
 void screen::exit_loop() {
-    if (impl_) impl_->exit_requested.store(true, std::memory_order_relaxed);
+    if (impl_) {
+        impl_->exit_requested.store(true, std::memory_order_relaxed);
+    }
 }
 
 void screen::post_event(input_event ev) {
-    if (!impl_) return;
+    if (!impl_) {
+        return;
+    }
     std::lock_guard lk(impl_->event_mu);
     impl_->event_queue.push(std::move(ev));
 }
@@ -154,12 +172,16 @@ void screen::post_event(input_event ev) {
 // ── Streaming API ───────────────────────────────────────────────────────
 
 void screen::render_once(const element &elem) {
-    if (!impl_) return;
+    if (!impl_) {
+        return;
+    }
     impl_->con.print_widget(elem, impl_->output_width());
 }
 
 void screen::set_live(component comp) {
-    if (!impl_ || !comp) return;
+    if (!impl_ || !comp) {
+        return;
+    }
     // Stop any existing live display
     stop_live();
     // Create a new live display that renders the component
@@ -186,12 +208,16 @@ bool screen::is_tty() const noexcept {
 }
 
 bool screen::is_interactive() const noexcept {
-    if (!impl_) return false;
+    if (!impl_) {
+        return false;
+    }
     return impl_->mode != screen_mode::terminal_output;
 }
 
 std::pair<uint32_t, uint32_t> screen::dimensions() const {
-    if (!impl_) return {80, 24};
+    if (!impl_) {
+        return {80, 24};
+    }
     return {impl_->output_width(), impl_->output_height()};
 }
 

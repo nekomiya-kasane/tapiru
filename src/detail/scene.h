@@ -135,16 +135,18 @@ class scene {
     [[nodiscard]] bool is_focusable(node_id id) const { return (flags_[id] & flag_focusable) != 0; }
 
     void set_visible(node_id id, bool v) {
-        if (v)
+        if (v) {
             flags_[id] |= flag_visible;
-        else
+        } else {
             flags_[id] &= ~flag_visible;
+        }
     }
     void set_focusable(node_id id, bool v) {
-        if (v)
+        if (v) {
             flags_[id] |= flag_focusable;
-        else
+        } else {
             flags_[id] &= ~flag_focusable;
+        }
     }
 
     // ── Widget keys ────────────────────────────────────────────────────
@@ -159,7 +161,9 @@ class scene {
     [[nodiscard]] std::unordered_map<widget_key, node_id> build_key_map() const {
         std::unordered_map<widget_key, node_id> m;
         for (node_id i = 0; i < static_cast<node_id>(keys_.size()); ++i) {
-            if (keys_[i] != no_key) m[keys_[i]] = i;
+            if (keys_[i] != no_key) {
+                m[keys_[i]] = i;
+            }
         }
         return m;
     }

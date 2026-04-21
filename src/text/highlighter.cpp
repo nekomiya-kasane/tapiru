@@ -40,7 +40,9 @@ std::vector<highlight_span> regex_highlighter::highlight(std::string_view text) 
             for (auto it = begin; it != end; ++it) {
                 const auto &match = *it;
                 int g = rule.group;
-                if (g < 0 || g >= static_cast<int>(match.size())) g = 0;
+                if (g < 0 || g >= static_cast<int>(match.size())) {
+                    g = 0;
+                }
                 if (match[g].matched) {
                     auto off = static_cast<size_t>(match[g].first - text.data());
                     auto len = static_cast<size_t>(match[g].length());
@@ -73,15 +75,18 @@ void scan_pattern(std::string_view text, const char *pattern, const style &sty, 
         for (auto it = begin; it != end; ++it) {
             const auto &m = *it;
             int g = group;
-            if (g < 0 || g >= static_cast<int>(m.size())) g = 0;
+            if (g < 0 || g >= static_cast<int>(m.size())) {
+                g = 0;
+            }
             if (m[g].matched) {
                 auto off = static_cast<size_t>(m[g].first - text.data());
                 auto len = static_cast<size_t>(m[g].length());
-                if (len > 0) out.push_back({off, len, sty, {}});
+                if (len > 0) {
+                    out.push_back({off, len, sty, {}});
+                }
             }
         }
-    } catch (const std::regex_error &) {
-    }
+    } catch (const std::regex_error &) {}
 }
 
 enum class link_kind { url_as_is, file_uri };
@@ -96,7 +101,9 @@ void scan_pattern_linked(std::string_view text, const char *pattern, const style
         for (auto it = begin; it != end; ++it) {
             const auto &m = *it;
             int g = group;
-            if (g < 0 || g >= static_cast<int>(m.size())) g = 0;
+            if (g < 0 || g >= static_cast<int>(m.size())) {
+                g = 0;
+            }
             if (m[g].matched) {
                 auto off = static_cast<size_t>(m[g].first - text.data());
                 auto len = static_cast<size_t>(m[g].length());
@@ -109,18 +116,18 @@ void scan_pattern_linked(std::string_view text, const char *pattern, const style
                         // Convert path to file:// URI
                         link_url = "file:///";
                         for (char c : matched) {
-                            if (c == '\\')
+                            if (c == '\\') {
                                 link_url += '/';
-                            else
+                            } else {
                                 link_url += c;
+                            }
                         }
                     }
                     out.push_back({off, len, sty, std::move(link_url)});
                 }
             }
         }
-    } catch (const std::regex_error &) {
-    }
+    } catch (const std::regex_error &) {}
 }
 
 } // anonymous namespace
@@ -252,7 +259,9 @@ std::vector<highlight_span> highlight_chain::highlight(std::string_view text) co
 // ═══════════════════════════════════════════════════════════════════════
 
 std::vector<highlight_span> merge_spans(std::vector<highlight_span> spans, size_t text_length) {
-    if (spans.empty()) return {};
+    if (spans.empty()) {
+        return {};
+    }
 
     // Sort by offset, then by insertion order (stable sort preserves priority)
     std::stable_sort(spans.begin(), spans.end(),
@@ -265,15 +274,21 @@ std::vector<highlight_span> merge_spans(std::vector<highlight_span> spans, size_
     size_t covered_until = 0;
 
     for (const auto &s : spans) {
-        if (s.offset >= text_length) break;
+        if (s.offset >= text_length) {
+            break;
+        }
 
         size_t start = s.offset;
         size_t end = s.end();
-        if (end > text_length) end = text_length;
+        if (end > text_length) {
+            end = text_length;
+        }
 
         if (start < covered_until) {
             // Overlap: trim or skip
-            if (end <= covered_until) continue; // fully covered
+            if (end <= covered_until) {
+                continue; // fully covered
+            }
             // Partial overlap: trim the start
             start = covered_until;
         }

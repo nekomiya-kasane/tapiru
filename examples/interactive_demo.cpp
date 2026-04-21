@@ -89,27 +89,51 @@ static void enable_raw_input() {
 }
 
 static void restore_input() {
-    if (g_stdin != INVALID_HANDLE_VALUE) SetConsoleMode(g_stdin, g_old_mode);
+    if (g_stdin != INVALID_HANDLE_VALUE) {
+        SetConsoleMode(g_stdin, g_old_mode);
+    }
 }
 
 static input_ev poll_input(int timeout_ms) {
-    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0) return input_ev::none;
+    if (WaitForSingleObject(g_stdin, static_cast<DWORD>(timeout_ms)) != WAIT_OBJECT_0) {
+        return input_ev::none;
+    }
     INPUT_RECORD rec;
     DWORD count = 0;
-    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0) return input_ev::none;
+    if (!ReadConsoleInputW(g_stdin, &rec, 1, &count) || count == 0) {
+        return input_ev::none;
+    }
     if (rec.EventType == KEY_EVENT && rec.Event.KeyEvent.bKeyDown) {
         auto vk = rec.Event.KeyEvent.wVirtualKeyCode;
         auto ch = rec.Event.KeyEvent.uChar.UnicodeChar;
         bool shift = (rec.Event.KeyEvent.dwControlKeyState & SHIFT_PRESSED) != 0;
-        if (vk == VK_UP) return input_ev::up;
-        if (vk == VK_DOWN) return input_ev::down;
-        if (vk == VK_LEFT) return input_ev::left;
-        if (vk == VK_RIGHT) return input_ev::right;
-        if (vk == VK_RETURN) return input_ev::enter;
-        if (vk == VK_TAB) return shift ? input_ev::shift_tab : input_ev::tab;
-        if (vk == VK_ESCAPE) return input_ev::quit;
-        if (ch == L'q' || ch == L'Q') return input_ev::quit;
-        if (ch == L' ') return input_ev::space;
+        if (vk == VK_UP) {
+            return input_ev::up;
+        }
+        if (vk == VK_DOWN) {
+            return input_ev::down;
+        }
+        if (vk == VK_LEFT) {
+            return input_ev::left;
+        }
+        if (vk == VK_RIGHT) {
+            return input_ev::right;
+        }
+        if (vk == VK_RETURN) {
+            return input_ev::enter;
+        }
+        if (vk == VK_TAB) {
+            return shift ? input_ev::shift_tab : input_ev::tab;
+        }
+        if (vk == VK_ESCAPE) {
+            return input_ev::quit;
+        }
+        if (ch == L'q' || ch == L'Q') {
+            return input_ev::quit;
+        }
+        if (ch == L' ') {
+            return input_ev::space;
+        }
     }
     if (rec.EventType == MOUSE_EVENT) {
         auto &me = rec.Event.MouseEvent;
@@ -146,21 +170,43 @@ static input_ev poll_input(int timeout_ms) {
     struct timeval tv;
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
-    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0) return input_ev::none;
+    if (select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv) <= 0) {
+        return input_ev::none;
+    }
     char buf[16];
     int n = read(STDIN_FILENO, buf, sizeof(buf));
-    if (n <= 0) return input_ev::none;
+    if (n <= 0) {
+        return input_ev::none;
+    }
     if (n == 1) {
-        if (buf[0] == 'q' || buf[0] == 'Q' || buf[0] == 27) return input_ev::quit;
-        if (buf[0] == '\n' || buf[0] == '\r') return input_ev::enter;
-        if (buf[0] == ' ') return input_ev::space;
-        if (buf[0] == '\t') return input_ev::tab;
+        if (buf[0] == 'q' || buf[0] == 'Q' || buf[0] == 27) {
+            return input_ev::quit;
+        }
+        if (buf[0] == '\n' || buf[0] == '\r') {
+            return input_ev::enter;
+        }
+        if (buf[0] == ' ') {
+            return input_ev::space;
+        }
+        if (buf[0] == '\t') {
+            return input_ev::tab;
+        }
     } else if (n >= 3 && buf[0] == 27 && buf[1] == '[') {
-        if (buf[2] == 'A') return input_ev::up;
-        if (buf[2] == 'B') return input_ev::down;
-        if (buf[2] == 'C') return input_ev::right;
-        if (buf[2] == 'D') return input_ev::left;
-        if (buf[2] == 'Z') return input_ev::shift_tab;
+        if (buf[2] == 'A') {
+            return input_ev::up;
+        }
+        if (buf[2] == 'B') {
+            return input_ev::down;
+        }
+        if (buf[2] == 'C') {
+            return input_ev::right;
+        }
+        if (buf[2] == 'D') {
+            return input_ev::left;
+        }
+        if (buf[2] == 'Z') {
+            return input_ev::shift_tab;
+        }
     }
     return input_ev::none;
 }
@@ -216,17 +262,29 @@ static bool is_menu_separator(int idx) {
 
 static int menu_cursor_next(int cur) {
     int next = cur + 1;
-    if (next > 7) return cur;
-    if (is_menu_separator(next)) ++next;
-    if (next > 7) return cur;
+    if (next > 7) {
+        return cur;
+    }
+    if (is_menu_separator(next)) {
+        ++next;
+    }
+    if (next > 7) {
+        return cur;
+    }
     return next;
 }
 
 static int menu_cursor_prev(int cur) {
     int prev = cur - 1;
-    if (prev < 0) return cur;
-    if (is_menu_separator(prev)) --prev;
-    if (prev < 0) return cur;
+    if (prev < 0) {
+        return cur;
+    }
+    if (is_menu_separator(prev)) {
+        --prev;
+    }
+    if (prev < 0) {
+        return cur;
+    }
     return prev;
 }
 
@@ -237,11 +295,14 @@ static int menu_cursor_prev(int cur) {
 static auto build_tab_bar(const app_state &st) {
     std::string tabs = "  ";
     for (int i = 0; i < NUM_PAGES; ++i) {
-        if (i == st.page)
+        if (i == st.page) {
             tabs += std::string("[bold bright_white on_blue] ") + page_names[i] + " [/]";
-        else
+        } else {
             tabs += std::string("[dim] ") + page_names[i] + " [/]";
-        if (i < NUM_PAGES - 1) tabs += " ";
+        }
+        if (i < NUM_PAGES - 1) {
+            tabs += " ";
+        }
     }
     return text_builder(tabs);
 }
@@ -640,8 +701,9 @@ class dashboard_page_view {
                 content.add(text_builder("[bold]Metrics[/]"));
                 content.add(rule_builder());
                 std::vector<float> data;
-                for (int i = 0; i < 40; ++i)
+                for (int i = 0; i < 40; ++i) {
                     data.push_back(static_cast<float>(std::sin((i + st_.tick) * 0.2) * 30 + 50));
+                }
                 content.add(
                     line_chart_builder(data, 30, 4).style_override(style{colors::bright_green}).key("metric-chart"));
                 break;
@@ -719,9 +781,13 @@ class tqdm_page_view {
             int bar_w = 40;
             int filled = static_cast<int>(pct / 100.0 * bar_w);
             std::string bar = "  [bright_green]";
-            for (int i = 0; i < filled; ++i) bar += "\xe2\x96\x88";
+            for (int i = 0; i < filled; ++i) {
+                bar += "\xe2\x96\x88";
+            }
             bar += "[/][dim]";
-            for (int i = filled; i < bar_w; ++i) bar += "\xe2\x96\x91";
+            for (int i = filled; i < bar_w; ++i) {
+                bar += "\xe2\x96\x91";
+            }
             bar += "[/]";
             page.add(text_builder(bar));
         } else {
@@ -830,7 +896,9 @@ static void handle_input(app_state &st, input_ev ev) {
     // Popup dismissal takes priority
     if (st.show_popup && (ev == input_ev::enter || ev == input_ev::quit || ev == input_ev::space)) {
         st.show_popup = false;
-        if (ev == input_ev::quit) return; // don't also quit
+        if (ev == input_ev::quit) {
+            return; // don't also quit
+        }
         return;
     }
 
@@ -849,18 +917,26 @@ static void handle_input(app_state &st, input_ev ev) {
         if (st.page == 0) {
             st.menu_cursor = menu_cursor_prev(st.menu_cursor);
         } else if (st.page == 4) {
-            if (st.dash_cursor > 0) --st.dash_cursor;
+            if (st.dash_cursor > 0) {
+                --st.dash_cursor;
+            }
         } else {
-            if (st.cursor > 0) --st.cursor;
+            if (st.cursor > 0) {
+                --st.cursor;
+            }
         }
         break;
     case input_ev::down:
         if (st.page == 0) {
             st.menu_cursor = menu_cursor_next(st.menu_cursor);
         } else if (st.page == 4) {
-            if (st.dash_cursor < 4) ++st.dash_cursor;
+            if (st.dash_cursor < 4) {
+                ++st.dash_cursor;
+            }
         } else {
-            if (st.cursor < max_cursor(st)) ++st.cursor;
+            if (st.cursor < max_cursor(st)) {
+                ++st.cursor;
+            }
         }
         break;
     case input_ev::enter:
@@ -883,14 +959,18 @@ static void handle_input(app_state &st, input_ev ev) {
         if (st.page == 1) {
             st.sb_style = st.cursor;
         } else if (st.page == 2) {
-            if (st.row_gap > 0) --st.row_gap;
+            if (st.row_gap > 0) {
+                --st.row_gap;
+            }
         }
         break;
     case input_ev::right:
         if (st.page == 1) {
             st.sb_style = st.cursor;
         } else if (st.page == 2) {
-            if (st.row_gap < 3) ++st.row_gap;
+            if (st.row_gap < 3) {
+                ++st.row_gap;
+            }
         }
         break;
     case input_ev::mouse_click:
@@ -920,9 +1000,15 @@ static void handle_input(app_state &st, input_ev ev) {
     }
 
     // Sync cursor with page-specific state
-    if (st.page == 1) st.sb_style = st.cursor;
-    if (st.page == 2) st.spacer_mode = st.cursor;
-    if (st.page == 3) st.table_effect = st.cursor;
+    if (st.page == 1) {
+        st.sb_style = st.cursor;
+    }
+    if (st.page == 2) {
+        st.spacer_mode = st.cursor;
+    }
+    if (st.page == 3) {
+        st.table_effect = st.cursor;
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════

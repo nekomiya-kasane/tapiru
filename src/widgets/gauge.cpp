@@ -35,7 +35,9 @@ element make_gauge(float progress, const style &filled, const style &remaining) 
     auto full_cells = static_cast<uint32_t>(filled_cells);
     float frac = filled_cells - static_cast<float>(full_cells);
     auto frac_idx = static_cast<uint32_t>(frac * 8.0f);
-    if (frac_idx > 8) frac_idx = 8;
+    if (frac_idx > 8) {
+        frac_idx = 8;
+    }
 
     std::string filled_str;
     for (uint32_t i = 0; i < full_cells && i < gauge_width; ++i) {
@@ -95,7 +97,9 @@ element make_gauge_direction(float progress, gauge_direction dir) {
     auto full_cells = static_cast<uint32_t>(filled_cells);
     float frac = filled_cells - static_cast<float>(full_cells);
     auto frac_idx = static_cast<uint32_t>(frac * 8.0f);
-    if (frac_idx > 8) frac_idx = 8;
+    if (frac_idx > 8) {
+        frac_idx = 8;
+    }
 
     auto rb = rows_builder();
 

@@ -171,12 +171,13 @@ static void show_performance(console &con) {
         char lat[16], thr[32];
         std::snprintf(lat, sizeof(lat), "%.1f", e.us);
         double ops_per_sec = 1000000.0 / e.us;
-        if (ops_per_sec >= 1000000.0)
+        if (ops_per_sec >= 1000000.0) {
             std::snprintf(thr, sizeof(thr), "%.1fM ops/s", ops_per_sec / 1000000.0);
-        else if (ops_per_sec >= 1000.0)
+        } else if (ops_per_sec >= 1000.0) {
             std::snprintf(thr, sizeof(thr), "%.1fK ops/s", ops_per_sec / 1000.0);
-        else
+        } else {
             std::snprintf(thr, sizeof(thr), "%.0f ops/s", ops_per_sec);
+        }
         tb.add_row({e.name, lat, thr});
     }
     con.print_widget(tb, W);
@@ -190,8 +191,12 @@ static void show_performance(console &con) {
         latencies.push_back(static_cast<float>(e.us));
         std::string l(e.name);
         auto paren = l.find('(');
-        if (paren != std::string::npos) l = l.substr(0, paren);
-        if (l.size() > 6) l = l.substr(0, 6);
+        if (paren != std::string::npos) {
+            l = l.substr(0, paren);
+        }
+        if (l.size() > 6) {
+            l = l.substr(0, 6);
+        }
         labels.push_back(l);
     }
     con.print_widget(bar_chart_builder(latencies, 6).labels(labels).style_override(style{colors::bright_cyan}), W);
