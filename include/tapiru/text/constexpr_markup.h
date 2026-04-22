@@ -560,8 +560,8 @@ namespace tapiru {
         }
 
         // Try to recognize a block tag. Returns true if recognized.
-        constexpr bool try_block_tag_ct(const char *tag, size_t len, const char *markup, size_t tag_abs_offset,
-                                        ct_rich_fragment &frag) {
+        constexpr bool try_block_tag_ct(const char *tag, size_t len, [[maybe_unused]] const char *markup,
+                                        size_t tag_abs_offset, ct_rich_fragment &frag) {
             // [br]
             if (sv_eq(tag, len, "br", 2)) {
                 frag.block.kind = block_kind::line_break;

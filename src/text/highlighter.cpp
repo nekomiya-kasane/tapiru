@@ -47,7 +47,7 @@ namespace tapiru {
                         auto off = static_cast<size_t>(match[g].first - text.data());
                         auto len = static_cast<size_t>(match[g].length());
                         if (len > 0) {
-                            spans.push_back({off, len, rule.sty});
+                            spans.push_back({off, len, rule.sty, {}});
                         }
                     }
                 }

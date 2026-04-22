@@ -242,6 +242,9 @@ namespace tapiru::detail {
             case justify::right:
                 offset = line_w < avail ? avail - line_w : 0;
                 break;
+            default:
+                offset = 0;
+                break;
             }
 
             (void)render_fragments_line(line, c, area.x + offset, area.y + row, avail - offset, styles);

@@ -42,7 +42,6 @@
 #include <string>
 
 #ifdef _WIN32
-#    define NOMINMAX
 #    include <crtdbg.h>
 #    include <windows.h>
 #endif

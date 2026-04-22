@@ -59,7 +59,7 @@ namespace tapiru {
                         }
                     }
                     if (is_rule) {
-                        blocks.push_back({md_block_type::rule, 0, ""});
+                        blocks.push_back({.type = md_block_type::rule});
                         continue;
                     }
                 }
@@ -76,17 +76,18 @@ namespace tapiru {
                 if (pos < line.size() && line[pos] == ' ') {
                     ++pos;
                 }
-                blocks.push_back({md_block_type::heading, level, std::string(line.substr(pos))});
+                blocks.push_back(
+                    {.type = md_block_type::heading, .level = level, .content = std::string(line.substr(pos))});
                 continue;
             }
 
             // Blockquote: > text
             if (line.size() >= 2 && line[0] == '>' && line[1] == ' ') {
-                blocks.push_back({md_block_type::blockquote, 0, std::string(line.substr(2))});
+                blocks.push_back({.type = md_block_type::blockquote, .content = std::string(line.substr(2))});
                 continue;
             }
             if (line.size() >= 1 && line[0] == '>') {
-                blocks.push_back({md_block_type::blockquote, 0, std::string(line.substr(1))});
+                blocks.push_back({.type = md_block_type::blockquote, .content = std::string(line.substr(1))});
                 continue;
             }
 
@@ -206,12 +207,12 @@ namespace tapiru {
 
             // Unordered list: - item or * item
             if (line.size() >= 2 && (line[0] == '-' || line[0] == '*') && line[1] == ' ') {
-                blocks.push_back({md_block_type::list_item, 0, std::string(line.substr(2))});
+                blocks.push_back({.type = md_block_type::list_item, .content = std::string(line.substr(2))});
                 continue;
             }
 
             // Default: paragraph
-            blocks.push_back({md_block_type::paragraph, 0, std::string(line)});
+            blocks.push_back({.type = md_block_type::paragraph, .content = std::string(line)});
         }
 
         return blocks;

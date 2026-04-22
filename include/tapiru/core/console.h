@@ -255,7 +255,7 @@ namespace tapiru {
     // ── Template implementation ─────────────────────────────────────────────
 
     template <typename Builder> void console::print_widget(const Builder &builder, uint32_t width) {
-        auto flatten_fn = [](void *ptr) -> uint32_t {
+        [[maybe_unused]] auto flatten_fn = [](void *ptr) -> uint32_t {
             // This is a type-erased trampoline; actual scene is created inside
             // render_widget_impl
             (void)ptr;
